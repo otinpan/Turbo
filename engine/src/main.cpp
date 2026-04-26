@@ -75,6 +75,7 @@ class HelloTriangleApplication {
     createInstance();
     setupDebugMessenger();
     pickPhysicalDevice();
+    printPhysicalDevices();
   }
 
   void mainLoop() {
@@ -194,6 +195,7 @@ class HelloTriangleApplication {
       vk::PhysicalDeviceFeatures2,
       vk::PhysicalDeviceVulkan13Features,
       vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>();
+
   bool supportsRequiredFeatures 
     = features
     .template get<vk::PhysicalDeviceVulkan13Features>().dynamicRendering &&
@@ -203,8 +205,8 @@ class HelloTriangleApplication {
   return supportsVulkan1_3 && supportsGraphics && supportsRequiredExtensions && supportsRequiredFeatures;
 
   }
-  void pickPhysicalDevice()
-  {
+
+  void pickPhysicalDevice(){
     std::vector<vk::raii::PhysicalDevice> physicalDevices = instance.enumeratePhysicalDevices();
     auto const devIter =
       std::ranges::find_if( 
@@ -218,6 +220,26 @@ class HelloTriangleApplication {
     }
     physicalDevice = *devIter;
   }
+
+  void printPhysicalDevices() {
+  std::vector<vk::raii::PhysicalDevice> physicalDevices = instance.enumeratePhysicalDevices();
+
+  std::cout << "Found " << physicalDevices.size() << " devices\n";
+
+  for (size_t i = 0; i < physicalDevices.size(); ++i) {
+    auto props = physicalDevices[i].getProperties();
+
+    std::cout << "Device " << i << ":\n";
+    std::cout << "  Name: " << props.deviceName << "\n";
+    std::cout << "  API Version: " 
+              << VK_VERSION_MAJOR(props.apiVersion) << "."
+              << VK_VERSION_MINOR(props.apiVersion) << "."
+              << VK_VERSION_PATCH(props.apiVersion) << "\n";
+    std::cout << "  Vendor ID: " << props.vendorID << "\n";
+    std::cout << "  Device ID: " << props.deviceID << "\n";
+    std::cout << "  Type: " << vk::to_string(props.deviceType) << "\n\n";
+  }
+}
 
   void setupDebugMessenger(){
     if(!enableValidationLayers)return;
