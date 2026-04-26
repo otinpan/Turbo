@@ -1,0 +1,10 @@
+^D:\MYGAME\TURBO\ENGINE\BUILD-WIN\CMAKEFILES\AE328267F967295357AF575F54810756\GENERATE.STAMP.RULE
+setlocal
+D:\MyGame\bin\cmake.exe -SD:/MyGame/Turbo/engine -BD:/MyGame/Turbo/engine/build-win --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/MyGame/Turbo/engine/build-win/Engine.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

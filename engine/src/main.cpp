@@ -223,7 +223,7 @@ class HelloTriangleApplication {
 
   void printPhysicalDevices() {
   std::vector<vk::raii::PhysicalDevice> physicalDevices = instance.enumeratePhysicalDevices();
-
+  std::cout<<"search physical devices"<<std::endl;
   std::cout << "Found " << physicalDevices.size() << " devices\n";
 
   for (size_t i = 0; i < physicalDevices.size(); ++i) {
@@ -277,15 +277,15 @@ class HelloTriangleApplication {
     return extensions;
   }
 
-  static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-      VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-      VkDebugUtilsMessageTypeFlagsEXT type,
-      const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+  static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(
+      vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+      vk::DebugUtilsMessageTypeFlagsEXT type,
+      const vk::DebugUtilsMessengerCallbackDataEXT *pCallbackData,
       void*
   ){
-    if(severity & (VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                   VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)){
-      std::cerr<<"validation layer: type "<<vk::to_string(vk::DebugUtilsMessageTypeFlagsEXT(type))
+    if(severity & (vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+                   vk::DebugUtilsMessageSeverityFlagBitsEXT::eError)){
+      std::cerr<<"validation layer: type "<<vk::to_string(type)
                <<" mst: "<<pCallbackData->pMessage<<std::endl;
     }
 
