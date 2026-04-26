@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/MyGame/Turbo/engine/build-win/cmake_install.cmake",
+		"D:/MyGame/Turbo/engine/build-win/_deps/glfw/cmake_install.cmake",
+		"D:/MyGame/Turbo/engine/build-win/_deps/glfw/src/cmake_install.cmake",
+		"D:/MyGame/Turbo/engine/build-win/_deps/glm/cmake_install.cmake",
+		"D:/MyGame/Turbo/engine/build-win/_deps/glm/glm/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

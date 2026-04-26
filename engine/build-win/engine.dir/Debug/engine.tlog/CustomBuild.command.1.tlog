@@ -1,0 +1,10 @@
+^D:\MYGAME\TURBO\ENGINE\CMAKELISTS.TXT
+setlocal
+D:\MyGame\bin\cmake.exe -SD:/MyGame/Turbo/engine -BD:/MyGame/Turbo/engine/build-win --check-stamp-file D:/MyGame/Turbo/engine/build-win/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
