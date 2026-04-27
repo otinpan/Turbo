@@ -55,7 +55,12 @@ class HelloTriangleApplication {
   vk::raii::SurfaceKHR surface=nullptr; // connection between Vulkan and GLFW
   vk::raii::PhysicalDevice physicalDevice=nullptr; // physical device
   vk::raii::Device device=nullptr; // logical device
-  vk::raii::Queue graphicsQueue=nullptr;
+  vk::raii::Queue queue=nullptr;
+  vk::raii::SwapchainKHR swapChain=nullptr;
+  std::vector<vk::Image> swapChainImages;
+  vk::SurfaceFormatKHR swapChainSurfaceFormat;
+  vk::Extent2D swapChainExtent;
+  std::vector<vk::raii::ImageView> swapChainImageViews;
 
   std::vector<const char*> requiredDeviceExtension={vk::KHRSwapchainExtensionName};
 
@@ -81,6 +86,7 @@ class HelloTriangleApplication {
     pickPhysicalDevice();
     printPhysicalDevices();
     createLogicalDevice();
+    createSwapChain();
   }
 
   void mainLoop() {
@@ -340,10 +346,16 @@ class HelloTriangleApplication {
     };
 
     device=vk::raii::Device(physicalDevice,deviceCreateInfo);
-    graphicsQueue=vk::raii::Queue(device, queueIndex,0);
-
+    queue=vk::raii::Queue(device, queueIndex,0);
   }
 
+  void createSwapChain(){
+    vk::SurfaceCapabilitiesKHR surfaceCapabilities=physicalDevice.getSurfaceCapabilitiesKHR(*surface);
+
+    std::vector<vk::SurfaceFormatKHR> availableFormats=physicalDevice.getSurfaceFormatsKHR( surface );
+
+    std::vector<vk::PresentModeKHR> availablePresentModes=physicalDevice.getSurfacePresentModesKHR(*surface);
+  }
 
   static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(
       vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
