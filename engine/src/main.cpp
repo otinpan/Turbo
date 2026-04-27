@@ -52,8 +52,11 @@ class HelloTriangleApplication {
   vk::raii::Context context;
   vk::raii::Instance instance=nullptr;
   vk::raii::DebugUtilsMessengerEXT debugMessenger=nullptr;
+  vk::raii::SurfaceKHR surface=nullptr; // connection between Vulkan and GLFW
+  vk::raii::PhysicalDevice physicalDevice=nullptr; // physical device
+  vk::raii::Device device=nullptr; // logical device
+  vk::raii::Queue graphicsQueue=nullptr;
 
-  vk::raii::PhysicalDevice physicalDevice=nullptr;
   std::vector<const char*> requiredDeviceExtension={vk::KHRSwapchainExtensionName};
 
   void initWindow() {
@@ -74,8 +77,10 @@ class HelloTriangleApplication {
   void initVulkan() {
     createInstance();
     setupDebugMessenger();
+    createSurface();
     pickPhysicalDevice();
     printPhysicalDevices();
+    createLogicalDevice();
   }
 
   void mainLoop() {
@@ -97,8 +102,7 @@ class HelloTriangleApplication {
   }
 
 
-  void createInstance()
-  {
+  void createInstance(){
       constexpr vk::ApplicationInfo appInfo{.pApplicationName   = "Hello Triangle",
                                             .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
                                             .pEngineName        = "No Engine",
@@ -162,6 +166,38 @@ class HelloTriangleApplication {
       
   }
 
+  void setupDebugMessenger(){
+    if(!enableValidationLayers)return;
+
+    vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
+    );
+
+    vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags(
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+        vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+    );
+
+    vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoEXT{
+      .messageSeverity=severityFlags,
+      .messageType=messageTypeFlags,
+      .pfnUserCallback=&debugCallback
+    };
+
+    debugMessenger=instance.createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
+  }
+
+  void createSurface(){
+    VkSurfaceKHR _surface;
+    if(glfwCreateWindowSurface(*instance,window,nullptr,&_surface)!=0){
+      throw::std::runtime_error("failed to create window surfacee!");
+    }
+
+    surface=vk::raii::SurfaceKHR(instance,_surface);
+  }
+
   bool isDeviceSuitable(vk::raii::PhysicalDevice const &physicalDevice){
     // check if the physicalDevice supports the Vulkan 1.3 API version
     bool supportsVulkan1_3=physicalDevice.getProperties().apiVersion>=vk::ApiVersion13;
@@ -222,47 +258,25 @@ class HelloTriangleApplication {
   }
 
   void printPhysicalDevices() {
-  std::vector<vk::raii::PhysicalDevice> physicalDevices = instance.enumeratePhysicalDevices();
-  std::cout<<"search physical devices"<<std::endl;
-  std::cout << "Found " << physicalDevices.size() << " devices\n";
+    std::vector<vk::raii::PhysicalDevice> physicalDevices = instance.enumeratePhysicalDevices();
+    std::cout<<"search physical devices"<<std::endl;
+    std::cout << "Found " << physicalDevices.size() << " devices\n";
 
-  for (size_t i = 0; i < physicalDevices.size(); ++i) {
-    auto props = physicalDevices[i].getProperties();
+    for (size_t i = 0; i < physicalDevices.size(); ++i) {
+      auto props = physicalDevices[i].getProperties();
 
-    std::cout << "Device " << i << ":\n";
-    std::cout << "  Name: " << props.deviceName << "\n";
-    std::cout << "  API Version: " 
-              << VK_VERSION_MAJOR(props.apiVersion) << "."
-              << VK_VERSION_MINOR(props.apiVersion) << "."
-              << VK_VERSION_PATCH(props.apiVersion) << "\n";
-    std::cout << "  Vendor ID: " << props.vendorID << "\n";
-    std::cout << "  Device ID: " << props.deviceID << "\n";
-    std::cout << "  Type: " << vk::to_string(props.deviceType) << "\n\n";
+      std::cout << "Device " << i << ":\n";
+      std::cout << "  Name: " << props.deviceName << "\n";
+      std::cout << "  API Version: " 
+                << VK_VERSION_MAJOR(props.apiVersion) << "."
+                << VK_VERSION_MINOR(props.apiVersion) << "."
+                << VK_VERSION_PATCH(props.apiVersion) << "\n";
+      std::cout << "  Vendor ID: " << props.vendorID << "\n";
+      std::cout << "  Device ID: " << props.deviceID << "\n";
+      std::cout << "  Type: " << vk::to_string(props.deviceType) << "\n\n";
+    }
   }
-}
 
-  void setupDebugMessenger(){
-    if(!enableValidationLayers)return;
-
-    vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
-    );
-
-    vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags(
-        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-        vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
-    );
-
-    vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoEXT{
-      .messageSeverity=severityFlags,
-      .messageType=messageTypeFlags,
-      .pfnUserCallback=&debugCallback
-    };
-
-    debugMessenger=instance.createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
-  }
 
 
   std::vector<const char*> getRequiredInstanceExtensions(){
@@ -276,6 +290,60 @@ class HelloTriangleApplication {
 
     return extensions;
   }
+
+  void createLogicalDevice(){
+    // find  queue family 
+    std::vector<vk::QueueFamilyProperties> queueFamilyProperties=physicalDevice.getQueueFamilyProperties();
+    // print queue family properties
+    for (size_t i=0;i<queueFamilyProperties.size();++i){
+      std::cout<<"Queue family "<<i<<": "<<vk::to_string(queueFamilyProperties[i].queueFlags)<<std::endl;
+    }
+
+    // get the first index into queueFamilyProperties that supports graphics and presentation
+    uint32_t queueIndex=~0; // ~0 is the maximum value for uint32_t, which is used to indicate an invalid index
+    for (uint32_t qfpIndex=0;qfpIndex<queueFamilyProperties.size();qfpIndex++){
+      if((queueFamilyProperties[qfpIndex].queueFlags & vk::QueueFlagBits::eGraphics) &&
+         physicalDevice.getSurfaceSupportKHR(qfpIndex,*surface)){
+        queueIndex=qfpIndex;
+        break;
+      }
+    }
+
+    if(queueIndex==~0){
+      throw std::runtime_error("could not find a queue for graphics and present -> terminating");
+    }
+    // device features to enable
+    vk::StructureChain<
+      vk::PhysicalDeviceFeatures2,
+      vk::PhysicalDeviceVulkan13Features,
+      vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT
+    > 
+    featureChain={
+      {}, // vk::PhysicalDeviceFeatures2
+      {.dynamicRendering=true}, // vk::PhysicalDeviceVulkan13Features
+      {.extendedDynamicState=true} // vk::PhysicalDeviceExtendedDynamicStateFeatureEXT
+    };
+
+    // create a Device
+    float queuePriority=0.5f;
+    vk::DeviceQueueCreateInfo deviceQueueCreateInfo{
+      .queueFamilyIndex=queueIndex,
+      .queueCount=1,
+      .pQueuePriorities=&queuePriority
+    };
+    vk::DeviceCreateInfo deviceCreateInfo{
+      .pNext=&featureChain.get<vk::PhysicalDeviceFeatures2>(),
+      .queueCreateInfoCount=1,
+      .pQueueCreateInfos=&deviceQueueCreateInfo,
+      .enabledExtensionCount=static_cast<uint32_t>(requiredDeviceExtension.size()),
+      .ppEnabledExtensionNames=requiredDeviceExtension.data()
+    };
+
+    device=vk::raii::Device(physicalDevice,deviceCreateInfo);
+    graphicsQueue=vk::raii::Queue(device, queueIndex,0);
+
+  }
+
 
   static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(
       vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
