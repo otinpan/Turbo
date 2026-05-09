@@ -87,6 +87,7 @@ class HelloTriangleApplication {
     printPhysicalDevices();
     createLogicalDevice();
     createSwapChain();
+    createImageViews();
   }
 
   void mainLoop() {
@@ -422,6 +423,20 @@ class HelloTriangleApplication {
       std::clamp<uint32_t>(width,capabilities.minImageExtent.width,capabilities.maxImageExtent.width),
       std::clamp<uint32_t>(height,capabilities.minImageExtent.height,capabilities.maxImageExtent.height)
     };
+  }
+
+  void createImageViews(){
+    assert(swapChainImageViews.empty());
+    vk::ImageViewCreateInfo imageViewCreateInfo{
+      .viewType=vk::ImageViewType::e2D,
+      .format=swapChainSurfaceFormat.format,
+      .subresourceRange={vk::ImageAspectFlagBits::eColor,0,1,0,1} 
+    };
+
+    for(auto &image:swapChainImages){
+      imageViewCreateInfo.image=image;
+      swapChainImageViews.emplace_back(device,imageViewCreateInfo);
+    }
   }
 
   static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(
