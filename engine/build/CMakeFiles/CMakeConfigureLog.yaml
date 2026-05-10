@@ -4,279 +4,3118 @@ events:
   -
     kind: "message-v1"
     backtrace:
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineSystem.cmake:233 (message)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineSystem.cmake:212 (message)"
       - "CMakeLists.txt:3 (project)"
     message: |
-      The system is: Linux - 6.6.87.2-microsoft-standard-WSL2 - x86_64
+      The system is: Windows - 10.0.26200 - AMD64
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:468 (find_file)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:506 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCXXCompilerId.cpp.in"
+    candidate_directories:
+      - "D:/MyGame/share/cmake-4.3/Modules/"
+    found: "D:/MyGame/share/cmake-4.3/Modules/CMakeCXXCompilerId.cpp.in"
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
   -
     kind: "message-v1"
     backtrace:
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
       - "CMakeLists.txt:3 (project)"
     message: |
       Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
-      Compiler: /usr/bin/c++ 
+      Compiler:  
       Build flags: 
       Id flags:  
       
       The output was:
       0
+      MSBuild のバージョン 17.14.40+3e7442088 (.NET Framework)
+      2026/05/10 21:26:52 にビルドを開始しました。
+      
+      ノード 1 上のプロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdCXX\\CompilerIdCXX.vcxproj" (既定のターゲット)。
+      PrepareForBuild:
+        ディレクトリ "Debug\\" を作成しています。
+        構造化出力が有効になっています。コンパイラ診断の書式設定にはエラー階層が反映されます。詳細については、https://aka.ms/cpp/structured-output を参照してください。
+        ディレクトリ "Debug\\CompilerIdCXX.tlog\\" を作成しています。
+      InitializeBuildStatus:
+        "AlwaysCreate" が指定されたため "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" を作成しています。
+        "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" のタッチ タスクを実行しています。
+      VcpkgTripletSelection:
+        Using triplet "x64-windows" from "D:\\tools\\vcpkg\\installed\\x64-windows\\"
+        Using normalized configuration "Release"
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TP /FC /errorReport:queue CMakeCXXCompilerId.cpp
+        CMakeCXXCompilerId.cpp
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\lib" /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "D:\\tools\\vcpkg\\installed\\x64-windows\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X64 Debug\\CMakeCXXCompilerId.obj
+        CompilerIdCXX.vcxproj -> D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdCXX\\CompilerIdCXX.exe
+      AppLocalFromInstalled:
+        pwsh.exe -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdCXX\\CompilerIdCXX.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.write.1u.tlog" "Debug\\vcpkg.applocal.log"
+        'pwsh.exe' は、内部コマンドまたは外部コマンド、
+        操作可能なプログラムまたはバッチ ファイルとして認識されていません。
+        コマンド "pwsh.exe -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdCXX\\CompilerIdCXX.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.write.1u.tlog" "Debug\\vcpkg.applocal.log"" はコード 9009 で終了しました。
+        "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdCXX\\CompilerIdCXX.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.write.1u.tlog" "Debug\\vcpkg.applocal.log"
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_CXX_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        ファイル "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" を削除しています。
+        "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate" のタッチ タスクを実行しています。
+      プロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdCXX\\CompilerIdCXX.vcxproj" (既定のターゲット) のビルドが完了しました。
+      
+      ビルドに成功しました。
+          0 個の警告
+          0 エラー
+      
+      経過時間 00:00:02.83
       
       
-      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
       
-      The CXX compiler identification is GNU, found in:
-        /home/hase/Turbo/engine/build/CMakeFiles/3.28.3/CompilerIdCXX/a.out
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
       
+      The CXX compiler identification is MSVC, found in:
+        D:/MyGame/Turbo/engine/build/CMakeFiles/4.3.2/CompilerIdCXX/CompilerIdCXX.exe
+      
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:37 (find_program)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:65 (__resolve_tool_path)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:103 (__resolve_linker_path)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "_CMAKE_TOOL_WITH_PATH"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "link"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/link.com"
+    found: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/link.exe"
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:37 (find_program)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:65 (__resolve_tool_path)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:104 (__resolve_linker_path)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "_CMAKE_TOOL_WITH_PATH"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "lld-link"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lld-link"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/lld-link.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/lld-link.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/lld-link"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/lld-link.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/lld-link.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/lld-link"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/lld-link.com"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/lld-link.exe"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/lld-link"
+      - "C:/VulkanSDK/1.4.341.1/Bin/lld-link.com"
+      - "C:/VulkanSDK/1.4.341.1/Bin/lld-link.exe"
+      - "C:/VulkanSDK/1.4.341.1/Bin/lld-link"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/lld-link.com"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/lld-link.exe"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/lld-link"
+      - "C:/Windows/System32/lld-link.com"
+      - "C:/Windows/System32/lld-link.exe"
+      - "C:/Windows/System32/lld-link"
+      - "C:/Windows/lld-link.com"
+      - "C:/Windows/lld-link.exe"
+      - "C:/Windows/lld-link"
+      - "C:/Windows/System32/wbem/lld-link.com"
+      - "C:/Windows/System32/wbem/lld-link.exe"
+      - "C:/Windows/System32/wbem/lld-link"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link"
+      - "C:/Windows/System32/OpenSSH/lld-link.com"
+      - "C:/Windows/System32/OpenSSH/lld-link.exe"
+      - "C:/Windows/System32/OpenSSH/lld-link"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/lld-link.com"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/lld-link.exe"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/lld-link"
+      - "C:/Program Files/Wolfram Research/WolframScript/lld-link.com"
+      - "C:/Program Files/Wolfram Research/WolframScript/lld-link.exe"
+      - "C:/Program Files/Wolfram Research/WolframScript/lld-link"
+      - "C:/Program Files/Docker/Docker/resources/bin/lld-link.com"
+      - "C:/Program Files/Docker/Docker/resources/bin/lld-link.exe"
+      - "C:/Program Files/Docker/Docker/resources/bin/lld-link"
+      - "C:/Program Files/Git/cmd/lld-link.com"
+      - "C:/Program Files/Git/cmd/lld-link.exe"
+      - "C:/Program Files/Git/cmd/lld-link"
+      - "D:/MyGame/bin/lld-link.com"
+      - "D:/MyGame/bin/lld-link.exe"
+      - "D:/MyGame/bin/lld-link"
+      - "C:/Program Files/nodejs/lld-link.com"
+      - "C:/Program Files/nodejs/lld-link.exe"
+      - "C:/Program Files/nodejs/lld-link"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link.com"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link.exe"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/lld-link.com"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/lld-link.exe"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/lld-link"
+      - "C:/Users/hases/AppData/Local/atom/bin/lld-link.com"
+      - "C:/Users/hases/AppData/Local/atom/bin/lld-link.exe"
+      - "C:/Users/hases/AppData/Local/atom/bin/lld-link"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/lld-link.com"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/lld-link.exe"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/lld-link"
+      - "C:/texlive/2022/bin/win32/lld-link.com"
+      - "C:/texlive/2022/bin/win32/lld-link.exe"
+      - "C:/texlive/2022/bin/win32/lld-link"
+      - "C:/Go/bin/lld-link.com"
+      - "C:/Go/bin/lld-link.exe"
+      - "C:/Go/bin/lld-link"
+      - "C:/Users/hases/AppData/Roaming/npm/lld-link.com"
+      - "C:/Users/hases/AppData/Roaming/npm/lld-link.exe"
+      - "C:/Users/hases/AppData/Roaming/npm/lld-link"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_LINKER"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "link"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/link.com"
+    found: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/link.exe"
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_MT"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "mt"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/mt.com"
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/mt.exe"
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/mt"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/mt.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/mt.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/mt"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/mt.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/mt.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/mt"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/mt.com"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/mt.exe"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/mt"
+      - "C:/VulkanSDK/1.4.341.1/Bin/mt.com"
+      - "C:/VulkanSDK/1.4.341.1/Bin/mt.exe"
+      - "C:/VulkanSDK/1.4.341.1/Bin/mt"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/mt.com"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/mt.exe"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/mt"
+      - "C:/Windows/System32/mt.com"
+      - "C:/Windows/System32/mt.exe"
+      - "C:/Windows/System32/mt"
+      - "C:/Windows/mt.com"
+      - "C:/Windows/mt.exe"
+      - "C:/Windows/mt"
+      - "C:/Windows/System32/wbem/mt.com"
+      - "C:/Windows/System32/wbem/mt.exe"
+      - "C:/Windows/System32/wbem/mt"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/mt.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/mt.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/mt"
+      - "C:/Windows/System32/OpenSSH/mt.com"
+      - "C:/Windows/System32/OpenSSH/mt.exe"
+      - "C:/Windows/System32/OpenSSH/mt"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/mt.com"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/mt.exe"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/mt"
+      - "C:/Program Files/Wolfram Research/WolframScript/mt.com"
+      - "C:/Program Files/Wolfram Research/WolframScript/mt.exe"
+      - "C:/Program Files/Wolfram Research/WolframScript/mt"
+      - "C:/Program Files/Docker/Docker/resources/bin/mt.com"
+      - "C:/Program Files/Docker/Docker/resources/bin/mt.exe"
+      - "C:/Program Files/Docker/Docker/resources/bin/mt"
+      - "C:/Program Files/Git/cmd/mt.com"
+      - "C:/Program Files/Git/cmd/mt.exe"
+      - "C:/Program Files/Git/cmd/mt"
+      - "D:/MyGame/bin/mt.com"
+      - "D:/MyGame/bin/mt.exe"
+      - "D:/MyGame/bin/mt"
+      - "C:/Program Files/nodejs/mt.com"
+      - "C:/Program Files/nodejs/mt.exe"
+      - "C:/Program Files/nodejs/mt"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/mt.com"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/mt.exe"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/mt"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/mt.com"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/mt.exe"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/mt"
+      - "C:/Users/hases/AppData/Local/atom/bin/mt.com"
+      - "C:/Users/hases/AppData/Local/atom/bin/mt.exe"
+      - "C:/Users/hases/AppData/Local/atom/bin/mt"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/mt.com"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/mt.exe"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/mt"
+      - "C:/texlive/2022/bin/win32/mt.com"
+      - "C:/texlive/2022/bin/win32/mt.exe"
+      - "C:/texlive/2022/bin/win32/mt"
+      - "C:/Go/bin/mt.com"
+      - "C:/Go/bin/mt.exe"
+      - "C:/Go/bin/mt"
+      - "C:/Users/hases/AppData/Roaming/npm/mt.com"
+      - "C:/Users/hases/AppData/Roaming/npm/mt.exe"
+      - "C:/Users/hases/AppData/Roaming/npm/mt"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_AR"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "lib"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lib.com"
+    found: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lib.exe"
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineRCCompiler.cmake:40 (find_program)"
+      - "D:/MyGame/share/cmake-4.3/Modules/Platform/Windows-MSVC.cmake:592 (enable_language)"
+      - "D:/MyGame/share/cmake-4.3/Modules/Platform/Windows-MSVC.cmake:565 (__windows_compiler_msvc_enable_rc)"
+      - "D:/MyGame/share/cmake-4.3/Modules/Platform/Windows-MSVC-CXX.cmake:6 (__windows_compiler_msvc)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeCXXInformation.cmake:48 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_RC_COMPILER"
+    description: "RC compiler"
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "rc"
+    candidate_directories:
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+      - "C:/Program Files/bin/"
+      - "C:/Program Files/sbin/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/bin/"
+      - "C:/Program Files (x86)/sbin/"
+      - "C:/Program Files (x86)/"
+      - "D:/MyGame/bin/"
+      - "D:/MyGame/sbin/"
+      - "D:/MyGame/"
+      - "C:/Program Files (x86)/Engine/bin/"
+      - "C:/Program Files (x86)/Engine/sbin/"
+      - "C:/Program Files (x86)/Engine/"
+    searched_directories:
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/rc.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/rc.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/rc"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/rc.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/rc.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/rc"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/rc.com"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/rc.exe"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/rc"
+      - "C:/VulkanSDK/1.4.341.1/Bin/rc.com"
+      - "C:/VulkanSDK/1.4.341.1/Bin/rc.exe"
+      - "C:/VulkanSDK/1.4.341.1/Bin/rc"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/rc.com"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/rc.exe"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/rc"
+      - "C:/Windows/System32/rc.com"
+      - "C:/Windows/System32/rc.exe"
+      - "C:/Windows/System32/rc"
+      - "C:/Windows/rc.com"
+      - "C:/Windows/rc.exe"
+      - "C:/Windows/rc"
+      - "C:/Windows/System32/wbem/rc.com"
+      - "C:/Windows/System32/wbem/rc.exe"
+      - "C:/Windows/System32/wbem/rc"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/rc.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/rc.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/rc"
+      - "C:/Windows/System32/OpenSSH/rc.com"
+      - "C:/Windows/System32/OpenSSH/rc.exe"
+      - "C:/Windows/System32/OpenSSH/rc"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/rc.com"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/rc.exe"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/rc"
+      - "C:/Program Files/Wolfram Research/WolframScript/rc.com"
+      - "C:/Program Files/Wolfram Research/WolframScript/rc.exe"
+      - "C:/Program Files/Wolfram Research/WolframScript/rc"
+      - "C:/Program Files/Docker/Docker/resources/bin/rc.com"
+      - "C:/Program Files/Docker/Docker/resources/bin/rc.exe"
+      - "C:/Program Files/Docker/Docker/resources/bin/rc"
+      - "C:/Program Files/Git/cmd/rc.com"
+      - "C:/Program Files/Git/cmd/rc.exe"
+      - "C:/Program Files/Git/cmd/rc"
+      - "D:/MyGame/bin/rc.com"
+      - "D:/MyGame/bin/rc.exe"
+      - "D:/MyGame/bin/rc"
+      - "C:/Program Files/nodejs/rc.com"
+      - "C:/Program Files/nodejs/rc.exe"
+      - "C:/Program Files/nodejs/rc"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/rc.com"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/rc.exe"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/rc"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/rc.com"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/rc.exe"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/rc"
+      - "C:/Users/hases/AppData/Local/atom/bin/rc.com"
+      - "C:/Users/hases/AppData/Local/atom/bin/rc.exe"
+      - "C:/Users/hases/AppData/Local/atom/bin/rc"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/rc.com"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/rc.exe"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/rc"
+      - "C:/texlive/2022/bin/win32/rc.com"
+      - "C:/texlive/2022/bin/win32/rc.exe"
+      - "C:/texlive/2022/bin/win32/rc"
+      - "C:/Go/bin/rc.com"
+      - "C:/Go/bin/rc.exe"
+      - "C:/Go/bin/rc"
+      - "C:/Users/hases/AppData/Roaming/npm/rc.com"
+      - "C:/Users/hases/AppData/Roaming/npm/rc.exe"
+      - "C:/Users/hases/AppData/Roaming/npm/rc"
+      - "C:/Program Files/bin/rc.com"
+      - "C:/Program Files/bin/rc.exe"
+      - "C:/Program Files/bin/rc"
+      - "C:/Program Files/sbin/rc.com"
+      - "C:/Program Files/sbin/rc.exe"
+      - "C:/Program Files/sbin/rc"
+      - "C:/Program Files/rc.com"
+      - "C:/Program Files/rc.exe"
+      - "C:/Program Files/rc"
+      - "C:/Program Files (x86)/bin/rc.com"
+      - "C:/Program Files (x86)/bin/rc.exe"
+      - "C:/Program Files (x86)/bin/rc"
+      - "C:/Program Files (x86)/sbin/rc.com"
+      - "C:/Program Files (x86)/sbin/rc.exe"
+      - "C:/Program Files (x86)/sbin/rc"
+      - "C:/Program Files (x86)/rc.com"
+      - "C:/Program Files (x86)/rc.exe"
+      - "C:/Program Files (x86)/rc"
+      - "D:/MyGame/bin/rc.com"
+      - "D:/MyGame/bin/rc.exe"
+      - "D:/MyGame/bin/rc"
+      - "D:/MyGame/sbin/rc.com"
+      - "D:/MyGame/sbin/rc.exe"
+      - "D:/MyGame/sbin/rc"
+      - "D:/MyGame/rc.com"
+      - "D:/MyGame/rc.exe"
+      - "D:/MyGame/rc"
+      - "C:/Program Files (x86)/Engine/bin/rc.com"
+      - "C:/Program Files (x86)/Engine/bin/rc.exe"
+      - "C:/Program Files (x86)/Engine/bin/rc"
+      - "C:/Program Files (x86)/Engine/sbin/rc.com"
+      - "C:/Program Files (x86)/Engine/sbin/rc.exe"
+      - "C:/Program Files (x86)/Engine/sbin/rc"
+      - "C:/Program Files (x86)/Engine/rc.com"
+      - "C:/Program Files (x86)/Engine/rc.exe"
+      - "C:/Program Files (x86)/Engine/rc"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
   -
     kind: "try_compile-v1"
     backtrace:
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
-      - "/usr/share/cmake-3.28/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
       - "CMakeLists.txt:3 (project)"
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/home/hase/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-fsQlA6"
-      binary: "/home/hase/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-fsQlA6"
+      source: "D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-x6bdh6"
+      binary: "D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-x6bdh6"
     cmakeVariables:
-      CMAKE_CXX_FLAGS: ""
-      CMAKE_CXX_FLAGS_DEBUG: "-g"
-      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
     buildResult:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/home/hase/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-fsQlA6'
+        Change Dir: 'D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-x6bdh6'
         
-        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_548b0/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_548b0.dir/build.make CMakeFiles/cmTC_548b0.dir/build
-        gmake[1]: Entering directory '/home/hase/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-fsQlA6'
-        Building CXX object CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o
-        /usr/bin/c++   -v -o CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp
-        Using built-in specs.
-        COLLECT_GCC=/usr/bin/c++
-        OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
-        OFFLOAD_TARGET_DEFAULT=1
-        Target: x86_64-linux-gnu
-        Configured with: ../src/configure -v --with-pkgversion='Ubuntu 12.4.0-2ubuntu1~24.04.1' --with-bugurl=file:///usr/share/doc/gcc-12/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-12 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-12-DveB6a/gcc-12-12.4.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-12-DveB6a/gcc-12-12.4.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
-        Thread model: posix
-        Supported LTO compression algorithms: zlib zstd
-        gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_548b0.dir/'
-         /usr/lib/gcc/x86_64-linux-gnu/12/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_548b0.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccRQBTp3.s
-        GNU C++17 (Ubuntu 12.4.0-2ubuntu1~24.04.1) version 12.4.0 (x86_64-linux-gnu)
-        	compiled by GNU C version 12.4.0, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version isl-0.26-GMP
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_5687f.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild のバージョン 17.14.40+3e7442088 (.NET Framework)
+        2026/05/10 21:26:56 にビルドを開始しました。
         
-        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
-        ignoring duplicate directory "/usr/include/x86_64-linux-gnu/c++/12"
-        ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"
-        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/12/include-fixed"
-        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include"
-        #include "..." search starts here:
-        #include <...> search starts here:
-         /usr/include/c++/12
-         /usr/include/x86_64-linux-gnu/c++/12
-         /usr/include/c++/12/backward
-         /usr/lib/gcc/x86_64-linux-gnu/12/include
-         /usr/local/include
-         /usr/include/x86_64-linux-gnu
-         /usr/include
-        End of search list.
-        GNU C++17 (Ubuntu 12.4.0-2ubuntu1~24.04.1) version 12.4.0 (x86_64-linux-gnu)
-        	compiled by GNU C version 12.4.0, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version isl-0.26-GMP
+        ノード 1 上のプロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x6bdh6\\cmTC_5687f.vcxproj" (既定のターゲット)。
+        PrepareForBuild:
+          構造化出力が有効になっています。コンパイラ診断の書式設定にはエラー階層が反映されます。詳細については、https://aka.ms/cpp/structured-output を参照してください。
+          ディレクトリ "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x6bdh6\\Debug\\" を作成しています。
+          ディレクトリ "cmTC_5687f.dir\\Debug\\cmTC_5687f.tlog\\" を作成しています。
+        InitializeBuildStatus:
+          "AlwaysCreate" が指定されたため "cmTC_5687f.dir\\Debug\\cmTC_5687f.tlog\\unsuccessfulbuild" を作成しています。
+          "cmTC_5687f.dir\\Debug\\cmTC_5687f.tlog\\unsuccessfulbuild" のタッチ タスクを実行しています。
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "D:\\tools\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_5687f.dir\\Debug\\\\" /Fd"cmTC_5687f.dir\\Debug\\vc143.pdb" /external:W1 /TP /errorReport:queue "D:\\MyGame\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
+          Microsoft(R) C/C++ Optimizing Compiler Version 19.44.35226 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_5687f.dir\\Debug\\\\" /Fd"cmTC_5687f.dir\\Debug\\vc143.pdb" /external:W1 /TP /errorReport:queue "D:\\MyGame\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
+          CMakeCXXCompilerABI.cpp
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x6bdh6\\Debug\\cmTC_5687f.exe" /INCREMENTAL /ILK:"cmTC_5687f.dir\\Debug\\cmTC_5687f.ilk" /NOLOGO /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-x6bdh6/Debug/cmTC_5687f.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-x6bdh6/Debug/cmTC_5687f.lib" /MACHINE:X64  /machine:x64 cmTC_5687f.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_5687f.vcxproj -> D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x6bdh6\\Debug\\cmTC_5687f.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x6bdh6\\Debug\\cmTC_5687f.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_5687f.dir\\Debug\\cmTC_5687f.tlog\\cmTC_5687f.write.1u.tlog" "cmTC_5687f.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' は、内部コマンドまたは外部コマンド、
+          操作可能なプログラムまたはバッチ ファイルとして認識されていません。
+          コマンド "pwsh.exe -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x6bdh6\\Debug\\cmTC_5687f.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_5687f.dir\\Debug\\cmTC_5687f.tlog\\cmTC_5687f.write.1u.tlog" "cmTC_5687f.dir\\Debug\\vcpkg.applocal.log"" はコード 9009 で終了しました。
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x6bdh6\\Debug\\cmTC_5687f.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_5687f.dir\\Debug\\cmTC_5687f.tlog\\cmTC_5687f.write.1u.tlog" "cmTC_5687f.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          ファイル "cmTC_5687f.dir\\Debug\\cmTC_5687f.tlog\\unsuccessfulbuild" を削除しています。
+          "cmTC_5687f.dir\\Debug\\cmTC_5687f.tlog\\cmTC_5687f.lastbuildstate" のタッチ タスクを実行しています。
+        プロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x6bdh6\\cmTC_5687f.vcxproj" (既定のターゲット) のビルドが完了しました。
         
-        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
-        Compiler executable checksum: 14a79cff496ee8965fa5d116dc00d6b4
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_548b0.dir/'
-         as -v --64 -o CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccRQBTp3.s
-        GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42
-        COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/
-        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.'
-        Linking CXX executable cmTC_548b0
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_548b0.dir/link.txt --verbose=1
-        /usr/bin/c++  -v CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_548b0 
-        Using built-in specs.
-        COLLECT_GCC=/usr/bin/c++
-        COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper
-        OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
-        OFFLOAD_TARGET_DEFAULT=1
-        Target: x86_64-linux-gnu
-        Configured with: ../src/configure -v --with-pkgversion='Ubuntu 12.4.0-2ubuntu1~24.04.1' --with-bugurl=file:///usr/share/doc/gcc-12/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-12 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-12-DveB6a/gcc-12-12.4.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-12-DveB6a/gcc-12-12.4.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
-        Thread model: posix
-        Supported LTO compression algorithms: zlib zstd
-        gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) 
-        COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/
-        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_548b0' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_548b0.'
-         /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccrwbXDh.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_548b0 /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_548b0' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_548b0.'
-        gmake[1]: Leaving directory '/home/hase/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-fsQlA6'
+        ビルドに成功しました。
+            0 個の警告
+            0 エラー
+        
+        経過時間 00:00:01.48
         
       exitCode: 0
   -
     kind: "message-v1"
     backtrace:
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:127 (message)"
-      - "/usr/share/cmake-3.28/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
       - "CMakeLists.txt:3 (project)"
     message: |
-      Parsed CXX implicit include dir info: rv=done
-        found start of include info
-        found start of implicit include info
-          add: [/usr/include/c++/12]
-          add: [/usr/include/x86_64-linux-gnu/c++/12]
-          add: [/usr/include/c++/12/backward]
-          add: [/usr/lib/gcc/x86_64-linux-gnu/12/include]
-          add: [/usr/local/include]
-          add: [/usr/include/x86_64-linux-gnu]
-          add: [/usr/include]
-        end of search list found
-        collapse include dir [/usr/include/c++/12] ==> [/usr/include/c++/12]
-        collapse include dir [/usr/include/x86_64-linux-gnu/c++/12] ==> [/usr/include/x86_64-linux-gnu/c++/12]
-        collapse include dir [/usr/include/c++/12/backward] ==> [/usr/include/c++/12/backward]
-        collapse include dir [/usr/lib/gcc/x86_64-linux-gnu/12/include] ==> [/usr/lib/gcc/x86_64-linux-gnu/12/include]
-        collapse include dir [/usr/local/include] ==> [/usr/local/include]
-        collapse include dir [/usr/include/x86_64-linux-gnu] ==> [/usr/include/x86_64-linux-gnu]
-        collapse include dir [/usr/include] ==> [/usr/include]
-        implicit include dirs: [/usr/include/c++/12;/usr/include/x86_64-linux-gnu/c++/12;/usr/include/c++/12/backward;/usr/lib/gcc/x86_64-linux-gnu/12/include;/usr/local/include;/usr/include/x86_64-linux-gnu;/usr/include]
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
       
       
   -
     kind: "message-v1"
     backtrace:
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:159 (message)"
-      - "/usr/share/cmake-3.28/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "D:/MyGame/share/cmake-4.3/Modules/Internal/CMakeDetermineLinkerId.cmake:38 (message)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:299 (cmake_determine_linker_id)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
       - "CMakeLists.txt:3 (project)"
     message: |
-      Parsed CXX implicit link information:
-        link line regex: [^( *|.*[/\\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
-        ignore line: [Change Dir: '/home/hase/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-fsQlA6']
-        ignore line: []
-        ignore line: [Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_548b0/fast]
-        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_548b0.dir/build.make CMakeFiles/cmTC_548b0.dir/build]
-        ignore line: [gmake[1]: Entering directory '/home/hase/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-fsQlA6']
-        ignore line: [Building CXX object CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o]
-        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp]
-        ignore line: [Using built-in specs.]
-        ignore line: [COLLECT_GCC=/usr/bin/c++]
-        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
-        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
-        ignore line: [Target: x86_64-linux-gnu]
-        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 12.4.0-2ubuntu1~24.04.1' --with-bugurl=file:///usr/share/doc/gcc-12/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-12 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-12-DveB6a/gcc-12-12.4.0/debian/tmp-nvptx/usr amdgcn-amdhsa=/build/gcc-12-DveB6a/gcc-12-12.4.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
-        ignore line: [Thread model: posix]
-        ignore line: [Supported LTO compression algorithms: zlib zstd]
-        ignore line: [gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_548b0.dir/']
-        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/12/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_548b0.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccRQBTp3.s]
-        ignore line: [GNU C++17 (Ubuntu 12.4.0-2ubuntu1~24.04.1) version 12.4.0 (x86_64-linux-gnu)]
-        ignore line: [	compiled by GNU C version 12.4.0  GMP version 6.3.0  MPFR version 4.2.1  MPC version 1.3.1  isl version isl-0.26-GMP]
-        ignore line: []
-        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
-        ignore line: [ignoring duplicate directory "/usr/include/x86_64-linux-gnu/c++/12"]
-        ignore line: [ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"]
-        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/12/include-fixed"]
-        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include"]
-        ignore line: [#include "..." search starts here:]
-        ignore line: [#include <...> search starts here:]
-        ignore line: [ /usr/include/c++/12]
-        ignore line: [ /usr/include/x86_64-linux-gnu/c++/12]
-        ignore line: [ /usr/include/c++/12/backward]
-        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/12/include]
-        ignore line: [ /usr/local/include]
-        ignore line: [ /usr/include/x86_64-linux-gnu]
-        ignore line: [ /usr/include]
-        ignore line: [End of search list.]
-        ignore line: [GNU C++17 (Ubuntu 12.4.0-2ubuntu1~24.04.1) version 12.4.0 (x86_64-linux-gnu)]
-        ignore line: [	compiled by GNU C version 12.4.0  GMP version 6.3.0  MPFR version 4.2.1  MPC version 1.3.1  isl version isl-0.26-GMP]
-        ignore line: []
-        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
-        ignore line: [Compiler executable checksum: 14a79cff496ee8965fa5d116dc00d6b4]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_548b0.dir/']
-        ignore line: [ as -v --64 -o CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccRQBTp3.s]
-        ignore line: [GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42]
-        ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/]
-        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.']
-        ignore line: [Linking CXX executable cmTC_548b0]
-        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_548b0.dir/link.txt --verbose=1]
-        ignore line: [/usr/bin/c++  -v CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_548b0 ]
-        ignore line: [Using built-in specs.]
-        ignore line: [COLLECT_GCC=/usr/bin/c++]
-        ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper]
-        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
-        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
-        ignore line: [Target: x86_64-linux-gnu]
-        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 12.4.0-2ubuntu1~24.04.1' --with-bugurl=file:///usr/share/doc/gcc-12/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-12 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-12-DveB6a/gcc-12-12.4.0/debian/tmp-nvptx/usr amdgcn-amdhsa=/build/gcc-12-DveB6a/gcc-12-12.4.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
-        ignore line: [Thread model: posix]
-        ignore line: [Supported LTO compression algorithms: zlib zstd]
-        ignore line: [gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) ]
-        ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/]
-        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_548b0' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_548b0.']
-        link line: [ /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccrwbXDh.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_548b0 /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
-          arg [/usr/lib/gcc/x86_64-linux-gnu/12/collect2] ==> ignore
-          arg [-plugin] ==> ignore
-          arg [/usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so] ==> ignore
-          arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/tmp/ccrwbXDh.res] ==> ignore
-          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
-          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
-          arg [-plugin-opt=-pass-through=-lc] ==> ignore
-          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
-          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
-          arg [--build-id] ==> ignore
-          arg [--eh-frame-hdr] ==> ignore
-          arg [-m] ==> ignore
-          arg [elf_x86_64] ==> ignore
-          arg [--hash-style=gnu] ==> ignore
-          arg [--as-needed] ==> ignore
-          arg [-dynamic-linker] ==> ignore
-          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
-          arg [-pie] ==> ignore
-          arg [-znow] ==> ignore
-          arg [-zrelro] ==> ignore
-          arg [-o] ==> ignore
-          arg [cmTC_548b0] ==> ignore
-          arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o]
-          arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o]
-          arg [/usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o]
-          arg [-L/usr/lib/gcc/x86_64-linux-gnu/12] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/12]
-          arg [-L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu]
-          arg [-L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib]
-          arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
-          arg [-L/lib/../lib] ==> dir [/lib/../lib]
-          arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
-          arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
-          arg [-L/usr/lib/gcc/x86_64-linux-gnu/12/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../..]
-          arg [CMakeFiles/cmTC_548b0.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
-          arg [-lstdc++] ==> lib [stdc++]
-          arg [-lm] ==> lib [m]
-          arg [-lgcc_s] ==> lib [gcc_s]
-          arg [-lgcc] ==> lib [gcc]
-          arg [-lc] ==> lib [c]
-          arg [-lgcc_s] ==> lib [gcc_s]
-          arg [-lgcc] ==> lib [gcc]
-          arg [/usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o]
-          arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
-        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o] ==> [/usr/lib/x86_64-linux-gnu/Scrt1.o]
-        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o] ==> [/usr/lib/x86_64-linux-gnu/crti.o]
-        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o] ==> [/usr/lib/x86_64-linux-gnu/crtn.o]
-        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/12] ==> [/usr/lib/gcc/x86_64-linux-gnu/12]
-        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
-        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib] ==> [/usr/lib]
-        collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
-        collapse library dir [/lib/../lib] ==> [/lib]
-        collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
-        collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
-        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../..] ==> [/usr/lib]
-        implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
-        implicit objs: [/usr/lib/x86_64-linux-gnu/Scrt1.o;/usr/lib/x86_64-linux-gnu/crti.o;/usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o;/usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o;/usr/lib/x86_64-linux-gnu/crtn.o]
-        implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/12;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+      Running the CXX compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.44.35226.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/FindVulkan.cmake:409 (find_path)"
+      - "CMakeLists.txt:9 (find_package)"
+    mode: "path"
+    variable: "Vulkan_INCLUDE_DIR"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "vulkan/vulkan.h"
+    candidate_directories:
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+      - "C:/Program Files/include/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/include/"
+      - "C:/Program Files (x86)/"
+      - "D:/MyGame/include/"
+      - "D:/MyGame/"
+      - "C:/Program Files (x86)/Engine/include/"
+      - "C:/Program Files (x86)/Engine/"
+    searched_directories:
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/vulkan/vulkan.h"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/vulkan/vulkan.h"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/vulkan/vulkan.h"
+      - "C:/VulkanSDK/1.4.341.1/Bin/vulkan/vulkan.h"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/vulkan/vulkan.h"
+      - "C:/Windows/System32/vulkan/vulkan.h"
+      - "C:/Windows/vulkan/vulkan.h"
+      - "C:/Windows/System32/wbem/vulkan/vulkan.h"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/vulkan/vulkan.h"
+      - "C:/Windows/System32/OpenSSH/vulkan/vulkan.h"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/vulkan/vulkan.h"
+      - "C:/Program Files/Wolfram Research/WolframScript/vulkan/vulkan.h"
+      - "C:/Program Files/Docker/Docker/resources/bin/vulkan/vulkan.h"
+      - "C:/Program Files/Git/cmd/vulkan/vulkan.h"
+      - "D:/MyGame/bin/vulkan/vulkan.h"
+      - "C:/Program Files/nodejs/vulkan/vulkan.h"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/vulkan/vulkan.h"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/vulkan/vulkan.h"
+      - "C:/Users/hases/AppData/Local/atom/bin/vulkan/vulkan.h"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/vulkan/vulkan.h"
+      - "C:/texlive/2022/bin/win32/vulkan/vulkan.h"
+      - "C:/Go/bin/vulkan/vulkan.h"
+      - "C:/Users/hases/AppData/Roaming/npm/vulkan/vulkan.h"
+      - "C:/Program Files/include/vulkan/vulkan.h"
+      - "C:/Program Files/vulkan/vulkan.h"
+      - "C:/Program Files (x86)/include/vulkan/vulkan.h"
+      - "C:/Program Files (x86)/vulkan/vulkan.h"
+      - "D:/MyGame/include/vulkan/vulkan.h"
+      - "D:/MyGame/vulkan/vulkan.h"
+      - "C:/Program Files (x86)/Engine/include/vulkan/vulkan.h"
+      - "C:/Program Files (x86)/Engine/vulkan/vulkan.h"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/FindVulkan.cmake:416 (find_library)"
+      - "CMakeLists.txt:9 (find_package)"
+    mode: "library"
+    variable: "Vulkan_LIBRARY"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "vulkan-1"
+    candidate_directories:
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+      - "C:/Program Files/lib/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/lib/"
+      - "C:/Program Files (x86)/"
+      - "D:/MyGame/lib/"
+      - "D:/MyGame/"
+      - "C:/Program Files (x86)/Engine/lib/"
+      - "C:/Program Files (x86)/Engine/"
+      - "C:/Program Files (x86)/Engine/bin/"
+      - "/bin/"
+    searched_directories:
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+      - "C:/Program Files/lib/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/lib/"
+      - "C:/Program Files (x86)/"
+      - "D:/MyGame/lib/"
+      - "D:/MyGame/"
+      - "C:/Program Files (x86)/Engine/lib/"
+      - "C:/Program Files (x86)/Engine/"
+      - "C:/Program Files (x86)/Engine/bin/"
+      - "/bin/"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "C:/Program Files (x86)/Engine/bin"
+        - "D:/MyGame/bin"
+        - "/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/FindVulkan.cmake:424 (find_program)"
+      - "CMakeLists.txt:9 (find_package)"
+    mode: "program"
+    variable: "Vulkan_GLSLC_EXECUTABLE"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "glslc"
+    candidate_directories:
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+      - "C:/Program Files/bin/"
+      - "C:/Program Files/sbin/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/bin/"
+      - "C:/Program Files (x86)/sbin/"
+      - "C:/Program Files (x86)/"
+      - "D:/MyGame/bin/"
+      - "D:/MyGame/sbin/"
+      - "D:/MyGame/"
+      - "C:/Program Files (x86)/Engine/bin/"
+      - "C:/Program Files (x86)/Engine/sbin/"
+      - "C:/Program Files (x86)/Engine/"
+    searched_directories:
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/glslc.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/glslc.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/glslc"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/glslc.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/glslc.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/glslc"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/glslc.com"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/glslc.exe"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/glslc"
+      - "C:/VulkanSDK/1.4.341.1/Bin/glslc.com"
+    found: "C:/VulkanSDK/1.4.341.1/Bin/glslc.exe"
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/FindVulkan.cmake:432 (find_program)"
+      - "CMakeLists.txt:9 (find_package)"
+    mode: "program"
+    variable: "Vulkan_GLSLANG_VALIDATOR_EXECUTABLE"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "glslangValidator"
+    candidate_directories:
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+      - "C:/Program Files/bin/"
+      - "C:/Program Files/sbin/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/bin/"
+      - "C:/Program Files (x86)/sbin/"
+      - "C:/Program Files (x86)/"
+      - "D:/MyGame/bin/"
+      - "D:/MyGame/sbin/"
+      - "D:/MyGame/"
+      - "C:/Program Files (x86)/Engine/bin/"
+      - "C:/Program Files (x86)/Engine/sbin/"
+      - "C:/Program Files (x86)/Engine/"
+    searched_directories:
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/glslangValidator.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/glslangValidator.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/glslangValidator"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/glslangValidator.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/glslangValidator.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/glslangValidator"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/glslangValidator.com"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/glslangValidator.exe"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/glslangValidator"
+      - "C:/VulkanSDK/1.4.341.1/Bin/glslangValidator.com"
+    found: "C:/VulkanSDK/1.4.341.1/Bin/glslangValidator.exe"
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
+...
+
+---
+events:
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/FindVulkan.cmake:409 (find_path)"
+      - "CMakeLists.txt:9 (find_package)"
+    mode: "path"
+    variable: "Vulkan_INCLUDE_DIR"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "vulkan/vulkan.h"
+    candidate_directories:
+      - "C:/VulkanSDK/1.4.341.1/include/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+      - "C:/Program Files/include/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/include/"
+      - "C:/Program Files (x86)/"
+      - "D:/MyGame/include/"
+      - "D:/MyGame/"
+      - "C:/Program Files (x86)/Engine/include/"
+      - "C:/Program Files (x86)/Engine/"
+    found: "C:/VulkanSDK/1.4.341.1/include/"
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/FindVulkan.cmake:416 (find_library)"
+      - "CMakeLists.txt:9 (find_package)"
+    mode: "library"
+    variable: "Vulkan_LIBRARY"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "vulkan-1"
+    candidate_directories:
+      - "C:/VulkanSDK/1.4.341.1/lib/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+      - "C:/Program Files/lib/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/lib/"
+      - "C:/Program Files (x86)/"
+      - "D:/MyGame/lib/"
+      - "D:/MyGame/"
+      - "C:/Program Files (x86)/Engine/lib/"
+      - "C:/Program Files (x86)/Engine/"
+      - "C:/Program Files (x86)/Engine/bin/"
+      - "/bin/"
+    found: "C:/VulkanSDK/1.4.341.1/Lib/vulkan-1.lib"
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "C:/Program Files (x86)/Engine/bin"
+        - "D:/MyGame/bin"
+        - "/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:468 (find_file)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:506 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "D:/MyGame/glfw-3.4/CMakeLists.txt:3 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCCompilerId.c.in"
+    candidate_directories:
+      - "D:/MyGame/share/cmake-4.3/Modules/"
+    found: "D:/MyGame/share/cmake-4.3/Modules/CMakeCCompilerId.c.in"
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "D:/MyGame/glfw-3.4/CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild のバージョン 17.14.40+3e7442088 (.NET Framework)
+      2026/05/10 21:32:43 にビルドを開始しました。
+      
+      ノード 1 上のプロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdC\\CompilerIdC.vcxproj" (既定のターゲット)。
+      PrepareForBuild:
+        ディレクトリ "Debug\\" を作成しています。
+        構造化出力が有効になっています。コンパイラ診断の書式設定にはエラー階層が反映されます。詳細については、https://aka.ms/cpp/structured-output を参照してください。
+        ディレクトリ "Debug\\CompilerIdC.tlog\\" を作成しています。
+      InitializeBuildStatus:
+        "AlwaysCreate" が指定されたため "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" を作成しています。
+        "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" のタッチ タスクを実行しています。
+      VcpkgTripletSelection:
+        Using triplet "x64-windows" from "D:\\tools\\vcpkg\\installed\\x64-windows\\"
+        Using normalized configuration "Release"
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
+        CMakeCCompilerId.c
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\lib" /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "D:\\tools\\vcpkg\\installed\\x64-windows\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
+        CompilerIdC.vcxproj -> D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdC\\CompilerIdC.exe
+      AppLocalFromInstalled:
+        pwsh.exe -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdC\\CompilerIdC.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdC.tlog\\CompilerIdC.write.1u.tlog" "Debug\\vcpkg.applocal.log"
+        'pwsh.exe' は、内部コマンドまたは外部コマンド、
+        操作可能なプログラムまたはバッチ ファイルとして認識されていません。
+        コマンド "pwsh.exe -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdC\\CompilerIdC.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdC.tlog\\CompilerIdC.write.1u.tlog" "Debug\\vcpkg.applocal.log"" はコード 9009 で終了しました。
+        "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdC\\CompilerIdC.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdC.tlog\\CompilerIdC.write.1u.tlog" "Debug\\vcpkg.applocal.log"
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_C_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        ファイル "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" を削除しています。
+        "Debug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate" のタッチ タスクを実行しています。
+      プロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\4.3.2\\CompilerIdC\\CompilerIdC.vcxproj" (既定のターゲット) のビルドが完了しました。
+      
+      ビルドに成功しました。
+          0 個の警告
+          0 エラー
+      
+      経過時間 00:00:01.49
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+      
+      The C compiler identification is MSVC, found in:
+        D:/MyGame/Turbo/engine/build/CMakeFiles/4.3.2/CompilerIdC/CompilerIdC.exe
+      
+  -
+    kind: "find-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:37 (find_program)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:65 (__resolve_tool_path)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:104 (__resolve_linker_path)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "D:/MyGame/glfw-3.4/CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "_CMAKE_TOOL_WITH_PATH"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "lld-link"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+      - "C:/Program Files/bin/"
+      - "C:/Program Files/sbin/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/bin/"
+      - "C:/Program Files (x86)/sbin/"
+      - "C:/Program Files (x86)/"
+      - "D:/MyGame/bin/"
+      - "D:/MyGame/sbin/"
+      - "D:/MyGame/"
+      - "C:/Program Files (x86)/Engine/bin/"
+      - "C:/Program Files (x86)/Engine/sbin/"
+      - "C:/Program Files (x86)/Engine/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lld-link"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/lld-link.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/lld-link.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/lld-link"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/lld-link.com"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/lld-link.exe"
+      - "C:/Users/hases/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/lld-link"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/lld-link.com"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/lld-link.exe"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/lld-link"
+      - "C:/VulkanSDK/1.4.341.1/Bin/lld-link.com"
+      - "C:/VulkanSDK/1.4.341.1/Bin/lld-link.exe"
+      - "C:/VulkanSDK/1.4.341.1/Bin/lld-link"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/lld-link.com"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/lld-link.exe"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/lld-link"
+      - "C:/Windows/System32/lld-link.com"
+      - "C:/Windows/System32/lld-link.exe"
+      - "C:/Windows/System32/lld-link"
+      - "C:/Windows/lld-link.com"
+      - "C:/Windows/lld-link.exe"
+      - "C:/Windows/lld-link"
+      - "C:/Windows/System32/wbem/lld-link.com"
+      - "C:/Windows/System32/wbem/lld-link.exe"
+      - "C:/Windows/System32/wbem/lld-link"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link"
+      - "C:/Windows/System32/OpenSSH/lld-link.com"
+      - "C:/Windows/System32/OpenSSH/lld-link.exe"
+      - "C:/Windows/System32/OpenSSH/lld-link"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/lld-link.com"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/lld-link.exe"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/lld-link"
+      - "C:/Program Files/Wolfram Research/WolframScript/lld-link.com"
+      - "C:/Program Files/Wolfram Research/WolframScript/lld-link.exe"
+      - "C:/Program Files/Wolfram Research/WolframScript/lld-link"
+      - "C:/Program Files/Docker/Docker/resources/bin/lld-link.com"
+      - "C:/Program Files/Docker/Docker/resources/bin/lld-link.exe"
+      - "C:/Program Files/Docker/Docker/resources/bin/lld-link"
+      - "C:/Program Files/Git/cmd/lld-link.com"
+      - "C:/Program Files/Git/cmd/lld-link.exe"
+      - "C:/Program Files/Git/cmd/lld-link"
+      - "D:/MyGame/bin/lld-link.com"
+      - "D:/MyGame/bin/lld-link.exe"
+      - "D:/MyGame/bin/lld-link"
+      - "C:/Program Files/nodejs/lld-link.com"
+      - "C:/Program Files/nodejs/lld-link.exe"
+      - "C:/Program Files/nodejs/lld-link"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link.com"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link.exe"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/lld-link.com"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/lld-link.exe"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/lld-link"
+      - "C:/Users/hases/AppData/Local/atom/bin/lld-link.com"
+      - "C:/Users/hases/AppData/Local/atom/bin/lld-link.exe"
+      - "C:/Users/hases/AppData/Local/atom/bin/lld-link"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/lld-link.com"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/lld-link.exe"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/lld-link"
+      - "C:/texlive/2022/bin/win32/lld-link.com"
+      - "C:/texlive/2022/bin/win32/lld-link.exe"
+      - "C:/texlive/2022/bin/win32/lld-link"
+      - "C:/Go/bin/lld-link.com"
+      - "C:/Go/bin/lld-link.exe"
+      - "C:/Go/bin/lld-link"
+      - "C:/Users/hases/AppData/Roaming/npm/lld-link.com"
+      - "C:/Users/hases/AppData/Roaming/npm/lld-link.exe"
+      - "C:/Users/hases/AppData/Roaming/npm/lld-link"
+      - "C:/Program Files/bin/lld-link.com"
+      - "C:/Program Files/bin/lld-link.exe"
+      - "C:/Program Files/bin/lld-link"
+      - "C:/Program Files/sbin/lld-link.com"
+      - "C:/Program Files/sbin/lld-link.exe"
+      - "C:/Program Files/sbin/lld-link"
+      - "C:/Program Files/lld-link.com"
+      - "C:/Program Files/lld-link.exe"
+      - "C:/Program Files/lld-link"
+      - "C:/Program Files (x86)/bin/lld-link.com"
+      - "C:/Program Files (x86)/bin/lld-link.exe"
+      - "C:/Program Files (x86)/bin/lld-link"
+      - "C:/Program Files (x86)/sbin/lld-link.com"
+      - "C:/Program Files (x86)/sbin/lld-link.exe"
+      - "C:/Program Files (x86)/sbin/lld-link"
+      - "C:/Program Files (x86)/lld-link.com"
+      - "C:/Program Files (x86)/lld-link.exe"
+      - "C:/Program Files (x86)/lld-link"
+      - "D:/MyGame/bin/lld-link.com"
+      - "D:/MyGame/bin/lld-link.exe"
+      - "D:/MyGame/bin/lld-link"
+      - "D:/MyGame/sbin/lld-link.com"
+      - "D:/MyGame/sbin/lld-link.exe"
+      - "D:/MyGame/sbin/lld-link"
+      - "D:/MyGame/lld-link.com"
+      - "D:/MyGame/lld-link.exe"
+      - "D:/MyGame/lld-link"
+      - "C:/Program Files (x86)/Engine/bin/lld-link.com"
+      - "C:/Program Files (x86)/Engine/bin/lld-link.exe"
+      - "C:/Program Files (x86)/Engine/bin/lld-link"
+      - "C:/Program Files (x86)/Engine/sbin/lld-link.com"
+      - "C:/Program Files (x86)/Engine/sbin/lld-link.exe"
+      - "C:/Program Files (x86)/Engine/sbin/lld-link"
+      - "C:/Program Files (x86)/Engine/lld-link.com"
+      - "C:/Program Files (x86)/Engine/lld-link.exe"
+      - "C:/Program Files (x86)/Engine/lld-link"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\hases\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "D:/MyGame/glfw-3.4/CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-sjjk56"
+      binary: "D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-sjjk56"
+    cmakeVariables:
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-sjjk56'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_010db.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild のバージョン 17.14.40+3e7442088 (.NET Framework)
+        2026/05/10 21:32:44 にビルドを開始しました。
+        
+        ノード 1 上のプロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-sjjk56\\cmTC_010db.vcxproj" (既定のターゲット)。
+        PrepareForBuild:
+          構造化出力が有効になっています。コンパイラ診断の書式設定にはエラー階層が反映されます。詳細については、https://aka.ms/cpp/structured-output を参照してください。
+          ディレクトリ "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-sjjk56\\Debug\\" を作成しています。
+          ディレクトリ "cmTC_010db.dir\\Debug\\cmTC_010db.tlog\\" を作成しています。
+        InitializeBuildStatus:
+          "AlwaysCreate" が指定されたため "cmTC_010db.dir\\Debug\\cmTC_010db.tlog\\unsuccessfulbuild" を作成しています。
+          "cmTC_010db.dir\\Debug\\cmTC_010db.tlog\\unsuccessfulbuild" のタッチ タスクを実行しています。
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "D:\\tools\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_010db.dir\\Debug\\\\" /Fd"cmTC_010db.dir\\Debug\\vc143.pdb" /external:W1 /TC /errorReport:queue "D:\\MyGame\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
+          Microsoft(R) C/C++ Optimizing Compiler Version 19.44.35226 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_010db.dir\\Debug\\\\" /Fd"cmTC_010db.dir\\Debug\\vc143.pdb" /external:W1 /TC /errorReport:queue "D:\\MyGame\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
+          CMakeCCompilerABI.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-sjjk56\\Debug\\cmTC_010db.exe" /INCREMENTAL /ILK:"cmTC_010db.dir\\Debug\\cmTC_010db.ilk" /NOLOGO /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-sjjk56/Debug/cmTC_010db.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-sjjk56/Debug/cmTC_010db.lib" /MACHINE:X64  /machine:x64 cmTC_010db.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_010db.vcxproj -> D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-sjjk56\\Debug\\cmTC_010db.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-sjjk56\\Debug\\cmTC_010db.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_010db.dir\\Debug\\cmTC_010db.tlog\\cmTC_010db.write.1u.tlog" "cmTC_010db.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' は、内部コマンドまたは外部コマンド、
+          操作可能なプログラムまたはバッチ ファイルとして認識されていません。
+          コマンド "pwsh.exe -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-sjjk56\\Debug\\cmTC_010db.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_010db.dir\\Debug\\cmTC_010db.tlog\\cmTC_010db.write.1u.tlog" "cmTC_010db.dir\\Debug\\vcpkg.applocal.log"" はコード 9009 で終了しました。
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "D:\\tools\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-sjjk56\\Debug\\cmTC_010db.exe" "D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_010db.dir\\Debug\\cmTC_010db.tlog\\cmTC_010db.write.1u.tlog" "cmTC_010db.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          ファイル "cmTC_010db.dir\\Debug\\cmTC_010db.tlog\\unsuccessfulbuild" を削除しています。
+          "cmTC_010db.dir\\Debug\\cmTC_010db.tlog\\cmTC_010db.lastbuildstate" のタッチ タスクを実行しています。
+        プロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-sjjk56\\cmTC_010db.vcxproj" (既定のターゲット) のビルドが完了しました。
+        
+        ビルドに成功しました。
+            0 個の警告
+            0 エラー
+        
+        経過時間 00:00:01.36
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "D:/MyGame/glfw-3.4/CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
         implicit fwks: []
       
       
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/Internal/CMakeDetermineLinkerId.cmake:38 (message)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:299 (cmake_determine_linker_id)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "D:/MyGame/glfw-3.4/CMakeLists.txt:3 (project)"
+    message: |
+      Running the C compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.44.35226.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/Internal/CheckSourceCompiles.cmake:104 (try_compile)"
+      - "D:/MyGame/share/cmake-4.3/Modules/CheckCSourceCompiles.cmake:103 (cmake_check_source_compiles)"
+      - "D:/MyGame/share/cmake-4.3/Modules/FindThreads.cmake:160 (check_c_source_compiles)"
+      - "D:/MyGame/share/cmake-4.3/Modules/FindThreads.cmake:226 (_threads_check_libc)"
+      - "D:/MyGame/glfw-3.4/CMakeLists.txt:60 (find_package)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-bf0vk6"
+      binary: "D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-bf0vk6"
+    cmakeVariables:
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/MyGame/glfw-3.4/CMake/modules"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-bf0vk6'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_5a89c.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild のバージョン 17.14.40+3e7442088 (.NET Framework)
+        2026/05/10 21:32:47 にビルドを開始しました。
+        
+        ノード 1 上のプロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bf0vk6\\cmTC_5a89c.vcxproj" (既定のターゲット)。
+        PrepareForBuild:
+          構造化出力が有効になっています。コンパイラ診断の書式設定にはエラー階層が反映されます。詳細については、https://aka.ms/cpp/structured-output を参照してください。
+          ディレクトリ "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bf0vk6\\Debug\\" を作成しています。
+          ディレクトリ "cmTC_5a89c.dir\\Debug\\cmTC_5a89c.tlog\\" を作成しています。
+        InitializeBuildStatus:
+          "AlwaysCreate" が指定されたため "cmTC_5a89c.dir\\Debug\\cmTC_5a89c.tlog\\unsuccessfulbuild" を作成しています。
+          "cmTC_5a89c.dir\\Debug\\cmTC_5a89c.tlog\\unsuccessfulbuild" のタッチ タスクを実行しています。
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "D:\\tools\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_5a89c.dir\\Debug\\\\" /Fd"cmTC_5a89c.dir\\Debug\\vc143.pdb" /external:W1 /TC /errorReport:queue "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bf0vk6\\src.c"
+          Microsoft(R) C/C++ Optimizing Compiler Version 19.44.35226 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_5a89c.dir\\Debug\\\\" /Fd"cmTC_5a89c.dir\\Debug\\vc143.pdb" /external:W1 /TC /errorReport:queue "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bf0vk6\\src.c"
+          src.c
+        D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bf0vk6\\src.c(1,10): error C1083: include ファイルを開けません。'pthread.h':No such file or directory [D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bf0vk6\\cmTC_5a89c.vcxproj]
+        プロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bf0vk6\\cmTC_5a89c.vcxproj" (既定のターゲット) のビルドが終了しました -- 失敗。
+        
+        ビルドに失敗しました。
+        
+        "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bf0vk6\\cmTC_5a89c.vcxproj" (既定のターゲット) (1) ->
+        (ClCompile ターゲット) -> 
+          D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bf0vk6\\src.c(1,10): error C1083: include ファイルを開けません。'pthread.h':No such file or directory [D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-bf0vk6\\cmTC_5a89c.vcxproj]
+        
+            0 個の警告
+            1 エラー
+        
+        経過時間 00:00:00.54
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CheckLibraryExists.cmake:154 (try_compile)"
+      - "D:/MyGame/share/cmake-4.3/Modules/FindThreads.cmake:175 (check_library_exists)"
+      - "D:/MyGame/share/cmake-4.3/Modules/FindThreads.cmake:238 (_threads_check_lib)"
+      - "D:/MyGame/glfw-3.4/CMakeLists.txt:60 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthreads"
+    directories:
+      source: "D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-l1h97s"
+      binary: "D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-l1h97s"
+    cmakeVariables:
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/MyGame/glfw-3.4/CMake/modules"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREADS_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-l1h97s'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_6879f.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild のバージョン 17.14.40+3e7442088 (.NET Framework)
+        2026/05/10 21:32:47 にビルドを開始しました。
+        
+        ノード 1 上のプロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-l1h97s\\cmTC_6879f.vcxproj" (既定のターゲット)。
+        PrepareForBuild:
+          構造化出力が有効になっています。コンパイラ診断の書式設定にはエラー階層が反映されます。詳細については、https://aka.ms/cpp/structured-output を参照してください。
+          ディレクトリ "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-l1h97s\\Debug\\" を作成しています。
+          ディレクトリ "cmTC_6879f.dir\\Debug\\cmTC_6879f.tlog\\" を作成しています。
+        InitializeBuildStatus:
+          "AlwaysCreate" が指定されたため "cmTC_6879f.dir\\Debug\\cmTC_6879f.tlog\\unsuccessfulbuild" を作成しています。
+          "cmTC_6879f.dir\\Debug\\cmTC_6879f.tlog\\unsuccessfulbuild" のタッチ タスクを実行しています。
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "D:\\tools\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_6879f.dir\\Debug\\\\" /Fd"cmTC_6879f.dir\\Debug\\vc143.pdb" /external:W1 /TC /errorReport:queue "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-l1h97s\\CheckFunctionExists.c"
+          Microsoft(R) C/C++ Optimizing Compiler Version 19.44.35226 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_6879f.dir\\Debug\\\\" /Fd"cmTC_6879f.dir\\Debug\\vc143.pdb" /external:W1 /TC /errorReport:queue "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-l1h97s\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-l1h97s\\Debug\\cmTC_6879f.exe" /INCREMENTAL /ILK:"cmTC_6879f.dir\\Debug\\cmTC_6879f.ilk" /NOLOGO /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" pthreads.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-l1h97s/Debug/cmTC_6879f.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-l1h97s/Debug/cmTC_6879f.lib" /MACHINE:X64  /machine:x64 cmTC_6879f.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: ファイル 'pthreads.lib' を開くことができません。 [D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-l1h97s\\cmTC_6879f.vcxproj]
+        プロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-l1h97s\\cmTC_6879f.vcxproj" (既定のターゲット) のビルドが終了しました -- 失敗。
+        
+        ビルドに失敗しました。
+        
+        "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-l1h97s\\cmTC_6879f.vcxproj" (既定のターゲット) (1) ->
+        (Link ターゲット) -> 
+          LINK : fatal error LNK1104: ファイル 'pthreads.lib' を開くことができません。 [D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-l1h97s\\cmTC_6879f.vcxproj]
+        
+            0 個の警告
+            1 エラー
+        
+        経過時間 00:00:00.56
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/MyGame/share/cmake-4.3/Modules/CheckLibraryExists.cmake:154 (try_compile)"
+      - "D:/MyGame/share/cmake-4.3/Modules/FindThreads.cmake:175 (check_library_exists)"
+      - "D:/MyGame/share/cmake-4.3/Modules/FindThreads.cmake:239 (_threads_check_lib)"
+      - "D:/MyGame/glfw-3.4/CMakeLists.txt:60 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthread"
+    directories:
+      source: "D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-qxfiw6"
+      binary: "D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-qxfiw6"
+    cmakeVariables:
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/MyGame/glfw-3.4/CMake/modules"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREAD_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-qxfiw6'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_c1281.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild のバージョン 17.14.40+3e7442088 (.NET Framework)
+        2026/05/10 21:32:48 にビルドを開始しました。
+        
+        ノード 1 上のプロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-qxfiw6\\cmTC_c1281.vcxproj" (既定のターゲット)。
+        PrepareForBuild:
+          構造化出力が有効になっています。コンパイラ診断の書式設定にはエラー階層が反映されます。詳細については、https://aka.ms/cpp/structured-output を参照してください。
+          ディレクトリ "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-qxfiw6\\Debug\\" を作成しています。
+          ディレクトリ "cmTC_c1281.dir\\Debug\\cmTC_c1281.tlog\\" を作成しています。
+        InitializeBuildStatus:
+          "AlwaysCreate" が指定されたため "cmTC_c1281.dir\\Debug\\cmTC_c1281.tlog\\unsuccessfulbuild" を作成しています。
+          "cmTC_c1281.dir\\Debug\\cmTC_c1281.tlog\\unsuccessfulbuild" のタッチ タスクを実行しています。
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "D:\\tools\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_c1281.dir\\Debug\\\\" /Fd"cmTC_c1281.dir\\Debug\\vc143.pdb" /external:W1 /TC /errorReport:queue "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-qxfiw6\\CheckFunctionExists.c"
+          Microsoft(R) C/C++ Optimizing Compiler Version 19.44.35226 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /I"D:\\tools\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_c1281.dir\\Debug\\\\" /Fd"cmTC_c1281.dir\\Debug\\vc143.pdb" /external:W1 /TC /errorReport:queue "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-qxfiw6\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-qxfiw6\\Debug\\cmTC_c1281.exe" /INCREMENTAL /ILK:"cmTC_c1281.dir\\Debug\\cmTC_c1281.ilk" /NOLOGO /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" pthread.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "D:\\tools\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-qxfiw6/Debug/cmTC_c1281.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/MyGame/Turbo/engine/build/CMakeFiles/CMakeScratch/TryCompile-qxfiw6/Debug/cmTC_c1281.lib" /MACHINE:X64  /machine:x64 cmTC_c1281.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: ファイル 'pthread.lib' を開くことができません。 [D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-qxfiw6\\cmTC_c1281.vcxproj]
+        プロジェクト "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-qxfiw6\\cmTC_c1281.vcxproj" (既定のターゲット) のビルドが終了しました -- 失敗。
+        
+        ビルドに失敗しました。
+        
+        "D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-qxfiw6\\cmTC_c1281.vcxproj" (既定のターゲット) (1) ->
+        (Link ターゲット) -> 
+          LINK : fatal error LNK1104: ファイル 'pthread.lib' を開くことができません。 [D:\\MyGame\\Turbo\\engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-qxfiw6\\cmTC_c1281.vcxproj]
+        
+            0 個の警告
+            1 エラー
+        
+        経過時間 00:00:00.57
+        
+      exitCode: 1
+...
+
+---
+events:
+  -
+    kind: "find_package-v1"
+    backtrace:
+      - "CMakeLists.txt:10 (find_package)"
+    name: "glfw3"
+    configs:
+      -
+        filename: "glfw3.cps"
+        kind: "cps"
+      -
+        filename: "glfw3Config.cmake"
+        kind: "cmake"
+      -
+        filename: "glfw3-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "required_explicit"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "glfw3"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: "D:/MyGame/Turbo/engine/build/CMakeFiles/pkgRedirects/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/Turbo/engine/build/CMakeFiles/pkgRedirects/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/Turbo/engine/build/CMakeFiles/pkgRedirects/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/Turbo/engine/build/CMakeFiles/pkgRedirects/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.codex/tmp/arg0/codex-arg0W1Lmrf/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.codex/tmp/arg0/codex-arg0W1Lmrf/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.codex/tmp/arg0/codex-arg0W1Lmrf/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.codex/tmp/arg0/codex-arg0W1Lmrf/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/VulkanSDK/1.4.341.1/Bin/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/VulkanSDK/1.4.341.1/Bin/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/VulkanSDK/1.4.341.1/Bin/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/VulkanSDK/1.4.341.1/Bin/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Docker/Docker/resources/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Docker/Docker/resources/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Docker/Docker/resources/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Docker/Docker/resources/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/CMake/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/CMake/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/atom/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/atom/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/atom/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/atom/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Roaming/npm/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Roaming/npm/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Roaming/npm/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Roaming/npm/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.vscode/extensions/openai.chatgpt-26.506.31421-win32-x64/bin/windows-x86_64/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.vscode/extensions/openai.chatgpt-26.506.31421-win32-x64/bin/windows-x86_64/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.vscode/extensions/openai.chatgpt-26.506.31421-win32-x64/bin/windows-x86_64/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.vscode/extensions/openai.chatgpt-26.506.31421-win32-x64/bin/windows-x86_64/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/glfw3Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/glfw3-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/lib/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/share/cps/glfw3.cps"
+        mode: "cps"
+        reason: "no_exist"
+    found: null
+    search_context:
+      ENV{PATH}:
+        - "C:\\Users\\hases\\.codex\\tmp\\arg0\\codex-arg0W1Lmrf"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+        - "c:\\Users\\hases\\.vscode\\extensions\\openai.chatgpt-26.506.31421-win32-x64\\bin\\windows-x86_64"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
+...
+
+---
+events:
+  -
+    kind: "find_package-v1"
+    backtrace:
+      - "CMakeLists.txt:19 (find_package)"
+    name: "glm"
+    configs:
+      -
+        filename: "glm.cps"
+        kind: "cps"
+      -
+        filename: "glmConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "glm-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: true
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "glm"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: "D:/MyGame/Turbo/engine/build/CMakeFiles/pkgRedirects/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/Turbo/engine/build/CMakeFiles/pkgRedirects/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/Turbo/engine/build/CMakeFiles/pkgRedirects/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/Turbo/engine/build/CMakeFiles/pkgRedirects/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.codex/tmp/arg0/codex-arg0W1Lmrf/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.codex/tmp/arg0/codex-arg0W1Lmrf/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.codex/tmp/arg0/codex-arg0W1Lmrf/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.codex/tmp/arg0/codex-arg0W1Lmrf/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/VulkanSDK/1.4.341.1/Bin/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/VulkanSDK/1.4.341.1/Bin/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/VulkanSDK/1.4.341.1/Bin/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/VulkanSDK/1.4.341.1/Bin/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Docker/Docker/resources/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Docker/Docker/resources/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Docker/Docker/resources/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Docker/Docker/resources/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/CMake/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/CMake/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/glm-1.0.1/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/glm-1.0.1/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/glm-1.0.1/cmake/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/glm-1.0.1/cmake/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "D:/MyGame/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/atom/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/atom/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/atom/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Local/atom/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Roaming/npm/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Roaming/npm/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Roaming/npm/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/AppData/Roaming/npm/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.vscode/extensions/openai.chatgpt-26.506.31421-win32-x64/bin/windows-x86_64/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.vscode/extensions/openai.chatgpt-26.506.31421-win32-x64/bin/windows-x86_64/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.vscode/extensions/openai.chatgpt-26.506.31421-win32-x64/bin/windows-x86_64/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/hases/.vscode/extensions/openai.chatgpt-26.506.31421-win32-x64/bin/windows-x86_64/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/glmConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/glm-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/lib/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/share/cps/glm.cps"
+        mode: "cps"
+        reason: "no_exist"
+    found: null
+    search_context:
+      ENV{PATH}:
+        - "C:\\Users\\hases\\.codex\\tmp\\arg0\\codex-arg0W1Lmrf"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+        - "c:\\Users\\hases\\.vscode\\extensions\\openai.chatgpt-26.506.31421-win32-x64\\bin\\windows-x86_64"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "CMakeLists.txt:26 (find_program)"
+    mode: "program"
+    variable: "SLANGC_EXECUTABLE"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "slangc"
+      - "slangc.exe"
+    candidate_directories:
+      - "D:/MyGame/Turbo/engine/1.4.341.1/Bin/"
+      - "D:/MyGame/Turbo/engine/1.4.341.1/bin/"
+      - "C:/VulkanSDK/1.4.341.1/Bin/"
+      - "C:/VulkanSDK/1.4.341.1/bin/"
+      - "C:/Users/hases/.codex/tmp/arg0/codex-arg0W1Lmrf/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/"
+      - "C:/Program Files/Microsoft/jdk-11.0.16.101-hotspot/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Wolfram Research/WolframScript/"
+      - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "D:/MyGame/bin/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Users/hases/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/hases/AppData/Local/atom/bin/"
+      - "C:/Users/hases/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/texlive/2022/bin/win32/"
+      - "C:/Go/bin/"
+      - "C:/Users/hases/AppData/Roaming/npm/"
+      - "C:/Users/hases/.vscode/extensions/openai.chatgpt-26.506.31421-win32-x64/bin/windows-x86_64/"
+      - "C:/Program Files/bin/"
+      - "C:/Program Files/sbin/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/bin/"
+      - "C:/Program Files (x86)/sbin/"
+      - "C:/Program Files (x86)/"
+      - "D:/MyGame/bin/"
+      - "D:/MyGame/sbin/"
+      - "D:/MyGame/"
+      - "C:/Program Files (x86)/Engine/bin/"
+      - "C:/Program Files (x86)/Engine/sbin/"
+      - "C:/Program Files (x86)/Engine/"
+    searched_directories:
+      - "D:/MyGame/Turbo/engine/1.4.341.1/Bin/slangc.com"
+      - "D:/MyGame/Turbo/engine/1.4.341.1/Bin/slangc.exe"
+      - "D:/MyGame/Turbo/engine/1.4.341.1/Bin/slangc"
+      - "D:/MyGame/Turbo/engine/1.4.341.1/bin/slangc.com"
+      - "D:/MyGame/Turbo/engine/1.4.341.1/bin/slangc.exe"
+      - "D:/MyGame/Turbo/engine/1.4.341.1/bin/slangc"
+      - "C:/VulkanSDK/1.4.341.1/Bin/slangc.com"
+    found: "C:/VulkanSDK/1.4.341.1/Bin/slangc.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Users\\hases\\.codex\\tmp\\arg0\\codex-arg0W1Lmrf"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\VulkanSDK\\1.4.341.1\\Bin"
+        - "C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Wolfram Research\\WolframScript\\"
+        - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "D:\\MyGame\\bin"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\atom\\bin"
+        - "C:\\Users\\hases\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\hases\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\texlive\\2022\\bin\\win32"
+        - "C:\\Go\\bin"
+        - "C:\\Users\\hases\\AppData\\Roaming\\npm"
+        - "c:\\Users\\hases\\.vscode\\extensions\\openai.chatgpt-26.506.31421-win32-x64\\bin\\windows-x86_64"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Engine"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "D:/MyGame"
+        - "C:/Program Files (x86)/Engine"
 ...
