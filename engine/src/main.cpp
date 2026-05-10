@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <fstream>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
@@ -88,6 +89,7 @@ class HelloTriangleApplication {
     createLogicalDevice();
     createSwapChain();
     createImageViews();
+    createGraphicsPipeline();
   }
 
   void mainLoop() {
@@ -439,6 +441,39 @@ class HelloTriangleApplication {
     }
   }
 
+  void createGraphicsPipeline(){
+    vk::raii::ShaderModule shaderVertModule
+      =createShaderModule(readFile("shaders/vert.spv"));
+    vk::raii::ShaderModule shaderFragModule
+      =createShaderModule(readFile("shaders/frag.spv"));
+
+    vk::PipelineShaderStageCreateInfo vertShaderStageInfo{
+      .stage=vk::ShaderStageFlagBits::eVertex,
+      .module=shaderVertModule,
+      .pName="vertMain"
+    };
+
+    vk::PipelineShaderStageCreateInfo fragShaderStageInfo{
+      .stage=vk::ShaderStageFlagBits::eFragment,
+      .module=shaderFragModule,
+      .pName="fragMain"
+    };
+
+    vk::PipelineShaderStageCreateInfo shaderStages[]={
+      vertShaderStageInfo,
+      fragShaderStageInfo
+    };
+  }
+
+  [[nodiscard]] vk::raii::ShaderModule createShaderModule(const std::vector<char> &code) const{
+    vk::ShaderModuleCreateInfo createInfo{
+      .codeSize=code.size()*sizeof(char),
+      .pCode=reinterpret_cast<const uint32_t*>(code.data())
+    };
+    vk::raii::ShaderModule shaderModule{device,createInfo};
+    return shaderModule;
+  }
+
   static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(
       vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
       vk::DebugUtilsMessageTypeFlagsEXT type,
@@ -452,6 +487,17 @@ class HelloTriangleApplication {
     }
 
     return VK_FALSE;
+  }
+
+  static std::vector<char> readFile(const std::string &filename){
+    std::ifstream file(filename,std::ios::ate | std::ios::binary);
+    if(!file.is_open()){
+      throw std::runtime_error("failed to open file!");
+    }
+    std::vector<char> buffer(file.tellg());
+    file.seekg(0,std::ios::beg);
+    file.read(buffer.data(),static_cast<std::streamsize>(buffer.size()));
+    return buffer;
   }
 };
 
