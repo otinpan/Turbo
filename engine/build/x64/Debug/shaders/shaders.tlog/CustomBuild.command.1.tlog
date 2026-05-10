@@ -1,0 +1,42 @@
+^D:\MYGAME\TURBO\ENGINE\BUILD\CMAKEFILES\93418027A8EC6DA38B999DAC88C01210\FRAG.SPV.RULE
+setlocal
+D:\MyGame\bin\cmake.exe -E make_directory D:/MyGame/Turbo/engine/build/shaders
+if %errorlevel% neq 0 goto :cmEnd
+C:\VulkanSDK\1.4.341.1\Bin\slangc.exe D:/MyGame/Turbo/engine/src/shaders/shader.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry fragMain -stage fragment -o D:/MyGame/Turbo/engine/build/shaders/frag.spv
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MYGAME\TURBO\ENGINE\BUILD\CMAKEFILES\93418027A8EC6DA38B999DAC88C01210\VERT.SPV.RULE
+setlocal
+D:\MyGame\bin\cmake.exe -E make_directory D:/MyGame/Turbo/engine/build/shaders
+if %errorlevel% neq 0 goto :cmEnd
+C:\VulkanSDK\1.4.341.1\Bin\slangc.exe D:/MyGame/Turbo/engine/src/shaders/shader.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -stage vertex -o D:/MyGame/Turbo/engine/build/shaders/vert.spv
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MYGAME\TURBO\ENGINE\BUILD\CMAKEFILES\DFAC8ED7163BA9C73FCE3EFD0D852623\SHADERS.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MYGAME\TURBO\ENGINE\CMAKELISTS.TXT
+setlocal
+D:\MyGame\bin\cmake.exe -SD:/MyGame/Turbo/engine -BD:/MyGame/Turbo/engine/build --check-stamp-file D:/MyGame/Turbo/engine/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

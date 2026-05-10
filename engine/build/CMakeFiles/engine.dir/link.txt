@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/engine.dir/src/main.cpp.o -o engine  /usr/lib/x86_64-linux-gnu/libvulkan.so /usr/lib/x86_64-linux-gnu/libglfw.so.3.3 

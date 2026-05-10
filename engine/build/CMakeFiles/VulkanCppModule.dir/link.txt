@@ -1,2 +1,0 @@
-/usr/bin/ar qc libVulkanCppModule.a CMakeFiles/VulkanCppModule.dir/usr/include/vulkan/vulkan.cppm.o
-/usr/bin/ranlib libVulkanCppModule.a

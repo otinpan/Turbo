@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\MyGame\Turbo\engine\build\CMakeFiles\9f555f1c6d94403c78ed2533b259e11a\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{7AE9D1B3-0C6C-3877-99D9-6B12AED82B7F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
