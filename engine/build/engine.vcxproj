@@ -107,12 +107,12 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;SHADER_BINARY_DIR="D:/MyGame/Turbo/engine/build/shaders";CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;SHADER_BINARY_DIR=\"D:/MyGame/Turbo/engine/build/shaders\";CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>D:\MyGame\glfw-3.4\include;D:\MyGame\glm-1.0.1;C:\VulkanSDK\1.4.341.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -163,14 +163,14 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;SHADER_BINARY_DIR="D:/MyGame/Turbo/engine/build/shaders";CMAKE_INTDIR="Release"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;SHADER_BINARY_DIR=\"D:/MyGame/Turbo/engine/build/shaders\";CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>D:\MyGame\glfw-3.4\include;D:\MyGame\glm-1.0.1;C:\VulkanSDK\1.4.341.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -221,14 +221,14 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;SHADER_BINARY_DIR="D:/MyGame/Turbo/engine/build/shaders";CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;SHADER_BINARY_DIR=\"D:/MyGame/Turbo/engine/build/shaders\";CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>D:\MyGame\glfw-3.4\include;D:\MyGame\glm-1.0.1;C:\VulkanSDK\1.4.341.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -280,12 +280,12 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;SHADER_BINARY_DIR="D:/MyGame/Turbo/engine/build/shaders";CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;SHADER_BINARY_DIR=\"D:/MyGame/Turbo/engine/build/shaders\";CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>D:\MyGame\glfw-3.4\include;D:\MyGame\glm-1.0.1;C:\VulkanSDK\1.4.341.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>

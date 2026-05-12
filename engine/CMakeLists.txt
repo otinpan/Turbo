@@ -86,6 +86,7 @@ add_executable(engine
 target_compile_definitions(engine PRIVATE
   VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
   VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1
+  SHADER_BINARY_DIR="${SHADER_OUTPUT_DIR}"
 )
 
 # Link against the Vulkan C++ bindings, GLFW, and GLM
