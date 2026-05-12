@@ -63,6 +63,8 @@ class HelloTriangleApplication {
   vk::Extent2D swapChainExtent;
   std::vector<vk::raii::ImageView> swapChainImageViews;
 
+  vk::raii::PipelineLayout pipelineLayout=nullptr;
+
   std::vector<const char*> requiredDeviceExtension={vk::KHRSwapchainExtensionName};
 
   void initWindow() {
@@ -463,6 +465,63 @@ class HelloTriangleApplication {
       vertShaderStageInfo,
       fragShaderStageInfo
     };
+
+    vk::PipelineVertexInputStateCreateInfo vertexInputInof;
+    vk::PipelineInputAssemblyStateCreateInfo inputAssembly{
+      .topology=vk::PrimitiveTopology::eTriangleList,
+    };
+
+    // need to specify to count each states
+    vk::PipelineViewportStateCreateInfo viewportState{
+      .viewportCount=1,
+      .scissorCount=1
+    };
+
+    // specific parameters of the graphics pipeline are dynamically changed
+    std::vector<vk::DynamicState> dynamicStates={vk::DynamicState::eViewport,vk::DynamicState::eScissor};
+    vk::PipelineDynamicStateCreateInfo dynamicStateInfo{
+      .dynamicStateCount=static_cast<uint32_t>(dynamicStates.size()),
+      .pDynamicStates=dynamicStates.data()
+    };
+
+    vk::PipelineRasterizationStateCreateInfo rasterizer{
+      .depthClampEnable=vk::False, // if true, fragments that are beyond the near and far planes are clamped to them as opposed to discarding them.
+      .rasterizerDiscardEnable=vk::False, // if true, geometry never passes through the rasterizer state.
+      .polygonMode=vk::PolygonMode::eFill, 
+      // eFill: fill the area of the polygon with fragments.
+      // eLine: polygon edges are drawn as lines.
+      // ePoint: polygon vertices are drawn as lines.
+      .cullMode=vk::CullModeFlagBits::eBack, // specify whether front- or back-facing (or both) polygons are culled (not drawn).
+      .frontFace=vk::FrontFace::eClockwise, // specify the vertex order for the faces to be considered front-facing and can be clockwise or counterclockwise.
+      .depthBiasEnable=vk::False, // if true, add biases to detpth values to resolve depth conflicts.
+      .lineWidth=1.0f // the width of line.
+    };
+
+    // configures multisampling, which is one of the ways to perform anti-aliasing
+    vk::PipelineMultisampleStateCreateInfo multsampling{
+      .rasterizationSamples=vk::SampleCountFlagBits::e1, // if e1, no mulitsampling is used. if e4, use MSAA
+      .sampleShadingEnable=vk::False, // if true, the final color of a pixel is determined by the shader invocation that covers the most samples.
+    };
+
+    // blending is the process of combining the color of a new fragment with the color of the existing pixel in the framebuffer.
+    vk::PipelineColorBlendAttachmentState colorBlendAttachment{
+      .blendEnable=vk::False, // if true, new color and old color are blended
+      .colorWriteMask=vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | 
+      vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA // specify which color components are written to the framebuffer
+    };
+
+    vk::PipelineColorBlendStateCreateInfo colorBlending{
+      .logicOpEnable=vk::False,
+      .attachmentCount=1,
+      .pAttachments=&colorBlendAttachment
+    };
+
+    vk::PipelineLayoutCreateInfo pipelineLayoutInfo{
+      .setLayoutCount=0,
+      .pushConstantRangeCount=0
+    };
+
+    pipelineLayout=vk::raii::PipelineLayout(device,pipelineLayoutInfo);
   }
 
   [[nodiscard]] vk::raii::ShaderModule createShaderModule(const std::vector<char> &code) const{
