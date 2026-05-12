@@ -58,6 +58,7 @@ class HelloTriangleApplication {
   vk::raii::PhysicalDevice physicalDevice=nullptr; // physical device
   vk::raii::Device device=nullptr; // logical device
   vk::raii::Queue queue=nullptr;
+  uint32_t queueIndex=~0;
   vk::raii::SwapchainKHR swapChain=nullptr;
   std::vector<vk::Image> swapChainImages;
   vk::SurfaceFormatKHR swapChainSurfaceFormat;
@@ -65,6 +66,7 @@ class HelloTriangleApplication {
   std::vector<vk::raii::ImageView> swapChainImageViews;
 
   vk::raii::PipelineLayout pipelineLayout=nullptr;
+  vk::raii::Pipeline graphicsPipeline=nullptr;
 
   std::vector<const char*> requiredDeviceExtension={vk::KHRSwapchainExtensionName};
 
@@ -93,6 +95,7 @@ class HelloTriangleApplication {
     createSwapChain();
     createImageViews();
     createGraphicsPipeline();
+    createCommandPool();
   }
 
   void mainLoop() {
@@ -545,6 +548,12 @@ class HelloTriangleApplication {
         .pColorAttachmentFormats=&swapChainSurfaceFormat.format
       }
     };
+
+    graphicsPipeline=vk::raii::Pipeline(
+      device,
+      nullptr,
+      pipelineCreateInfoChain.get<vk::GraphicsPipelineCreateInfo>()
+    );
   }
 
   [[nodiscard]] vk::raii::ShaderModule createShaderModule(const std::vector<char> &code) const{
@@ -554,6 +563,13 @@ class HelloTriangleApplication {
     };
     vk::raii::ShaderModule shaderModule{device,createInfo};
     return shaderModule;
+  }
+
+  void createCommandPool(){
+    vk::CommnadPoolCreateInfo poolInfo{
+      .flags=vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+      .queueFamilyIndex=queueIndex
+    };
   }
 
   static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(
@@ -595,3 +611,4 @@ int main() {
 
   return EXIT_SUCCESS;
 }
+
