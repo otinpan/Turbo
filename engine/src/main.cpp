@@ -5,6 +5,7 @@
 #include <memory>
 #include <stdexcept>
 #include <fstream>
+#include <string>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
@@ -240,13 +241,14 @@ class HelloTriangleApplication {
     physicalDevice
       .template getFeatures2<
       vk::PhysicalDeviceFeatures2,
+      vk::PhysicalDeviceVulkan11Features,
       vk::PhysicalDeviceVulkan13Features,
       vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>();
 
   bool supportsRequiredFeatures 
-    = features
-    .template get<vk::PhysicalDeviceVulkan13Features>().dynamicRendering &&
-                                  features.template get<vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>().extendedDynamicState;
+    = features.template get<vk::PhysicalDeviceVulkan11Features>().shaderDrawParameters &&
+      features.template get<vk::PhysicalDeviceVulkan13Features>().dynamicRendering &&
+      features.template get<vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>().extendedDynamicState;
 
   // Return true if the physicalDevice meets all the criteria
   return supportsVulkan1_3 && supportsGraphics && supportsRequiredExtensions && supportsRequiredFeatures;
@@ -326,11 +328,13 @@ class HelloTriangleApplication {
     // device features to enable
     vk::StructureChain<
       vk::PhysicalDeviceFeatures2,
+      vk::PhysicalDeviceVulkan11Features,
       vk::PhysicalDeviceVulkan13Features,
       vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT
     > 
     featureChain={
       {}, // vk::PhysicalDeviceFeatures2
+      {.shaderDrawParameters=true}, // vk::PhysicalDeviceVulkan11Features
       {.dynamicRendering=true}, // vk::PhysicalDeviceVulkan13Features
       {.extendedDynamicState=true} // vk::PhysicalDeviceExtendedDynamicStateFeatureEXT
     };
@@ -445,9 +449,9 @@ class HelloTriangleApplication {
 
   void createGraphicsPipeline(){
     vk::raii::ShaderModule shaderVertModule
-      =createShaderModule(readFile("shaders/vert.spv"));
+      =createShaderModule(readFile(std::string(SHADER_BINARY_DIR) + "/vert.spv"));
     vk::raii::ShaderModule shaderFragModule
-      =createShaderModule(readFile("shaders/frag.spv"));
+      =createShaderModule(readFile(std::string(SHADER_BINARY_DIR) + "/frag.spv"));
 
     vk::PipelineShaderStageCreateInfo vertShaderStageInfo{
       .stage=vk::ShaderStageFlagBits::eVertex,
@@ -466,7 +470,7 @@ class HelloTriangleApplication {
       fragShaderStageInfo
     };
 
-    vk::PipelineVertexInputStateCreateInfo vertexInputInof;
+    vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
     vk::PipelineInputAssemblyStateCreateInfo inputAssembly{
       .topology=vk::PrimitiveTopology::eTriangleList,
     };
@@ -479,7 +483,7 @@ class HelloTriangleApplication {
 
     // specific parameters of the graphics pipeline are dynamically changed
     std::vector<vk::DynamicState> dynamicStates={vk::DynamicState::eViewport,vk::DynamicState::eScissor};
-    vk::PipelineDynamicStateCreateInfo dynamicStateInfo{
+    vk::PipelineDynamicStateCreateInfo dynamicState{
       .dynamicStateCount=static_cast<uint32_t>(dynamicStates.size()),
       .pDynamicStates=dynamicStates.data()
     };
@@ -498,7 +502,7 @@ class HelloTriangleApplication {
     };
 
     // configures multisampling, which is one of the ways to perform anti-aliasing
-    vk::PipelineMultisampleStateCreateInfo multsampling{
+    vk::PipelineMultisampleStateCreateInfo multisampling{
       .rasterizationSamples=vk::SampleCountFlagBits::e1, // if e1, no mulitsampling is used. if e4, use MSAA
       .sampleShadingEnable=vk::False, // if true, the final color of a pixel is determined by the shader invocation that covers the most samples.
     };
@@ -520,8 +524,27 @@ class HelloTriangleApplication {
       .setLayoutCount=0,
       .pushConstantRangeCount=0
     };
-
     pipelineLayout=vk::raii::PipelineLayout(device,pipelineLayoutInfo);
+
+    vk::StructureChain<vk::GraphicsPipelineCreateInfo,vk::PipelineRenderingCreateInfo> pipelineCreateInfoChain={
+      {
+        .stageCount=2,
+        .pStages=shaderStages,
+        .pVertexInputState=&vertexInputInfo,
+        .pInputAssemblyState=&inputAssembly,
+        .pViewportState=&viewportState,
+        .pRasterizationState=&rasterizer,
+        .pMultisampleState=&multisampling,
+        .pColorBlendState=&colorBlending,
+        .pDynamicState=&dynamicState,
+        .layout=pipelineLayout,
+        .renderPass=nullptr
+      },
+      {
+        .colorAttachmentCount=1,
+        .pColorAttachmentFormats=&swapChainSurfaceFormat.format
+      }
+    };
   }
 
   [[nodiscard]] vk::raii::ShaderModule createShaderModule(const std::vector<char> &code) const{
