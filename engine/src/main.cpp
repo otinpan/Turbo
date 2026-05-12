@@ -67,6 +67,8 @@ class HelloTriangleApplication {
 
   vk::raii::PipelineLayout pipelineLayout=nullptr;
   vk::raii::Pipeline graphicsPipeline=nullptr;
+  vk::raii::CommandPool commandPool=nullptr;
+  vk::raii::CommandBuffer commandBuffer=nullptr;
 
   std::vector<const char*> requiredDeviceExtension={vk::KHRSwapchainExtensionName};
 
@@ -96,6 +98,7 @@ class HelloTriangleApplication {
     createImageViews();
     createGraphicsPipeline();
     createCommandPool();
+    createCommandBuffer();
   }
 
   void mainLoop() {
@@ -316,7 +319,7 @@ class HelloTriangleApplication {
     }
 
     // get the first index into queueFamilyProperties that supports graphics and presentation
-    uint32_t queueIndex=~0; // ~0 is the maximum value for uint32_t, which is used to indicate an invalid index
+    queueIndex=~0; // ~0 is the maximum value for uint32_t, which is used to indicate an invalid index
     for (uint32_t qfpIndex=0;qfpIndex<queueFamilyProperties.size();qfpIndex++){
       if((queueFamilyProperties[qfpIndex].queueFlags & vk::QueueFlagBits::eGraphics) &&
          physicalDevice.getSurfaceSupportKHR(qfpIndex,*surface)){
@@ -564,13 +567,138 @@ class HelloTriangleApplication {
     vk::raii::ShaderModule shaderModule{device,createInfo};
     return shaderModule;
   }
-
+  // CommandPool manages some CommandBuffers, which are used to record commands that will be submitted to a queue for execution.
   void createCommandPool(){
-    vk::CommnadPoolCreateInfo poolInfo{
+    vk::CommandPoolCreateInfo poolInfo{
+      // hint that command buffers are recorded with new commands very often
+      // .flags=vk::CommandPoolCreateFlagBits::eTransient,
+      // allow command bufffers to be recorded individually
       .flags=vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
       .queueFamilyIndex=queueIndex
     };
+
+    commandPool=vk::raii::CommandPool(device,poolInfo);
   }
+
+  void createCommandBuffer(){
+    vk::CommandBufferAllocateInfo allocInfo{
+      .commandPool=commandPool,
+      // ePrimary: can be submitted to a queue for execution, but cannnot be called from other command buffers.
+      // eSecondary: cannot be submitted to a queue, but can be called from primary command
+      .level=vk::CommandBufferLevel::ePrimary,
+      .commandBufferCount=1
+    };
+
+    commandBuffer=std::move(vk::raii::CommandBuffers(device,allocInfo).front());
+  }
+
+  void recordCommandBuffer(uint32_t imageIndex){
+    commandBuffer.begin({
+      // .flags=vk::CommandBufferUsageFlagBits::...
+      // eOneTimeSubmit: the command buffer will be submitted only once, and the driver can optimize for that.
+      // eRenderPassContinue: the command buffer will be entirely within a single render pass,
+      // and is only called from within a primary command buffer.
+      // eSimultaneousUse: the command buffer can be resubmitted to a queue
+    });
+
+    // before starting to rendering, need to transition its layout to one that is suitable 
+    // for rendering, because of optimization
+    transition_image_layout(
+      imageIndex,
+      vk::ImageLayout::eUndefined,
+      vk::ImageLayout::eColorAttachmentOptimal,
+      {}, //srcAccessMask
+      vk::AccessFlagBits2::eColorAttachmentWrite, // dstAccessMask
+      vk::PipelineStageFlagBits2::eColorAttachmentOutput, // srcStageMask
+      vk::PipelineStageFlagBits2::eColorAttachmentOutput // dstStageMask
+    );
+
+    vk::ClearValue clearColor=vk::ClearColorValue(0.0f,0.0f,0.0f,1.0f);
+    vk::RenderingAttachmentInfo attachmentInfo={
+      .imageView=swapChainImageViews[imageIndex],
+      .imageLayout=vk::ImageLayout::eColorAttachmentOptimal,
+      .loadOp=vk::AttachmentLoadOp::eClear,
+      .storeOp=vk::AttachmentStoreOp::eStore,
+      .clearValue=clearColor
+    };
+
+    vk::RenderingInfo renderingInfo={
+      .renderArea={ // define the size of render area
+        .offset={0,0},
+        .extent=swapChainExtent,
+      },
+      .layerCount=1, // number of layers to render to
+      .colorAttachmentCount=1, // color attachments to render to
+      .pColorAttachments=&attachmentInfo
+    };
+
+    commandBuffer.beginRendering(renderingInfo);
+    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,*graphicsPipeline);
+    commandBuffer.setViewport(
+      0,
+      vk::Viewport(
+        0.0f,
+        0.0f,
+        static_cast<float>(swapChainExtent.width),
+        static_cast<float>(swapChainExtent.height),
+        0.0f,
+        1.0f
+      )
+    );
+
+    commandBuffer.setScissor(0,vk::Rect2D(vk::Offset2D(0,0),swapChainExtent));
+    commandBuffer.draw(3,1,0,0);
+    commandBuffer.endRendering();
+    
+    // after rendering, transition the swapchain image layout back to
+    // vk::ImageLayout::ePresentSrcKHR so it can be presented to the screem
+    transition_image_layout(
+      imageIndex,
+      vk::ImageLayout::eColorAttachmentOptimal,
+      vk::ImageLayout::ePresentSrcKHR,
+      vk::AccessFlagBits2::eColorAttachmentWrite,
+      {},
+      vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+      vk::PipelineStageFlagBits2::eBottomOfPipe
+    );
+
+    commandBuffer.end();
+  }
+
+  void transition_image_layout(
+    uint32_t                imageIndex,
+    vk::ImageLayout         old_layout,
+    vk::ImageLayout         new_layout,
+    vk::AccessFlags2        src_access_mask,
+    vk::AccessFlags2        dst_access_mask,
+    vk::PipelineStageFlags2 src_stage_mask,
+    vk::PipelineStageFlags2 dst_stage_mask)
+  {
+		vk::ImageMemoryBarrier2 barrier = {
+      .srcStageMask        = src_stage_mask,
+      .srcAccessMask       = src_access_mask,
+      .dstStageMask        = dst_stage_mask,
+      .dstAccessMask       = dst_access_mask,
+      .oldLayout           = old_layout,
+      .newLayout           = new_layout,
+      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .image               = swapChainImages[imageIndex],
+      .subresourceRange    = {
+        .aspectMask     = vk::ImageAspectFlagBits::eColor,
+        .baseMipLevel   = 0,
+        .levelCount     = 1,
+        .baseArrayLayer = 0,
+        .layerCount     = 1
+      }
+    };
+		vk::DependencyInfo dependency_info = {
+		    .dependencyFlags         = {},
+		    .imageMemoryBarrierCount = 1,
+		    .pImageMemoryBarriers    = &barrier};
+    commandBuffer.pipelineBarrier2(dependency_info);
+  }
+
 
   static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(
       vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
