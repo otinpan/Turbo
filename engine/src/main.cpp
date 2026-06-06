@@ -70,6 +70,10 @@ class HelloTriangleApplication {
   vk::raii::CommandPool commandPool=nullptr;
   vk::raii::CommandBuffer commandBuffer=nullptr;
 
+  vk::raii::Semaphore presentCompleteSemaphore=nullptr;
+  vk::raii::Semaphore renderFinishedSemaphore=nullptr;
+  vk::raii::Fence drawFence=nullptr;
+
   std::vector<const char*> requiredDeviceExtension={vk::KHRSwapchainExtensionName};
 
   void initWindow() {
@@ -99,11 +103,13 @@ class HelloTriangleApplication {
     createGraphicsPipeline();
     createCommandPool();
     createCommandBuffer();
+    createSyncObjects();
   }
 
   void mainLoop() {
     while (!glfwWindowShouldClose(window)) {
       glfwPollEvents();
+      drawFrame();
     }
   }
 
@@ -665,6 +671,12 @@ class HelloTriangleApplication {
     commandBuffer.end();
   }
 
+  void createSyncObjects(){
+    presentCompleteSemaphore = vk::raii::Semaphore(device, vk::SemaphoreCreateInfo());
+    renderFinishedSemaphore=vk::raii::Semaphore(device,vk::SemaphoreCreateInfo());
+    drawFence=vk::raii::Fence(device,{.flags=vk::FenceCreateFlagBits::eSignaled});
+  }
+
   void transition_image_layout(
     uint32_t                imageIndex,
     vk::ImageLayout         old_layout,
@@ -725,6 +737,52 @@ class HelloTriangleApplication {
     file.read(buffer.data(),static_cast<std::streamsize>(buffer.size()));
     return buffer;
   }
+  void drawFrame(){
+    auto fenceResult=device.waitForFences(*drawFence,vk::True,UINT64_MAX);
+    if(fenceResult!=vk::Result::eSuccess){
+      throw std::runtime_error("failed to wait for fence!");
+    }
+    device.resetFences(*drawFence);
+
+    auto [result,imageIndex]=swapChain.acquireNextImage(UINT64_MAX,*presentCompleteSemaphore,nullptr);
+    recordCommandBuffer(imageIndex);
+
+    queue.waitIdle(); // NOTE: for simplicity, wait for the queue to be idle before starting the frame
+    
+    vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+    const vk::SubmitInfo submitInfo{
+      .waitSemaphoreCount=1,
+      .pWaitSemaphores=&*presentCompleteSemaphore,
+      .pWaitDstStageMask=&waitDestinationStageMask,
+      .commandBufferCount=1,
+      .pCommandBuffers=&*commandBuffer,
+      .signalSemaphoreCount=1,
+      .pSignalSemaphores=&*renderFinishedSemaphore
+    };
+
+    queue.submit(submitInfo,*drawFence);
+
+    const vk::PresentInfoKHR presentInfoKHR{
+      .waitSemaphoreCount=1,
+      .pWaitSemaphores=&*renderFinishedSemaphore,
+      .swapchainCount=1,
+      .pSwapchains=&*swapChain,
+      .pImageIndices=&imageIndex
+    };
+
+    result=queue.presentKHR(presentInfoKHR);
+    switch(result){
+      case vk::Result::eSuccess:
+        break;
+      case vk::Result::eSuboptimalKHR:
+        std::cout<<"vk::Queue::presentKHR returned vk::Result::eSuboptimalKHR! \n";
+        break;
+      default:
+        break;
+    }
+
+  }
+
 };
 
 
@@ -739,4 +797,5 @@ int main() {
 
   return EXIT_SUCCESS;
 }
+
 
