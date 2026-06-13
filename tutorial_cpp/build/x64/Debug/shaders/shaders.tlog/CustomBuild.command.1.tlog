@@ -1,0 +1,42 @@
+^D:\MYGAME\TURBO\TUTORIAL_CPP\BUILD\CMAKEFILES\332ADDC215D62E4D2DF038C526D4C566\FRAG.SPV.RULE
+setlocal
+D:\MyGame\bin\cmake.exe -E make_directory D:/MyGame/Turbo/tutorial_cpp/build/shaders
+if %errorlevel% neq 0 goto :cmEnd
+C:\VulkanSDK\1.4.341.1\Bin\slangc.exe D:/MyGame/Turbo/tutorial_cpp/src/shaders/shader.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry fragMain -stage fragment -o D:/MyGame/Turbo/tutorial_cpp/build/shaders/frag.spv
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MYGAME\TURBO\TUTORIAL_CPP\BUILD\CMAKEFILES\332ADDC215D62E4D2DF038C526D4C566\VERT.SPV.RULE
+setlocal
+D:\MyGame\bin\cmake.exe -E make_directory D:/MyGame/Turbo/tutorial_cpp/build/shaders
+if %errorlevel% neq 0 goto :cmEnd
+C:\VulkanSDK\1.4.341.1\Bin\slangc.exe D:/MyGame/Turbo/tutorial_cpp/src/shaders/shader.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -stage vertex -o D:/MyGame/Turbo/tutorial_cpp/build/shaders/vert.spv
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MYGAME\TURBO\TUTORIAL_CPP\BUILD\CMAKEFILES\7605D7E0609A6073CEEABFC4F9336661\SHADERS.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MYGAME\TURBO\TUTORIAL_CPP\CMAKELISTS.TXT
+setlocal
+D:\MyGame\bin\cmake.exe -SD:/MyGame/Turbo/tutorial_cpp -BD:/MyGame/Turbo/tutorial_cpp/build --check-stamp-file D:/MyGame/Turbo/tutorial_cpp/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

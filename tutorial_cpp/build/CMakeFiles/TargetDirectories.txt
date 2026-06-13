@@ -1,0 +1,15 @@
+D:/MyGame/Turbo/tutorial_cpp/build/CMakeFiles/shaders.dir
+D:/MyGame/Turbo/tutorial_cpp/build/CMakeFiles/tutorial_cpp.dir
+D:/MyGame/Turbo/tutorial_cpp/build/CMakeFiles/INSTALL.dir
+D:/MyGame/Turbo/tutorial_cpp/build/CMakeFiles/ALL_BUILD.dir
+D:/MyGame/Turbo/tutorial_cpp/build/CMakeFiles/ZERO_CHECK.dir
+D:/MyGame/Turbo/tutorial_cpp/build/_deps/glfw/CMakeFiles/uninstall.dir
+D:/MyGame/Turbo/tutorial_cpp/build/_deps/glfw/CMakeFiles/INSTALL.dir
+D:/MyGame/Turbo/tutorial_cpp/build/_deps/glfw/CMakeFiles/ALL_BUILD.dir
+D:/MyGame/Turbo/tutorial_cpp/build/_deps/glfw/src/CMakeFiles/glfw.dir
+D:/MyGame/Turbo/tutorial_cpp/build/_deps/glfw/src/CMakeFiles/update_mappings.dir
+D:/MyGame/Turbo/tutorial_cpp/build/_deps/glfw/src/CMakeFiles/INSTALL.dir
+D:/MyGame/Turbo/tutorial_cpp/build/_deps/glm/CMakeFiles/INSTALL.dir
+D:/MyGame/Turbo/tutorial_cpp/build/_deps/glm/CMakeFiles/ALL_BUILD.dir
+D:/MyGame/Turbo/tutorial_cpp/build/_deps/glm/glm/CMakeFiles/glm.dir
+D:/MyGame/Turbo/tutorial_cpp/build/_deps/glm/glm/CMakeFiles/INSTALL.dir
