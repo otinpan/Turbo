@@ -5,7 +5,10 @@ mod device;
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 use vulkanalia::vk::ExtDebugUtilsExtensionInstanceCommands;
-use winit::window::Window;
+use vulkanalia::vk::KhrSurfaceExtensionInstanceCommands;
+use vulkanalia::window as vk_window;
+use winit::window::{Window,WindowBuilder};
+
 
 use self::device::{create_logical_device, pick_physical_device};
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
@@ -23,6 +26,7 @@ impl VulkanRenderer {
         let entry = create_entry()?;
         let mut data = VulkanData::default();
         let instance = create_instance(window, &entry, &mut data)?;
+        data.surface=vk_window::create_surface(&instance,&window,&window)?;
         // device
         pick_physical_device(&instance, &mut data)?;
         let device = create_logical_device(&entry, &instance, &mut data)?;
@@ -44,6 +48,7 @@ impl VulkanRenderer {
             self.instance
                 .destroy_debug_utils_messenger_ext(self.data.messenger, None);
         }
+        self.instance.destroy_surface_khr(self.data.surface,None);
         self.instance.destroy_instance(None);
     }
 }
