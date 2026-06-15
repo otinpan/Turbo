@@ -14,9 +14,9 @@ use winit::window::Window;
 use super::types::VulkanData;
 
 pub const VALIDATION_ENABLED: bool = cfg!(debug_assertions);
-const VALIDATION_LAYER: vk::ExtensionName =
+pub const VALIDATION_LAYER: vk::ExtensionName =
     vk::ExtensionName::from_bytes(b"VK_LAYER_KHRONOS_validation");
-const PORTABILITY_MACOS_VERSION: Version = Version::new(1, 3, 216);
+pub const PORTABILITY_MACOS_VERSION: Version = Version::new(1, 3, 216);
 
 pub unsafe fn create_entry() -> Result<Entry> {
     let loader = LibloadingLoader::new(LIBRARY)?;
