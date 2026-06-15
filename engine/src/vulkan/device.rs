@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use png::DecodingError::IoError;
 use std::collections::HashSet;
 use log::{info, warn};
 use thiserror::Error;
@@ -8,6 +7,10 @@ use vulkanalia::vk::KhrSurfaceExtensionInstanceCommands;
 
 use super::instance::{PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER};
 use super::types::VulkanData;
+use super::swapchain::SwapchainSupport;
+
+pub const DEVICE_EXTENSIONS: &[vk::ExtensionName] = &[vk::KHR_SWAPCHAIN_EXTENSION.name];
+
 
 #[derive(Debug, Error)]
 #[error("{0}")]
@@ -42,17 +45,23 @@ unsafe fn check_physical_device(
     physical_device: vk::PhysicalDevice,
 ) -> Result<()> {
     QueueFamilyIndices::get(instance, data, physical_device)?;
+    check_physical_device_extensions(instance,physical_device)?;
+
+    let support=SwapchainSupport::get(instance,data,physical_device)?;
+    if support.formats.is_empty() || support.present_modes.is_empty(){
+        return Err(anyhow!(SuitabilityError("Insufficient swapchain support.")));
+    }
     Ok(())
 }
 
 #[derive(Copy, Clone, Debug)]
-struct QueueFamilyIndices {
-    graphics: u32,
-    present: u32,
+pub struct QueueFamilyIndices {
+    pub graphics: u32,
+    pub present: u32,
 }
 
 impl QueueFamilyIndices {
-    unsafe fn get(
+    pub unsafe fn get(
         instance: &Instance,
         data: &VulkanData,
         physical_device: vk::PhysicalDevice,
@@ -110,7 +119,10 @@ pub unsafe fn create_logical_device(
     };
 
     // Extensions
-    let mut extensions = vec![];
+    let mut extensions = DEVICE_EXTENSIONS
+        .iter()
+        .map(|e| e.as_ptr())
+        .collect::<Vec<_>>();
 
     // Required by Vulkan SDK on macOS since 1.3.216
     if cfg!(target_os = "macos") && entry.version()? >= PORTABILITY_MACOS_VERSION {
@@ -133,4 +145,21 @@ pub unsafe fn create_logical_device(
     data.graphics_queue = device.get_device_queue(indices.graphics, 0);
     data.present_queue=device.get_device_queue(indices.present,0);
     Ok(device)
+}
+
+unsafe fn check_physical_device_extensions(
+    instance: &Instance,
+    physical_device: vk::PhysicalDevice,
+) -> Result<()>{
+    let extensions=instance
+        .enumerate_device_extension_properties(physical_device,None)?
+        .iter()
+        .map(|e| e.extension_name)
+        .collect::<HashSet<_>>();
+
+    if DEVICE_EXTENSIONS.iter().all(|e| extensions.contains(e)){
+        Ok(())
+    }else{
+        Err(anyhow!(SuitabilityError("Missing required device extensions.")))
+    }
 }

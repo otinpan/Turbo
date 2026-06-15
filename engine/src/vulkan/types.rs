@@ -10,4 +10,11 @@ pub struct VulkanData {
     pub physical_device: vk::PhysicalDevice,
     pub graphics_queue: vk::Queue,
     pub present_queue: vk::Queue,
+    // Swapchain
+    pub swapchain_format: vk::Format,
+    pub swapchain_extent: vk::Extent2D,
+    pub swapchain: vk::SwapchainKHR,
+    pub swapchain_images: Vec<vk::Image>,
+    // Image views
+    pub swapchain_image_views: Vec<vk::ImageView>,
 }
