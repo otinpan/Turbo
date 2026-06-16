@@ -2,6 +2,7 @@ mod instance;
 mod types;
 mod device;
 mod swapchain;
+mod pipeline;
 
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
@@ -15,6 +16,7 @@ use winit::window::Window;
 use self::device::{create_logical_device, pick_physical_device};
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::swapchain::{create_swapchain,create_swapchain_image_views};
+use self::pipeline::{create_pipeline};
 use self::types::VulkanData;
 
 pub struct VulkanRenderer {
@@ -35,6 +37,7 @@ impl VulkanRenderer {
         let device = create_logical_device(&entry, &instance, &mut data)?;
         create_swapchain(window, &instance, &device, &mut data)?;
         create_swapchain_image_views(&device,&mut data)?;
+        create_pipeline(&device,&mut data)?;
         Ok(Self {
             entry,
             instance,
