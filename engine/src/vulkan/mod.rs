@@ -16,7 +16,7 @@ use winit::window::Window;
 use self::device::{create_logical_device, pick_physical_device};
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::swapchain::{create_swapchain,create_swapchain_image_views};
-use self::pipeline::{create_pipeline};
+use self::pipeline::{create_pipeline,create_render_pass};
 use self::types::VulkanData;
 
 pub struct VulkanRenderer {
@@ -37,6 +37,7 @@ impl VulkanRenderer {
         let device = create_logical_device(&entry, &instance, &mut data)?;
         create_swapchain(window, &instance, &device, &mut data)?;
         create_swapchain_image_views(&device,&mut data)?;
+        create_render_pass(&instance,&device,&mut data)?;
         create_pipeline(&device,&mut data)?;
         Ok(Self {
             entry,
@@ -52,6 +53,7 @@ impl VulkanRenderer {
 
     pub unsafe fn destroy(&mut self) {
         self.device.destroy_pipeline_layout(self.data.pipeline_layout,None);
+        self.device.destroy_render_pass(self.data.render_pass,None);
         self.data.swapchain_image_views
             .iter()
             .for_each(|v| self.device.destroy_image_view(*v,None));

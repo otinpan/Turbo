@@ -18,5 +18,6 @@ pub struct VulkanData {
     // Image views
     pub swapchain_image_views: Vec<vk::ImageView>,
     // Pipeline
+    pub render_pass: vk::RenderPass,
     pub pipeline_layout: vk::PipelineLayout,
 }
