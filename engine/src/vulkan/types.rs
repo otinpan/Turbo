@@ -21,4 +21,13 @@ pub struct VulkanData {
     pub render_pass: vk::RenderPass,
     pub pipeline_layout: vk::PipelineLayout,
     pub pipeline: vk::Pipeline,
+    // Framebuffers
+    pub framebuffers: Vec<vk::Framebuffer>,
+    // Command Pool
+    pub command_pool: vk::CommandPool,
+    // Command Buffers
+    pub command_buffers: Vec<vk::CommandBuffer>,
+    // Semaphore
+    pub image_available_semaphore: vk::Semaphore,
+    pub render_finished_semaphore: vk::Semaphore,
 }

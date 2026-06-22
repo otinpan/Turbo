@@ -3,6 +3,7 @@ mod types;
 mod device;
 mod swapchain;
 mod pipeline;
+mod command;
 
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
@@ -15,8 +16,9 @@ use winit::window::Window;
 
 use self::device::{create_logical_device, pick_physical_device};
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
-use self::swapchain::{create_swapchain,create_swapchain_image_views};
+use self::swapchain::{create_swapchain,create_swapchain_image_views,create_framebuffers};
 use self::pipeline::{create_pipeline,create_render_pass};
+use self::command::{create_command_pool,create_command_buffers};
 use self::types::VulkanData;
 
 pub struct VulkanRenderer {
@@ -39,6 +41,9 @@ impl VulkanRenderer {
         create_swapchain_image_views(&device,&mut data)?;
         create_render_pass(&instance,&device,&mut data)?;
         create_pipeline(&device,&mut data)?;
+        create_framebuffers(&device, &mut data)?;
+        create_command_pool(&instance,&device,&mut data)?;
+        create_command_buffers(&device,&mut data)?;
         Ok(Self {
             entry,
             instance,
@@ -52,6 +57,11 @@ impl VulkanRenderer {
     }
 
     pub unsafe fn destroy(&mut self) {
+        self.device.destroy_command_pool(self.data.command_pool,None);
+        self.data.framebuffers
+            .iter()
+            .for_each(|f| self.device.destroy_framebuffer(*f,None));
+
         self.device.destroy_pipeline(self.data.pipeline,None);
         self.device.destroy_pipeline_layout(self.data.pipeline_layout,None);
         self.device.destroy_render_pass(self.data.render_pass,None);

@@ -15,7 +15,9 @@ pub struct SwapchainSupport{
   pub present_modes: Vec<vk::PresentModeKHR>,
 }
 
+
 impl SwapchainSupport{
+  // get constraints from physical device
   pub unsafe fn get(
     instance: &Instance,
     data: &VulkanData,
@@ -38,6 +40,8 @@ impl SwapchainSupport{
   }
 }
 
+// A swapchain is a collection fo images used for 
+// presenting redered results to the screen
 pub unsafe fn create_swapchain(
   window: &Window,
   instance: &Instance,
@@ -92,6 +96,8 @@ pub unsafe fn create_swapchain(
   Ok(())
 }
 
+
+// An image view describes how Vulkan should access an image.
 pub unsafe fn create_swapchain_image_views(
   device: &Device,
   data: &mut VulkanData,
@@ -168,3 +174,28 @@ pub fn get_swapchain_extent(
       .build()
   }
 } 
+
+
+// A framebuffer binds actual image views to the attachments
+// described by a render pass
+pub unsafe fn create_framebuffers(
+  device: &Device,
+  data: &mut VulkanData
+) -> Result<()>{
+  data.framebuffers=data
+    .swapchain_image_views
+    .iter()
+    .map(|i|{
+      let attachments=&[*i];
+      let create_info=vk::FramebufferCreateInfo::builder()
+        .render_pass(data.render_pass)
+        .attachments(attachments)
+        .width(data.swapchain_extent.width)
+        .height(data.swapchain_extent.height)
+        .layers(1);
+      device.create_framebuffer(&create_info,None)
+    })
+    .collect::<Result<Vec<_>,_>>()?;
+
+  Ok(())
+}
