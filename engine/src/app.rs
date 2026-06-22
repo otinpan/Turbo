@@ -4,7 +4,7 @@ use winit::window::Window;
 use crate::vulkan::VulkanRenderer;
 
 pub struct App {
-    renderer: VulkanRenderer,
+    pub renderer: VulkanRenderer,
 }
 
 impl App {

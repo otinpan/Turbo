@@ -27,7 +27,9 @@ pub struct VulkanData {
     pub command_pool: vk::CommandPool,
     // Command Buffers
     pub command_buffers: Vec<vk::CommandBuffer>,
-    // Semaphore
-    pub image_available_semaphore: vk::Semaphore,
-    pub render_finished_semaphore: vk::Semaphore,
+    // Sync Objects
+    pub image_available_semaphores: Vec<vk::Semaphore>,
+    pub render_finished_semaphores: Vec<vk::Semaphore>,
+    pub in_flight_fences: Vec<vk::Fence>,
+    pub images_in_flight: Vec<vk::Fence>,
 }
