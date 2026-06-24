@@ -1,0 +1,118 @@
+use anyhow::{anyhow, Result};
+use std::ptr::copy_nonoverlapping as memcpy;
+use vulkanalia::prelude::v1_0::*;
+
+use std::mem::size_of;
+use cgmath::{vec2,vec3};
+
+use super::instance::{PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER};
+use super::types::VulkanData;
+use super::VERTICES;
+
+type Vec2=cgmath::Vector2<f32>;
+type Vec3=cgmath::Vector3<f32>;
+
+#[repr(C)]
+#[derive(Copy,Clone,Debug)]
+pub struct Vertex{
+  pub pos: Vec2,
+  pub color: Vec3,
+}
+
+impl Vertex{
+  pub const fn new(pos: Vec2, color: Vec3) ->Self{
+    Self{pos,color}
+  }
+  pub fn binding_description() -> vk::VertexInputBindingDescription{
+    vk::VertexInputBindingDescription::builder()
+      .binding(0)
+      .stride(size_of::<Vertex>() as u32)
+      .input_rate(vk::VertexInputRate::VERTEX)
+      .build()
+  }
+
+  pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 2]{
+    let pos=vk::VertexInputAttributeDescription::builder()
+      .binding(0)
+      .location(0)
+      .format(vk::Format::R32G32_SFLOAT)
+      .offset(0)
+      .build();
+    let color=vk::VertexInputAttributeDescription::builder()
+      .binding(0)
+      .location(1)
+      .format(vk::Format::R32G32B32_SFLOAT)
+      .offset(size_of::<Vec2>() as u32)
+      .build();
+
+    [pos,color]
+  }
+}
+
+
+// copy VERTICES to GPU buffer
+pub unsafe fn create_vertex_buffer(
+  instance: &Instance,
+  device: &Device,
+  data: &mut VulkanData,
+) -> Result<()>{
+  // create buffer. not allocate
+  let buffer_info=vk::BufferCreateInfo::builder()
+    .size((size_of::<Vertex>()*VERTICES.len()) as u64)
+    .usage(vk::BufferUsageFlags::VERTEX_BUFFER)
+    .sharing_mode(vk::SharingMode::EXCLUSIVE);
+
+  data.vertex_buffer=device.create_buffer(&buffer_info,None)?;
+
+  // get memory size
+  // ex. size=64 alignment=16, memory_type_bits=...
+  let requirements=device.get_buffer_memory_requirements(data.vertex_buffer);
+  // memory allocation info
+  let memory_info=vk::MemoryAllocateInfo::builder()
+    .allocation_size(requirements.size)
+    .memory_type_index(get_memory_type_index(
+      instance,
+      data,
+      vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
+      requirements,
+    )?);
+
+  // allocate GPU memory
+  data.vertex_buffer_memory=device.allocate_memory(&memory_info,None)?;
+  
+  // bind buffer and memory
+  device.bind_buffer_memory(data.vertex_buffer,data.vertex_buffer_memory,0)?;
+
+  // Copy
+  // get pointer to GPU memory
+  let memory=device.map_memory(
+    data.vertex_buffer_memory,
+    0,
+    buffer_info.size,
+    vk::MemoryMapFlags::empty(),
+  )?;
+
+  // memcopy(GPU_MEMORY,VERTICES,SIZE)
+  memcpy(VERTICES.as_ptr(),memory.cast(),VERTICES.len());
+
+  device.unmap_memory(data.vertex_buffer_memory);
+
+  Ok(())
+}
+
+pub unsafe fn get_memory_type_index(
+  instance: &Instance,
+  data: &VulkanData,
+  properties: vk::MemoryPropertyFlags,
+  requirements: vk::MemoryRequirements,
+) ->Result<u32>{
+  let memory=instance.get_physical_device_memory_properties(data.physical_device);
+
+  (0..memory.memory_type_count)
+    .find(|i| {
+      let suitable=(requirements.memory_type_bits & (1<<i))!=0;
+      let memory_type=memory.memory_types[*i as usize];
+      suitable && memory_type.property_flags.contains(properties)
+    })
+    .ok_or_else(|| anyhow!("Failed to find sutable memory type."))
+}

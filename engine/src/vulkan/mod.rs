@@ -5,6 +5,7 @@ mod swapchain;
 mod pipeline;
 mod command;
 mod sync;
+mod vertex;
 
 use anyhow::{anyhow, Result};
 use vulkanalia::prelude::v1_0::*;
@@ -13,7 +14,7 @@ use vulkanalia::vk::KhrSurfaceExtensionInstanceCommands;
 use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use vulkanalia::window as vk_window;
 use winit::window::Window;
-
+use cgmath::{vec2,vec3};
 
 use self::device::{create_logical_device, pick_physical_device};
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
@@ -22,6 +23,13 @@ use self::pipeline::{create_pipeline,create_render_pass};
 use self::command::{create_command_pool,create_command_buffers};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::VulkanData;
+use self::vertex::{Vertex,create_vertex_buffer};
+
+static VERTICES: [Vertex; 3]=[
+    Vertex::new(vec2(0.0,-0.5),vec3(1.0,1.0,1.0)),
+    Vertex::new(vec2(0.5,0.5),vec3(0.0,1.0,0.0)),
+    Vertex::new(vec2(-0.5,0.5),vec3(0.0,0.0,1.0)),
+];
 
 
 pub const MAX_FRAMES_IN_FLIGHT: usize=2;
@@ -48,6 +56,7 @@ impl VulkanRenderer {
         create_render_pass(&instance,&device,&mut data)?;
         create_pipeline(&device,&mut data)?;
         create_framebuffers(&device, &mut data)?;
+        create_vertex_buffer(&instance,&device,&mut data)?;
         create_command_pool(&instance,&device,&mut data)?;
         create_command_buffers(&device,&mut data)?;
         create_sync_objects(&device,&mut data)?;
@@ -160,6 +169,8 @@ impl VulkanRenderer {
         self.device.device_wait_idle().unwrap();
 
         self.destroy_swapchain();
+        self.device.destroy_buffer(self.data.vertex_buffer,None);
+        self.device.free_memory(self.data.vertex_buffer_memory,None);
 
         self.data.in_flight_fences
             .iter()

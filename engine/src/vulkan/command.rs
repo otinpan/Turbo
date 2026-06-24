@@ -1,12 +1,10 @@
 use anyhow::Result;
 use png::DecodingError::IoError;
 use vulkanalia::prelude::v1_0::*;
-use vulkanalia::vk::KhrSurfaceExtensionInstanceCommands;
-use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
-use winit::window::Window;
 
 use super::types::VulkanData;
 use super::device::QueueFamilyIndices;
+use super::VERTICES;
 
 pub unsafe fn create_command_pool(
   instance: &Instance,
@@ -62,6 +60,8 @@ pub unsafe fn create_command_buffers(
 
     device.cmd_begin_render_pass(*command_buffer,&info,vk::SubpassContents::INLINE);
     device.cmd_bind_pipeline(*command_buffer,vk::PipelineBindPoint::GRAPHICS,data.pipeline);
+    device.cmd_bind_vertex_buffers(*command_buffer,0,&[data.vertex_buffer],&[0]);
+    device.cmd_draw(*command_buffer,VERTICES.len() as u32,1,0,0);
     device.cmd_draw(*command_buffer,3,1,0,0);
     device.cmd_end_render_pass(*command_buffer);
 

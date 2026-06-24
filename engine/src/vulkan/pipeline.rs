@@ -4,6 +4,7 @@ use vulkanalia::prelude::v1_0::*;
 
 use super::instance::{PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER};
 use super::types::VulkanData;
+use super::vertex::{Vertex};
 
 // A graphics pipeline describes how vertices and fragments 
 // are processed by the GPU.
@@ -26,7 +27,11 @@ pub unsafe fn create_pipeline(device: &Device,data: &mut VulkanData) ->Result<()
     .name(b"main\0");
 
   // Vertex Input
-  let vertex_input_state=vk::PipelineVertexInputStateCreateInfo::builder();
+  let binding_descriptions=&[Vertex::binding_description()];
+  let attribute_descriptions=Vertex::attribute_descriptions();
+  let vertex_input_state=vk::PipelineVertexInputStateCreateInfo::builder()
+    .vertex_binding_descriptions(binding_descriptions)
+    .vertex_attribute_descriptions(&attribute_descriptions);
 
   // Input assembly
   let input_assembly_state=vk::PipelineInputAssemblyStateCreateInfo::builder()
