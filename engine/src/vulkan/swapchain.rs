@@ -1,5 +1,4 @@
 use anyhow::Result;
-use png::DecodingError::IoError;
 use vulkanalia::prelude::v1_0::*;
 use vulkanalia::vk::KhrSurfaceExtensionInstanceCommands;
 use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
@@ -199,4 +198,3 @@ pub unsafe fn create_framebuffers(
 
   Ok(())
 }
-

@@ -3,9 +3,7 @@ use std::ptr::copy_nonoverlapping as memcpy;
 use vulkanalia::prelude::v1_0::*;
 
 use std::mem::size_of;
-use cgmath::{vec2,vec3};
 
-use super::instance::{PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER};
 use super::types::VulkanData;
 use super::VERTICES;
 
@@ -49,58 +47,136 @@ impl Vertex{
   }
 }
 
-
-// copy VERTICES to GPU buffer
-pub unsafe fn create_vertex_buffer(
+pub unsafe fn create_buffer(
   instance: &Instance,
   device: &Device,
-  data: &mut VulkanData,
-) -> Result<()>{
-  // create buffer. not allocate
+  data: &VulkanData,
+  size: vk::DeviceSize,
+  usage: vk::BufferUsageFlags,
+  properties: vk::MemoryPropertyFlags,
+) -> Result<(vk::Buffer,vk::DeviceMemory)>{
+    // create buffer. not allocate
   let buffer_info=vk::BufferCreateInfo::builder()
-    .size((size_of::<Vertex>()*VERTICES.len()) as u64)
-    .usage(vk::BufferUsageFlags::VERTEX_BUFFER)
+    .size(size)
+    .usage(usage)
     .sharing_mode(vk::SharingMode::EXCLUSIVE);
-
-  data.vertex_buffer=device.create_buffer(&buffer_info,None)?;
+  let buffer=device.create_buffer(&buffer_info,None)?;
 
   // get memory size
   // ex. size=64 alignment=16, memory_type_bits=...
-  let requirements=device.get_buffer_memory_requirements(data.vertex_buffer);
+  let requirements=device.get_buffer_memory_requirements(buffer);
   // memory allocation info
   let memory_info=vk::MemoryAllocateInfo::builder()
     .allocation_size(requirements.size)
     .memory_type_index(get_memory_type_index(
       instance,
       data,
-      vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
+      properties,
       requirements,
     )?);
-
   // allocate GPU memory
-  data.vertex_buffer_memory=device.allocate_memory(&memory_info,None)?;
-  
+  let buffer_memory=device.allocate_memory(&memory_info,None)?;
   // bind buffer and memory
-  device.bind_buffer_memory(data.vertex_buffer,data.vertex_buffer_memory,0)?;
+  device.bind_buffer_memory(buffer,buffer_memory,0)?;
 
-  // Copy
-  // get pointer to GPU memory
-  let memory=device.map_memory(
-    data.vertex_buffer_memory,
-    0,
-    buffer_info.size,
-    vk::MemoryMapFlags::empty(),
+  Ok((buffer,buffer_memory))
+    
+}
+
+// 1. record staging buffer
+// 2. copy vertices from staging buffer to vertex buffer
+pub unsafe fn create_vertex_buffer(
+  instance: &Instance,
+  device: &Device,
+  data: &mut VulkanData,
+) -> Result<()>{
+  let size=(size_of::<Vertex>()*VERTICES.len()) as u64;
+
+  let (staging_buffer,staging_buffer_memory)=create_buffer(
+    instance,
+    device,
+    data,
+    size,
+    vk::BufferUsageFlags::TRANSFER_SRC,
+    vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
   )?;
 
-  // memcopy(GPU_MEMORY,VERTICES,SIZE)
-  memcpy(VERTICES.as_ptr(),memory.cast(),VERTICES.len());
 
-  device.unmap_memory(data.vertex_buffer_memory);
+  let memory=device.map_memory(
+    staging_buffer_memory,
+    0,
+    size,
+    vk::MemoryMapFlags::empty(),
+  )?;
+  
+  // memcpy(GPU_MEMORY,VERTICES,SIZE)
+  memcpy(VERTICES.as_ptr(),memory.cast(),VERTICES.len());
+  device.unmap_memory(staging_buffer_memory);
+
+  let (vertex_buffer,vertex_buffer_memory)=create_buffer(
+    instance,
+    device,
+    data,
+    size,
+    vk::BufferUsageFlags::TRANSFER_DST | vk::BufferUsageFlags::VERTEX_BUFFER,
+    vk::MemoryPropertyFlags::DEVICE_LOCAL,
+  )?;
+
+  data.vertex_buffer=vertex_buffer;
+  data.vertex_buffer_memory=vertex_buffer_memory;
+
+  // copy staging buffer to vertex buffer
+  copy_buffer(device,data,staging_buffer,vertex_buffer,size)?;
+
+  device.destroy_buffer(staging_buffer,None);
+  device.free_memory(staging_buffer_memory,None);
+  Ok(())
+}
+
+
+// create instance Command Buffer to copy vertices from staging buffer to vertex buffer
+unsafe fn copy_buffer(
+  device: &Device,
+  data: &VulkanData,
+  source: vk::Buffer,
+  destination: vk::Buffer,
+  size: vk::DeviceSize,
+) -> Result<()>{
+  // create command buffer
+  let info=vk::CommandBufferAllocateInfo::builder()
+    .level(vk::CommandBufferLevel::PRIMARY)
+    .command_pool(data.command_pool)
+    .command_buffer_count(1);
+
+  let command_buffer=device.allocate_command_buffers(&info)?[0];
+
+  // start command buffer recording
+  let info=vk::CommandBufferBeginInfo::builder()
+    .flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
+  device.begin_command_buffer(command_buffer,&info)?;
+
+  // write command buffer instruction
+  // instruction: copy source(staging) to destination(vertex)
+  let regions=vk::BufferCopy::builder().size(size);
+  device.cmd_copy_buffer(command_buffer,source,destination,&[regions]);
+
+  device.end_command_buffer(command_buffer)?;
+
+  // submit
+  let command_buffers=&[command_buffer];
+  let info=vk::SubmitInfo::builder().command_buffers(command_buffers);
+
+  // send command (on command buffer which created in this function) to graphics queue
+  device.queue_submit(data.graphics_queue,&[info],vk::Fence::null())?;
+  device.queue_wait_idle(data.graphics_queue)?;
+
+  // cleanup
+  device.free_command_buffers(data.command_pool,&[command_buffer]);
 
   Ok(())
 }
 
-pub unsafe fn get_memory_type_index(
+unsafe fn get_memory_type_index(
   instance: &Instance,
   data: &VulkanData,
   properties: vk::MemoryPropertyFlags,

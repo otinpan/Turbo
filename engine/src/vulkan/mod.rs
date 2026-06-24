@@ -56,8 +56,8 @@ impl VulkanRenderer {
         create_render_pass(&instance,&device,&mut data)?;
         create_pipeline(&device,&mut data)?;
         create_framebuffers(&device, &mut data)?;
-        create_vertex_buffer(&instance,&device,&mut data)?;
         create_command_pool(&instance,&device,&mut data)?;
+        create_vertex_buffer(&instance,&device,&mut data)?;
         create_command_buffers(&device,&mut data)?;
         create_sync_objects(&device,&mut data)?;
         Ok(Self {

@@ -1,8 +1,7 @@
 use vulkanalia::bytecode::Bytecode;
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
-use super::instance::{PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER};
 use super::types::VulkanData;
 use super::vertex::{Vertex};
 
@@ -126,7 +125,7 @@ unsafe fn create_shader_module(device: &Device,bytecode: &[u8]) ->Result<vk::Sha
 // A render pass describes the rendering operations and
 // the attachments that will be used
 pub unsafe fn create_render_pass(
-  instance: &Instance,
+  _instance: &Instance,
   device: &Device,
   data: &mut VulkanData
 ) -> Result<()>{
