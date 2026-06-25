@@ -1,194 +1,97 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use std::ptr::copy_nonoverlapping as memcpy;
 use vulkanalia::prelude::v1_0::*;
 
 use std::mem::size_of;
 
+use super::VERTICES_RECTANGLE;
+use super::buffer::{copy_buffer, create_buffer};
 use super::types::VulkanData;
-use super::VERTICES;
 
-type Vec2=cgmath::Vector2<f32>;
-type Vec3=cgmath::Vector3<f32>;
+type Vec2 = cgmath::Vector2<f32>;
+type Vec3 = cgmath::Vector3<f32>;
 
 #[repr(C)]
-#[derive(Copy,Clone,Debug)]
-pub struct Vertex{
-  pub pos: Vec2,
-  pub color: Vec3,
+#[derive(Copy, Clone, Debug)]
+pub struct Vertex {
+    pub pos: Vec2,
+    pub color: Vec3,
 }
 
-impl Vertex{
-  pub const fn new(pos: Vec2, color: Vec3) ->Self{
-    Self{pos,color}
-  }
-  pub fn binding_description() -> vk::VertexInputBindingDescription{
-    vk::VertexInputBindingDescription::builder()
-      .binding(0)
-      .stride(size_of::<Vertex>() as u32)
-      .input_rate(vk::VertexInputRate::VERTEX)
-      .build()
-  }
+impl Vertex {
+    pub const fn new(pos: Vec2, color: Vec3) -> Self {
+        Self { pos, color }
+    }
+    pub fn binding_description() -> vk::VertexInputBindingDescription {
+        vk::VertexInputBindingDescription::builder()
+            .binding(0)
+            .stride(size_of::<Vertex>() as u32)
+            .input_rate(vk::VertexInputRate::VERTEX)
+            .build()
+    }
 
-  pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 2]{
-    let pos=vk::VertexInputAttributeDescription::builder()
-      .binding(0)
-      .location(0)
-      .format(vk::Format::R32G32_SFLOAT)
-      .offset(0)
-      .build();
-    let color=vk::VertexInputAttributeDescription::builder()
-      .binding(0)
-      .location(1)
-      .format(vk::Format::R32G32B32_SFLOAT)
-      .offset(size_of::<Vec2>() as u32)
-      .build();
+    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 2] {
+        let pos = vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(0)
+            .format(vk::Format::R32G32_SFLOAT)
+            .offset(0)
+            .build();
+        let color = vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(1)
+            .format(vk::Format::R32G32B32_SFLOAT)
+            .offset(size_of::<Vec2>() as u32)
+            .build();
 
-    [pos,color]
-  }
-}
-
-pub unsafe fn create_buffer(
-  instance: &Instance,
-  device: &Device,
-  data: &VulkanData,
-  size: vk::DeviceSize,
-  usage: vk::BufferUsageFlags,
-  properties: vk::MemoryPropertyFlags,
-) -> Result<(vk::Buffer,vk::DeviceMemory)>{
-    // create buffer. not allocate
-  let buffer_info=vk::BufferCreateInfo::builder()
-    .size(size)
-    .usage(usage)
-    .sharing_mode(vk::SharingMode::EXCLUSIVE);
-  let buffer=device.create_buffer(&buffer_info,None)?;
-
-  // get memory size
-  // ex. size=64 alignment=16, memory_type_bits=...
-  let requirements=device.get_buffer_memory_requirements(buffer);
-  // memory allocation info
-  let memory_info=vk::MemoryAllocateInfo::builder()
-    .allocation_size(requirements.size)
-    .memory_type_index(get_memory_type_index(
-      instance,
-      data,
-      properties,
-      requirements,
-    )?);
-  // allocate GPU memory
-  let buffer_memory=device.allocate_memory(&memory_info,None)?;
-  // bind buffer and memory
-  device.bind_buffer_memory(buffer,buffer_memory,0)?;
-
-  Ok((buffer,buffer_memory))
-    
+        [pos, color]
+    }
 }
 
 // 1. record staging buffer
 // 2. copy vertices from staging buffer to vertex buffer
 pub unsafe fn create_vertex_buffer(
-  instance: &Instance,
-  device: &Device,
-  data: &mut VulkanData,
-) -> Result<()>{
-  let size=(size_of::<Vertex>()*VERTICES.len()) as u64;
+    instance: &Instance,
+    device: &Device,
+    data: &mut VulkanData,
+) -> Result<()> {
+    let size = (size_of::<Vertex>() * VERTICES_RECTANGLE.len()) as u64;
 
-  let (staging_buffer,staging_buffer_memory)=create_buffer(
-    instance,
-    device,
-    data,
-    size,
-    vk::BufferUsageFlags::TRANSFER_SRC,
-    vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
-  )?;
+    let (staging_buffer, staging_buffer_memory) = create_buffer(
+        instance,
+        device,
+        data,
+        size,
+        vk::BufferUsageFlags::TRANSFER_SRC,
+        vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
+    )?;
 
+    let memory = device.map_memory(staging_buffer_memory, 0, size, vk::MemoryMapFlags::empty())?;
 
-  let memory=device.map_memory(
-    staging_buffer_memory,
-    0,
-    size,
-    vk::MemoryMapFlags::empty(),
-  )?;
-  
-  // memcpy(GPU_MEMORY,VERTICES,SIZE)
-  memcpy(VERTICES.as_ptr(),memory.cast(),VERTICES.len());
-  device.unmap_memory(staging_buffer_memory);
+    // memcpy(GPU_MEMORY,VERTICES,SIZE)
+    memcpy(
+        VERTICES_RECTANGLE.as_ptr(),
+        memory.cast(),
+        VERTICES_RECTANGLE.len(),
+    );
+    device.unmap_memory(staging_buffer_memory);
 
-  let (vertex_buffer,vertex_buffer_memory)=create_buffer(
-    instance,
-    device,
-    data,
-    size,
-    vk::BufferUsageFlags::TRANSFER_DST | vk::BufferUsageFlags::VERTEX_BUFFER,
-    vk::MemoryPropertyFlags::DEVICE_LOCAL,
-  )?;
+    let (vertex_buffer, vertex_buffer_memory) = create_buffer(
+        instance,
+        device,
+        data,
+        size,
+        vk::BufferUsageFlags::TRANSFER_DST | vk::BufferUsageFlags::VERTEX_BUFFER,
+        vk::MemoryPropertyFlags::DEVICE_LOCAL,
+    )?;
 
-  data.vertex_buffer=vertex_buffer;
-  data.vertex_buffer_memory=vertex_buffer_memory;
+    data.vertex_buffer = vertex_buffer;
+    data.vertex_buffer_memory = vertex_buffer_memory;
 
-  // copy staging buffer to vertex buffer
-  copy_buffer(device,data,staging_buffer,vertex_buffer,size)?;
+    // copy staging buffer to vertex buffer
+    copy_buffer(device, data, staging_buffer, vertex_buffer, size)?;
 
-  device.destroy_buffer(staging_buffer,None);
-  device.free_memory(staging_buffer_memory,None);
-  Ok(())
-}
-
-
-// create instance Command Buffer to copy vertices from staging buffer to vertex buffer
-unsafe fn copy_buffer(
-  device: &Device,
-  data: &VulkanData,
-  source: vk::Buffer,
-  destination: vk::Buffer,
-  size: vk::DeviceSize,
-) -> Result<()>{
-  // create command buffer
-  let info=vk::CommandBufferAllocateInfo::builder()
-    .level(vk::CommandBufferLevel::PRIMARY)
-    .command_pool(data.command_pool)
-    .command_buffer_count(1);
-
-  let command_buffer=device.allocate_command_buffers(&info)?[0];
-
-  // start command buffer recording
-  let info=vk::CommandBufferBeginInfo::builder()
-    .flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
-  device.begin_command_buffer(command_buffer,&info)?;
-
-  // write command buffer instruction
-  // instruction: copy source(staging) to destination(vertex)
-  let regions=vk::BufferCopy::builder().size(size);
-  device.cmd_copy_buffer(command_buffer,source,destination,&[regions]);
-
-  device.end_command_buffer(command_buffer)?;
-
-  // submit
-  let command_buffers=&[command_buffer];
-  let info=vk::SubmitInfo::builder().command_buffers(command_buffers);
-
-  // send command (on command buffer which created in this function) to graphics queue
-  device.queue_submit(data.graphics_queue,&[info],vk::Fence::null())?;
-  device.queue_wait_idle(data.graphics_queue)?;
-
-  // cleanup
-  device.free_command_buffers(data.command_pool,&[command_buffer]);
-
-  Ok(())
-}
-
-unsafe fn get_memory_type_index(
-  instance: &Instance,
-  data: &VulkanData,
-  properties: vk::MemoryPropertyFlags,
-  requirements: vk::MemoryRequirements,
-) ->Result<u32>{
-  let memory=instance.get_physical_device_memory_properties(data.physical_device);
-
-  (0..memory.memory_type_count)
-    .find(|i| {
-      let suitable=(requirements.memory_type_bits & (1<<i))!=0;
-      let memory_type=memory.memory_types[*i as usize];
-      suitable && memory_type.property_flags.contains(properties)
-    })
-    .ok_or_else(|| anyhow!("Failed to find sutable memory type."))
+    device.destroy_buffer(staging_buffer, None);
+    device.free_memory(staging_buffer_memory, None);
+    Ok(())
 }

@@ -1,38 +1,50 @@
-mod instance;
-mod types;
-mod device;
-mod swapchain;
-mod pipeline;
+mod buffer;
 mod command;
+mod device;
+mod index;
+mod instance;
+mod pipeline;
+mod swapchain;
 mod sync;
+mod types;
 mod vertex;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
+use cgmath::{vec2, vec3};
 use vulkanalia::prelude::v1_0::*;
 use vulkanalia::vk::ExtDebugUtilsExtensionInstanceCommands;
 use vulkanalia::vk::KhrSurfaceExtensionInstanceCommands;
 use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use vulkanalia::window as vk_window;
 use winit::window::Window;
-use cgmath::{vec2,vec3};
 
+use self::command::{create_command_buffers, create_command_pool};
 use self::device::{create_logical_device, pick_physical_device};
+use self::index::create_index_buffer;
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
-use self::swapchain::{create_swapchain,create_swapchain_image_views,create_framebuffers};
-use self::pipeline::{create_pipeline,create_render_pass};
-use self::command::{create_command_pool,create_command_buffers};
+use self::pipeline::{create_pipeline, create_render_pass};
+use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::VulkanData;
-use self::vertex::{Vertex,create_vertex_buffer};
+use self::vertex::{Vertex, create_vertex_buffer};
 
-static VERTICES: [Vertex; 3]=[
-    Vertex::new(vec2(0.0,-0.5),vec3(1.0,1.0,1.0)),
-    Vertex::new(vec2(0.5,0.5),vec3(0.0,1.0,0.0)),
-    Vertex::new(vec2(-0.5,0.5),vec3(0.0,0.0,1.0)),
+
+static VERTICES: [Vertex; 3] = [
+    Vertex::new(vec2(0.0, -0.5), vec3(1.0, 1.0, 1.0)),
+    Vertex::new(vec2(0.5, 0.5), vec3(0.0, 1.0, 0.0)),
+    Vertex::new(vec2(-0.5, 0.5), vec3(0.0, 0.0, 1.0)),
 ];
 
+static VERTICES_RECTANGLE: [Vertex; 4] = [
+    Vertex::new(vec2(-0.5, -0.5), vec3(1.0, 0.0, 0.0)),
+    Vertex::new(vec2(0.5, -0.5), vec3(0.0, 1.0, 0.0)),
+    Vertex::new(vec2(0.5, 0.5), vec3(0.0, 0.0, 1.0)),
+    Vertex::new(vec2(-0.5, 0.5), vec3(1.0, 1.0, 1.0)),
+];
 
-pub const MAX_FRAMES_IN_FLIGHT: usize=2;
+const INDICES: &[u16] = &[0, 1, 2, 2, 3, 0];
+
+pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 pub struct VulkanRenderer {
     entry: Entry,
     instance: Instance,
@@ -52,14 +64,15 @@ impl VulkanRenderer {
         pick_physical_device(&instance, &mut data)?;
         let device = create_logical_device(&entry, &instance, &mut data)?;
         create_swapchain(window, &instance, &device, &mut data)?;
-        create_swapchain_image_views(&device,&mut data)?;
-        create_render_pass(&instance,&device,&mut data)?;
-        create_pipeline(&device,&mut data)?;
+        create_swapchain_image_views(&device, &mut data)?;
+        create_render_pass(&instance, &device, &mut data)?;
+        create_pipeline(&device, &mut data)?;
         create_framebuffers(&device, &mut data)?;
-        create_command_pool(&instance,&device,&mut data)?;
-        create_vertex_buffer(&instance,&device,&mut data)?;
-        create_command_buffers(&device,&mut data)?;
-        create_sync_objects(&device,&mut data)?;
+        create_command_pool(&instance, &device, &mut data)?;
+        create_vertex_buffer(&instance, &device, &mut data)?;
+        create_index_buffer(&instance, &device, &mut data)?;
+        create_command_buffers(&device, &mut data)?;
+        create_sync_objects(&device, &mut data)?;
         Ok(Self {
             entry,
             instance,
@@ -72,11 +85,12 @@ impl VulkanRenderer {
 
     pub unsafe fn render(&mut self, window: &Window) -> Result<()> {
         // 1. wait for fence
-        let in_flight_fence=self.data.in_flight_fences[self.frame];
-        self.device.wait_for_fences(&[in_flight_fence],true,u64::MAX)?;
+        let in_flight_fence = self.data.in_flight_fences[self.frame];
+        self.device
+            .wait_for_fences(&[in_flight_fence], true, u64::MAX)?;
 
         // 2. When get swapchain image, then signal image_available_semaphore
-        let result=self.device.acquire_next_image_khr(
+        let result = self.device.acquire_next_image_khr(
             self.data.swapchain,
             u64::MAX,
             self.data.image_available_semaphores[self.frame],
@@ -85,32 +99,33 @@ impl VulkanRenderer {
 
         // 3. if swapchain is invalid because changed window size,
         // recreate swapchain
-        let (image_index, acquire_code)=match result{
+        let (image_index, acquire_code) = match result {
             Ok((image_index, code)) => (image_index as usize, code),
             Err(vk::ErrorCode::OUT_OF_DATE_KHR) => return self.recreate_swapchain(window),
             Err(e) => return Err(anyhow!(e)),
         };
 
         // 4. if swapchain image is used wait fence
-        let image_in_flight=self.data.images_in_flight[image_index];
-        if !image_in_flight.is_null(){
-            self.device.wait_for_fences(&[image_in_flight],true,u64::MAX)?;
+        let image_in_flight = self.data.images_in_flight[image_index];
+        if !image_in_flight.is_null() {
+            self.device
+                .wait_for_fences(&[image_in_flight], true, u64::MAX)?;
         }
 
         // 5. record fence witch use swapchain image
-        self.data.images_in_flight[image_index]=in_flight_fence;
+        self.data.images_in_flight[image_index] = in_flight_fence;
 
         // 6. wait image_available_semaphores
-        let wait_semaphores=&[self.data.image_available_semaphores[self.frame]];
-        let wait_stages=&[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
+        let wait_semaphores = &[self.data.image_available_semaphores[self.frame]];
+        let wait_stages = &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
         // 7. copy using command buffer
-        let command_buffers=&[self.data.command_buffers[image_index]];
+        let command_buffers = &[self.data.command_buffers[image_index]];
         // Presentation can outlive the frame fence, so keep one signal
         // semaphore per swapchain image and only reuse it after that image is
         // acquired again.
         // 8. signal to render_finished_semaphore
-        let signal_semaphores=&[self.data.render_finished_semaphores[image_index]];
-        let submit_info=vk::SubmitInfo::builder()
+        let signal_semaphores = &[self.data.render_finished_semaphores[image_index]];
+        let submit_info = vk::SubmitInfo::builder()
             .wait_semaphores(wait_semaphores)
             .wait_dst_stage_mask(wait_stages)
             .command_buffers(command_buffers)
@@ -121,31 +136,33 @@ impl VulkanRenderer {
 
         // 10. submit to graphics queue
         self.device
-            .queue_submit(self.data.graphics_queue,&[submit_info],in_flight_fence)?;
+            .queue_submit(self.data.graphics_queue, &[submit_info], in_flight_fence)?;
 
-        let swapchains=&[self.data.swapchain];
-        let image_indices=&[image_index as u32];
+        let swapchains = &[self.data.swapchain];
+        let image_indices = &[image_index as u32];
 
         // 11. present_queue wait for render_finished_semaphore
-        let present_info=vk::PresentInfoKHR::builder()
+        let present_info = vk::PresentInfoKHR::builder()
             .wait_semaphores(signal_semaphores)
             .swapchains(swapchains)
             .image_indices(image_indices);
 
         // 12. presentation
-        let result=self.device.queue_present_khr(self.data.present_queue,&present_info);
+        let result = self
+            .device
+            .queue_present_khr(self.data.present_queue, &present_info);
         // 13. if window is resized, recreate swapchain
-        let changed=acquire_code==vk::SuccessCode::SUBOPTIMAL_KHR ||
-            result==Ok(vk::SuccessCode::SUBOPTIMAL_KHR) ||
-            result==Err(vk::ErrorCode::OUT_OF_DATE_KHR);
+        let changed = acquire_code == vk::SuccessCode::SUBOPTIMAL_KHR
+            || result == Ok(vk::SuccessCode::SUBOPTIMAL_KHR)
+            || result == Err(vk::ErrorCode::OUT_OF_DATE_KHR);
         if self.resized || changed {
-            self.resized=false;
+            self.resized = false;
             self.recreate_swapchain(window)?;
-        }else if let Err(e) =result{
+        } else if let Err(e) = result {
             return Err(anyhow!(e));
         }
-        
-        self.frame=(self.frame+1)%MAX_FRAMES_IN_FLIGHT;
+
+        self.frame = (self.frame + 1) % MAX_FRAMES_IN_FLIGHT;
 
         Ok(())
     }
@@ -160,8 +177,7 @@ impl VulkanRenderer {
         create_framebuffers(&self.device, &mut self.data)?;
         create_command_buffers(&self.device, &mut self.data)?;
         create_render_finished_semaphores(&self.device, &mut self.data)?;
-        self.data.images_in_flight=
-            vec![vk::Fence::null(); self.data.swapchain_images.len()];
+        self.data.images_in_flight = vec![vk::Fence::null(); self.data.swapchain_images.len()];
         Ok(())
     }
 
@@ -169,16 +185,24 @@ impl VulkanRenderer {
         self.device.device_wait_idle().unwrap();
 
         self.destroy_swapchain();
-        self.device.destroy_buffer(self.data.vertex_buffer,None);
-        self.device.free_memory(self.data.vertex_buffer_memory,None);
+        self.device.destroy_buffer(self.data.index_buffer,None);
+        self.device.free_memory(self.data.index_buffer_memory,None);
+        self.device.destroy_buffer(self.data.vertex_buffer, None);
+        self.device
+            .free_memory(self.data.vertex_buffer_memory, None);
+        self.device.destroy_buffer(self.data.index_buffer, None);
+        self.device.free_memory(self.data.index_buffer_memory, None);
 
-        self.data.in_flight_fences
+        self.data
+            .in_flight_fences
             .iter()
-            .for_each(|f| self.device.destroy_fence(*f,None));
-        self.data.image_available_semaphores
+            .for_each(|f| self.device.destroy_fence(*f, None));
+        self.data
+            .image_available_semaphores
             .iter()
-            .for_each(|s| self.device.destroy_semaphore(*s,None));
-        self.device.destroy_command_pool(self.data.command_pool,None);
+            .for_each(|s| self.device.destroy_semaphore(*s, None));
+        self.device
+            .destroy_command_pool(self.data.command_pool, None);
         self.device.destroy_device(None);
         if VALIDATION_ENABLED {
             self.instance
@@ -189,15 +213,24 @@ impl VulkanRenderer {
     }
 
     unsafe fn destroy_swapchain(&mut self) {
-        self.data.render_finished_semaphores
+        self.data
+            .render_finished_semaphores
             .drain(..)
             .for_each(|s| self.device.destroy_semaphore(s, None));
-        self.device.free_command_buffers(self.data.command_pool, &self.data.command_buffers);
-        self.data.framebuffers.iter().for_each(|f| self.device.destroy_framebuffer(*f, None));
+        self.device
+            .free_command_buffers(self.data.command_pool, &self.data.command_buffers);
+        self.data
+            .framebuffers
+            .iter()
+            .for_each(|f| self.device.destroy_framebuffer(*f, None));
         self.device.destroy_pipeline(self.data.pipeline, None);
-        self.device.destroy_pipeline_layout(self.data.pipeline_layout, None);
+        self.device
+            .destroy_pipeline_layout(self.data.pipeline_layout, None);
         self.device.destroy_render_pass(self.data.render_pass, None);
-        self.data.swapchain_image_views.iter().for_each(|v| self.device.destroy_image_view(*v, None));
+        self.data
+            .swapchain_image_views
+            .iter()
+            .for_each(|v| self.device.destroy_image_view(*v, None));
         self.device.destroy_swapchain_khr(self.data.swapchain, None);
     }
 }

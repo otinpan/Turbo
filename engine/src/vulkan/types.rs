@@ -28,6 +28,8 @@ pub struct VulkanData {
     // Buffers
     pub vertex_buffer: vk::Buffer,
     pub vertex_buffer_memory: vk::DeviceMemory,
+    pub index_buffer: vk::Buffer,
+    pub index_buffer_memory: vk::DeviceMemory,
     // Command Buffers
     pub command_buffers: Vec<vk::CommandBuffer>,
     // Sync Objects
@@ -35,5 +37,4 @@ pub struct VulkanData {
     pub render_finished_semaphores: Vec<vk::Semaphore>,
     pub in_flight_fences: Vec<vk::Fence>,
     pub images_in_flight: Vec<vk::Fence>,
-    // Vertex Buffer
 }

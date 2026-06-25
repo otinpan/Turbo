@@ -1,26 +1,22 @@
-use anyhow::{anyhow, Result};
-use std::collections::HashSet;
+use anyhow::{Result, anyhow};
 use log::{info, warn};
+use std::collections::HashSet;
 use thiserror::Error;
 use vulkanalia::prelude::v1_0::*;
 use vulkanalia::vk::KhrSurfaceExtensionInstanceCommands;
 
 use super::instance::{PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER};
-use super::types::VulkanData;
 use super::swapchain::SwapchainSupport;
+use super::types::VulkanData;
 
 pub const DEVICE_EXTENSIONS: &[vk::ExtensionName] = &[vk::KHR_SWAPCHAIN_EXTENSION.name];
-
 
 #[derive(Debug, Error)]
 #[error("{0}")]
 pub struct SuitabilityError(pub &'static str);
 
 // Physical Device
-pub unsafe fn pick_physical_device(
-    instance: &Instance,
-    data: &mut VulkanData,
-) -> Result<()> {
+pub unsafe fn pick_physical_device(instance: &Instance, data: &mut VulkanData) -> Result<()> {
     for physical_device in instance.enumerate_physical_devices()? {
         let properties = instance.get_physical_device_properties(physical_device);
 
@@ -45,10 +41,10 @@ unsafe fn check_physical_device(
     physical_device: vk::PhysicalDevice,
 ) -> Result<()> {
     QueueFamilyIndices::get(instance, data, physical_device)?;
-    check_physical_device_extensions(instance,physical_device)?;
+    check_physical_device_extensions(instance, physical_device)?;
 
-    let support=SwapchainSupport::get(instance,data,physical_device)?;
-    if support.formats.is_empty() || support.present_modes.is_empty(){
+    let support = SwapchainSupport::get(instance, data, physical_device)?;
+    if support.formats.is_empty() || support.present_modes.is_empty() {
         return Err(anyhow!(SuitabilityError("Insufficient swapchain support.")));
     }
     Ok(())
@@ -73,16 +69,20 @@ impl QueueFamilyIndices {
             .position(|p| p.queue_flags.contains(vk::QueueFlags::GRAPHICS))
             .map(|i| i as u32);
 
-        let mut present=None;
-        for (index,properties) in properties.iter().enumerate(){
-            if instance.get_physical_device_surface_support_khr(physical_device,index as u32,data.surface)?{
-                present=Some(index as u32);
+        let mut present = None;
+        for (index, properties) in properties.iter().enumerate() {
+            if instance.get_physical_device_surface_support_khr(
+                physical_device,
+                index as u32,
+                data.surface,
+            )? {
+                present = Some(index as u32);
                 break;
             }
         }
 
-        if let (Some(graphics),Some(present)) = (graphics,present) {
-            Ok(Self { graphics,present })
+        if let (Some(graphics), Some(present)) = (graphics, present) {
+            Ok(Self { graphics, present })
         } else {
             Err(anyhow!(SuitabilityError("Missing required queue families")))
         }
@@ -97,14 +97,14 @@ pub unsafe fn create_logical_device(
     // Queue Create Infos
     let indices = QueueFamilyIndices::get(instance, data, data.physical_device)?;
 
-    let mut unique_indices=HashSet::new();
+    let mut unique_indices = HashSet::new();
     unique_indices.insert(indices.graphics);
     unique_indices.insert(indices.present);
 
     let queue_priorities = &[1.0];
-    let queue_infos=unique_indices
+    let queue_infos = unique_indices
         .iter()
-        .map(|i|{
+        .map(|i| {
             vk::DeviceQueueCreateInfo::builder()
                 .queue_family_index(*i)
                 .queue_priorities(queue_priorities)
@@ -133,7 +133,7 @@ pub unsafe fn create_logical_device(
     let features = vk::PhysicalDeviceFeatures::builder();
 
     // Create
-    let info=vk::DeviceCreateInfo::builder()
+    let info = vk::DeviceCreateInfo::builder()
         .queue_create_infos(&queue_infos)
         .enabled_layer_names(&layers)
         .enabled_extension_names(&extensions)
@@ -143,23 +143,25 @@ pub unsafe fn create_logical_device(
 
     // Queues
     data.graphics_queue = device.get_device_queue(indices.graphics, 0);
-    data.present_queue=device.get_device_queue(indices.present,0);
+    data.present_queue = device.get_device_queue(indices.present, 0);
     Ok(device)
 }
 
 unsafe fn check_physical_device_extensions(
     instance: &Instance,
     physical_device: vk::PhysicalDevice,
-) -> Result<()>{
-    let extensions=instance
-        .enumerate_device_extension_properties(physical_device,None)?
+) -> Result<()> {
+    let extensions = instance
+        .enumerate_device_extension_properties(physical_device, None)?
         .iter()
         .map(|e| e.extension_name)
         .collect::<HashSet<_>>();
 
-    if DEVICE_EXTENSIONS.iter().all(|e| extensions.contains(e)){
+    if DEVICE_EXTENSIONS.iter().all(|e| extensions.contains(e)) {
         Ok(())
-    }else{
-        Err(anyhow!(SuitabilityError("Missing required device extensions.")))
+    } else {
+        Err(anyhow!(SuitabilityError(
+            "Missing required device extensions."
+        )))
     }
 }
