@@ -127,6 +127,10 @@ impl VulkanRenderer {
         // 5. record fence which use swapchain image
         self.data.images_in_flight[image_index] = in_flight_fence;
 
+        // if image_index is updated from render function,
+        // uniform_buffer[index] is updated
+        // and then reflect shader via descriptor sets which is binding with pipeline
+        // uniform buffer <-> descriptor set <-> pipeline layout <-> pipeline <-> shader
         update_uniform_buffer(self, image_index)?;
 
         // 6. wait image_available_semaphores

@@ -58,6 +58,8 @@ pub unsafe fn create_uniform_buffers(
     Ok(())
 }
 
+
+// create pool to record descriptor_set
 pub unsafe fn create_descriptor_pool(device: &Device, data: &mut VulkanData) -> Result<()> {
     let ubo_size = vk::DescriptorPoolSize::builder()
         .type_(vk::DescriptorType::UNIFORM_BUFFER)
@@ -73,12 +75,17 @@ pub unsafe fn create_descriptor_pool(device: &Device, data: &mut VulkanData) -> 
     Ok(())
 }
 
+// if image_index is updated from render function,
+// uniform_buffer[index] is updated
+// and then reflect shader via descriptor sets which is binding with pipeline
+// uniform buffer <-> descriptor set <-> pipeline layout <-> pipeline <-> shader
 pub unsafe fn create_descriptor_sets(device: &Device, data: &mut VulkanData) -> Result<()> {
     let layouts = vec![data.descriptor_set_layout; data.swapchain_images.len()];
     let info = vk::DescriptorSetAllocateInfo::builder()
         .descriptor_pool(data.descriptor_pool)
         .set_layouts(&layouts);
 
+    // allocate memory for descriptor set.
     data.descriptor_sets = device.allocate_descriptor_sets(&info)?;
 
     for i in 0..data.swapchain_images.len() {
@@ -87,6 +94,7 @@ pub unsafe fn create_descriptor_sets(device: &Device, data: &mut VulkanData) -> 
             .offset(0)
             .range(size_of::<UniformBufferObject>() as u64);
 
+        // this descirptor use unifrom_buffers[i].
         let buffer_infos = &[buffer_info];
         let descriptor_write = vk::WriteDescriptorSet::builder()
             .dst_set(data.descriptor_sets[i])
