@@ -7,10 +7,12 @@ mod pipeline;
 mod swapchain;
 mod sync;
 mod types;
+mod uniform;
 mod vertex;
 
 use anyhow::{Result, anyhow};
 use cgmath::{vec2, vec3};
+use std::time::Instant;
 use vulkanalia::prelude::v1_0::*;
 use vulkanalia::vk::ExtDebugUtilsExtensionInstanceCommands;
 use vulkanalia::vk::KhrSurfaceExtensionInstanceCommands;
@@ -26,8 +28,11 @@ use self::pipeline::{create_pipeline, create_render_pass};
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::VulkanData;
+use self::uniform::{
+    create_descriptor_pool, create_descriptor_set_layout, create_descriptor_sets,
+    create_uniform_buffers, update_uniform_buffer,
+};
 use self::vertex::{Vertex, create_vertex_buffer};
-
 
 static VERTICES: [Vertex; 3] = [
     Vertex::new(vec2(0.0, -0.5), vec3(1.0, 1.0, 1.0)),
@@ -52,6 +57,8 @@ pub struct VulkanRenderer {
     device: Device,
     frame: usize,
     pub resized: bool,
+    // timer
+    start: Instant,
 }
 
 impl VulkanRenderer {
@@ -66,11 +73,15 @@ impl VulkanRenderer {
         create_swapchain(window, &instance, &device, &mut data)?;
         create_swapchain_image_views(&device, &mut data)?;
         create_render_pass(&instance, &device, &mut data)?;
+        create_descriptor_set_layout(&device, &mut data)?;
         create_pipeline(&device, &mut data)?;
         create_framebuffers(&device, &mut data)?;
         create_command_pool(&instance, &device, &mut data)?;
         create_vertex_buffer(&instance, &device, &mut data)?;
         create_index_buffer(&instance, &device, &mut data)?;
+        create_uniform_buffers(&instance, &device, &mut data)?;
+        create_descriptor_pool(&device, &mut data)?;
+        create_descriptor_sets(&device, &mut data)?;
         create_command_buffers(&device, &mut data)?;
         create_sync_objects(&device, &mut data)?;
         Ok(Self {
@@ -80,6 +91,7 @@ impl VulkanRenderer {
             device,
             frame: 0,
             resized: false,
+            start: Instant::now(),
         })
     }
 
@@ -112,8 +124,10 @@ impl VulkanRenderer {
                 .wait_for_fences(&[image_in_flight], true, u64::MAX)?;
         }
 
-        // 5. record fence witch use swapchain image
+        // 5. record fence which use swapchain image
         self.data.images_in_flight[image_index] = in_flight_fence;
+
+        update_uniform_buffer(self, image_index)?;
 
         // 6. wait image_available_semaphores
         let wait_semaphores = &[self.data.image_available_semaphores[self.frame]];
@@ -175,6 +189,9 @@ impl VulkanRenderer {
         create_render_pass(&self.instance, &self.device, &mut self.data)?;
         create_pipeline(&self.device, &mut self.data)?;
         create_framebuffers(&self.device, &mut self.data)?;
+        create_uniform_buffers(&self.instance, &self.device, &mut self.data)?;
+        create_descriptor_pool(&self.device, &mut self.data)?;
+        create_descriptor_sets(&self.device, &mut self.data)?;
         create_command_buffers(&self.device, &mut self.data)?;
         create_render_finished_semaphores(&self.device, &mut self.data)?;
         self.data.images_in_flight = vec![vk::Fence::null(); self.data.swapchain_images.len()];
@@ -185,40 +202,57 @@ impl VulkanRenderer {
         self.device.device_wait_idle().unwrap();
 
         self.destroy_swapchain();
-        self.device.destroy_buffer(self.data.index_buffer,None);
-        self.device.free_memory(self.data.index_buffer_memory,None);
-        self.device.destroy_buffer(self.data.vertex_buffer, None);
         self.device
-            .free_memory(self.data.vertex_buffer_memory, None);
-        self.device.destroy_buffer(self.data.index_buffer, None);
-        self.device.free_memory(self.data.index_buffer_memory, None);
+            .destroy_descriptor_set_layout(self.data.descriptor_set_layout, None);
 
         self.data
             .in_flight_fences
             .iter()
             .for_each(|f| self.device.destroy_fence(*f, None));
         self.data
+            .render_finished_semaphores
+            .iter()
+            .for_each(|s| self.device.destroy_semaphore(*s, None));
+        self.data
             .image_available_semaphores
             .iter()
             .for_each(|s| self.device.destroy_semaphore(*s, None));
+        self.device.free_memory(self.data.index_buffer_memory, None);
+        self.device.destroy_buffer(self.data.index_buffer, None);
+        self.device
+            .free_memory(self.data.vertex_buffer_memory, None);
+        self.device.destroy_buffer(self.data.vertex_buffer, None);
         self.device
             .destroy_command_pool(self.data.command_pool, None);
         self.device.destroy_device(None);
+        self.instance.destroy_surface_khr(self.data.surface, None);
+
         if VALIDATION_ENABLED {
             self.instance
                 .destroy_debug_utils_messenger_ext(self.data.messenger, None);
         }
-        self.instance.destroy_surface_khr(self.data.surface, None);
+
         self.instance.destroy_instance(None);
     }
 
     unsafe fn destroy_swapchain(&mut self) {
+        self.device
+            .free_command_buffers(self.data.command_pool, &self.data.command_buffers);
+        self.device
+            .destroy_descriptor_pool(self.data.descriptor_pool, None);
+        self.data
+            .uniform_buffers
+            .drain(..)
+            .for_each(|b| self.device.destroy_buffer(b, None));
+        self.data
+            .uniform_buffers_memory
+            .drain(..)
+            .for_each(|m| self.device.free_memory(m, None));
+        self.data.descriptor_sets.clear();
         self.data
             .render_finished_semaphores
             .drain(..)
             .for_each(|s| self.device.destroy_semaphore(s, None));
-        self.device
-            .free_command_buffers(self.data.command_pool, &self.data.command_buffers);
         self.data
             .framebuffers
             .iter()

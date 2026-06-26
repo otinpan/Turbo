@@ -1,3 +1,7 @@
+// pipeline is like a cartridge
+// each pipeline has single vertex shader
+// you can create pipelines for UI(2D) and for Actor(3D), and so on.
+// when you want to switch render format, you switch pipelint like cartridges.
 use anyhow::Result;
 use vulkanalia::bytecode::Bytecode;
 use vulkanalia::prelude::v1_0::*;
@@ -85,7 +89,8 @@ pub unsafe fn create_pipeline(device: &Device, data: &mut VulkanData) -> Result<
         .blend_constants([0.0, 0.0, 0.0, 0.0]);
 
     // Layout
-    let layout_info = vk::PipelineLayoutCreateInfo::builder();
+    let set_layouts = &[data.descriptor_set_layout];
+    let layout_info = vk::PipelineLayoutCreateInfo::builder().set_layouts(set_layouts);
     data.pipeline_layout = device.create_pipeline_layout(&layout_info, None)?;
 
     // Create
