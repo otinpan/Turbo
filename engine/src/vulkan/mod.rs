@@ -26,7 +26,7 @@ use self::device::{create_logical_device, pick_physical_device};
 use self::index::create_index_buffer;
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::pipeline::{create_pipeline, create_render_pass};
-use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
+use self::swapchain::{create_framebuffers, create_swapchain,create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::VulkanData;
 use self::uniform::{
@@ -34,7 +34,11 @@ use self::uniform::{
     create_uniform_buffers, update_uniform_buffer,
 };
 use self::vertex::{Vertex, create_vertex_buffer};
-use self::image::{create_texture_image};
+use self::image::{
+    create_texture_image,
+    create_texture_image_view,
+    create_texture_sampler,
+};
 
 static VERTICES: [Vertex; 3] = [
     Vertex::new(vec2(0.0, -0.5), vec3(1.0, 1.0, 1.0)),
@@ -80,6 +84,8 @@ impl VulkanRenderer {
         create_framebuffers(&device, &mut data)?;
         create_command_pool(&instance, &device, &mut data)?;
         create_texture_image(&instance,&device,&mut data)?;
+        create_texture_image_view(&device,&mut data)?;
+        create_texture_sampler(&device,&mut data)?;
         create_vertex_buffer(&instance, &device, &mut data)?;
         create_index_buffer(&instance, &device, &mut data)?;
         create_uniform_buffers(&instance, &device, &mut data)?;
@@ -209,6 +215,11 @@ impl VulkanRenderer {
         self.device.device_wait_idle().unwrap();
 
         self.destroy_swapchain();
+
+        self.device.destroy_sampler(self.data.texture_sampler,None);
+
+        self.device.destroy_image_view(self.data.texture_image_view,None);
+
         self.device.destroy_image(self.data.texture_image,None);
         self.device.free_memory(self.data.texture_image_memory,None);
         self.device

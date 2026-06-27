@@ -8,13 +8,14 @@ use super::Instance;
 use super::Device;
 use super::buffer::{create_buffer,begin_single_time_commands,end_single_time_commands};
 
+// texture image ///////////////////////////////////////////////
 pub unsafe fn create_texture_image(
   instance: &Instance,
   device: &Device,
   data: &mut VulkanData,
 ) -> Result<()>{
   // load
-  let image=File::open("../assets/texture.png")?;
+  let image=File::open("src/assets/texture.png")?;
 
   let decoder=png::Decoder::new(image);
   let mut reader=decoder.read_info()?;
@@ -112,10 +113,10 @@ unsafe fn create_image(
     })
     .mip_levels(1)
     .array_layers(1)
-    .format(vk::Format::R8G8B8A8_SRGB)
-    .tiling(vk::ImageTiling::OPTIMAL)
+    .format(format)
+    .tiling(tiling)
     .initial_layout(vk::ImageLayout::UNDEFINED)
-    .usage(vk::ImageUsageFlags::SAMPLED | vk::ImageUsageFlags::TRANSFER_DST)
+    .usage(usage)
     .sharing_mode(vk::SharingMode::EXCLUSIVE)
     .samples(vk::SampleCountFlags::_1)
     .flags(vk::ImageCreateFlags::empty());
@@ -131,7 +132,7 @@ unsafe fn create_image(
     .memory_type_index(get_memory_type_index(
       instance,
       data,
-      vk::MemoryPropertyFlags::DEVICE_LOCAL,
+      properties,
       requirements,
     )?);
 
@@ -269,5 +270,68 @@ unsafe fn copy_buffer_to_image(
   );
 
   end_single_time_commands(device,data,command_buffer)?;
+  Ok(())
+}
+
+
+// texture image view //////////////////////////////////////
+pub unsafe fn create_texture_image_view(
+  device: &Device,
+  data: &mut VulkanData,
+) -> Result<()>{
+  data.texture_image_view=create_image_view(
+    device,
+    data.texture_image,
+    vk::Format::R8G8B8A8_SRGB,
+  )?;
+
+  Ok(())
+}
+
+
+pub unsafe fn create_image_view(
+  device: &Device,
+  image: vk::Image,
+  format: vk::Format,
+) -> Result<vk::ImageView>{
+  let subresource_range=vk::ImageSubresourceRange::builder()
+    .aspect_mask(vk::ImageAspectFlags::COLOR)
+    .base_mip_level(0)
+    .level_count(1)
+    .base_array_layer(0)
+    .layer_count(1);
+
+  let info=vk::ImageViewCreateInfo::builder()
+    .image(image)
+    .view_type(vk::ImageViewType::_2D)
+    .format(format)
+    .subresource_range(subresource_range);
+
+  Ok(device.create_image_view(&info,None)?)
+}
+
+// samper //////////////////////////////////////////////////
+pub unsafe fn create_texture_sampler(
+  device: &Device,
+  data: &mut VulkanData,
+) -> Result<()>{
+  let info=vk::SamplerCreateInfo::builder()
+    .mag_filter(vk::Filter::LINEAR)
+    .min_filter(vk::Filter::LINEAR)
+    .address_mode_u(vk::SamplerAddressMode::REPEAT) // x
+    .address_mode_v(vk::SamplerAddressMode::REPEAT) // y
+    .address_mode_w(vk::SamplerAddressMode::REPEAT) // z
+    .anisotropy_enable(true)
+    .max_anisotropy(16.0)
+    .border_color(vk::BorderColor::INT_OPAQUE_BLACK)
+    .unnormalized_coordinates(false)
+    .compare_enable(false)
+    .compare_op(vk::CompareOp::ALWAYS)
+    .mipmap_mode(vk::SamplerMipmapMode::LINEAR)
+    .mip_lod_bias(0.0)
+    .min_lod(0.0)
+    .max_lod(0.0);
+
+  data.texture_sampler=device.create_sampler(&info,None)?;
   Ok(())
 }

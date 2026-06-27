@@ -47,6 +47,13 @@ unsafe fn check_physical_device(
     if support.formats.is_empty() || support.present_modes.is_empty() {
         return Err(anyhow!(SuitabilityError("Insufficient swapchain support.")));
     }
+
+    // feature for anistropy used in texture sampler
+    let features=instance.get_physical_device_features(physical_device);
+    if features.sampler_anisotropy !=vk::TRUE{
+        return Err(anyhow!(SuitabilityError("No sampler anisotropy")));
+    }
+
     Ok(())
 }
 
@@ -130,7 +137,8 @@ pub unsafe fn create_logical_device(
     }
 
     // Features
-    let features = vk::PhysicalDeviceFeatures::builder();
+    let features = vk::PhysicalDeviceFeatures::builder()
+        .sampler_anisotropy(true);
 
     // Create
     let info = vk::DeviceCreateInfo::builder()
