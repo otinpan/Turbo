@@ -43,4 +43,7 @@ pub struct VulkanData {
     pub render_finished_semaphores: Vec<vk::Semaphore>,
     pub in_flight_fences: Vec<vk::Fence>,
     pub images_in_flight: Vec<vk::Fence>,
+    // Texture Image
+    pub texture_image: vk::Image,
+    pub texture_image_memory: vk::DeviceMemory,
 }

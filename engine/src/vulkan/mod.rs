@@ -9,6 +9,7 @@ mod sync;
 mod types;
 mod uniform;
 mod vertex;
+mod image;
 
 use anyhow::{Result, anyhow};
 use cgmath::{vec2, vec3};
@@ -33,6 +34,7 @@ use self::uniform::{
     create_uniform_buffers, update_uniform_buffer,
 };
 use self::vertex::{Vertex, create_vertex_buffer};
+use self::image::{create_texture_image};
 
 static VERTICES: [Vertex; 3] = [
     Vertex::new(vec2(0.0, -0.5), vec3(1.0, 1.0, 1.0)),
@@ -77,6 +79,7 @@ impl VulkanRenderer {
         create_pipeline(&device, &mut data)?;
         create_framebuffers(&device, &mut data)?;
         create_command_pool(&instance, &device, &mut data)?;
+        create_texture_image(&instance,&device,&mut data)?;
         create_vertex_buffer(&instance, &device, &mut data)?;
         create_index_buffer(&instance, &device, &mut data)?;
         create_uniform_buffers(&instance, &device, &mut data)?;
@@ -206,6 +209,8 @@ impl VulkanRenderer {
         self.device.device_wait_idle().unwrap();
 
         self.destroy_swapchain();
+        self.device.destroy_image(self.data.texture_image,None);
+        self.device.free_memory(self.data.texture_image_memory,None);
         self.device
             .destroy_descriptor_set_layout(self.data.descriptor_set_layout, None);
 
