@@ -41,16 +41,16 @@ use self::image::{
 };
 
 static VERTICES: [Vertex; 3] = [
-    Vertex::new(vec2(0.0, -0.5), vec3(1.0, 1.0, 1.0)),
-    Vertex::new(vec2(0.5, 0.5), vec3(0.0, 1.0, 0.0)),
-    Vertex::new(vec2(-0.5, 0.5), vec3(0.0, 0.0, 1.0)),
+    Vertex::new(vec2(0.0, -0.5), vec3(1.0, 1.0, 1.0),vec2(1.0,0.0)),
+    Vertex::new(vec2(0.5, 0.5), vec3(0.0, 1.0, 0.0),vec2(0.0,0.0)),
+    Vertex::new(vec2(-0.5, 0.5), vec3(0.0, 0.0, 1.0),vec2(0.0,0.1)),
 ];
 
 static VERTICES_RECTANGLE: [Vertex; 4] = [
-    Vertex::new(vec2(-0.5, -0.5), vec3(1.0, 0.0, 0.0)),
-    Vertex::new(vec2(0.5, -0.5), vec3(0.0, 1.0, 0.0)),
-    Vertex::new(vec2(0.5, 0.5), vec3(0.0, 0.0, 1.0)),
-    Vertex::new(vec2(-0.5, 0.5), vec3(1.0, 1.0, 1.0)),
+    Vertex::new(vec2(-0.5, -0.5), vec3(1.0, 0.0, 0.0),vec2(1.0,0.0)),
+    Vertex::new(vec2(0.5, -0.5), vec3(0.0, 1.0, 0.0),vec2(0.0,0.0)),
+    Vertex::new(vec2(0.5, 0.5), vec3(0.0, 0.0, 1.0),vec2(0.0,1.0)),
+    Vertex::new(vec2(-0.5, 0.5), vec3(1.0, 1.0, 1.0),vec2(1.0,1.0)),
 ];
 
 const INDICES: &[u16] = &[0, 1, 2, 2, 3, 0];

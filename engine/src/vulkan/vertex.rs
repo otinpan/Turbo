@@ -16,11 +16,12 @@ type Vec3 = cgmath::Vector3<f32>;
 pub struct Vertex {
     pub pos: Vec2,
     pub color: Vec3,
+    pub tex_coord: Vec2,
 }
 
 impl Vertex {
-    pub const fn new(pos: Vec2, color: Vec3) -> Self {
-        Self { pos, color }
+    pub const fn new(pos: Vec2, color: Vec3,tex_coord: Vec2) -> Self {
+        Self { pos, color, tex_coord}
     }
     pub fn binding_description() -> vk::VertexInputBindingDescription {
         vk::VertexInputBindingDescription::builder()
@@ -30,7 +31,7 @@ impl Vertex {
             .build()
     }
 
-    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 2] {
+    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 3] {
         let pos = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(0)
@@ -43,8 +44,14 @@ impl Vertex {
             .format(vk::Format::R32G32B32_SFLOAT)
             .offset(size_of::<Vec2>() as u32)
             .build();
+        let tex_coord=vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(2)
+            .format(vk::Format::R32G32_SFLOAT)
+            .offset((size_of::<Vec2>() + size_of::<Vec3>()) as u32)
+            .build();
 
-        [pos, color]
+        [pos, color,tex_coord]
     }
 }
 

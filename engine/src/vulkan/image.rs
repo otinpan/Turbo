@@ -23,7 +23,23 @@ pub unsafe fn create_texture_image(
   let mut pixels=vec![0;reader.info().raw_bytes()];
   reader.next_frame(&mut pixels)?;
 
-  let size=reader.info().raw_bytes() as u64;
+  // if png corresponds RGB, convert to RGBA to add 4bytes
+  let pixels=match (reader.info().color_type,reader.info().bit_depth) {
+    (png::ColorType::Rgb,png::BitDepth::Eight) => pixels
+      .chunks_exact(3)
+      .flat_map(|rgb| [rgb[0],rgb[1],rgb[2],255])
+      .collect::<Vec<_>>(),
+    (png::ColorType::Rgba,png::BitDepth::Eight) => pixels,
+    (color_type,bit_depth) => {
+      return Err(anyhow!(
+        "Unsupported PNG format: {:?} {:?}",
+        color_type,
+        bit_depth,
+      ));
+    }
+  };
+
+  let size=pixels.len() as u64;
   let (width,height)=reader.info().size();
 
   // create (staging)
