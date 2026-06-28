@@ -38,22 +38,26 @@ use self::image::{
     create_texture_image,
     create_texture_image_view,
     create_texture_sampler,
+    create_depth_objects,
 };
 
-static VERTICES: [Vertex; 3] = [
-    Vertex::new(vec2(0.0, -0.5), vec3(1.0, 1.0, 1.0),vec2(1.0,0.0)),
-    Vertex::new(vec2(0.5, 0.5), vec3(0.0, 1.0, 0.0),vec2(0.0,0.0)),
-    Vertex::new(vec2(-0.5, 0.5), vec3(0.0, 0.0, 1.0),vec2(0.0,0.1)),
+static VERTICES: [Vertex; 8] = [
+    Vertex::new(vec3(-0.5, -0.5, 0.0), vec3(1.0, 0.0, 0.0), vec2(1.0, 0.0)),
+    Vertex::new(vec3(0.5, -0.5, 0.0), vec3(0.0, 1.0, 0.0), vec2(0.0, 0.0)),
+    Vertex::new(vec3(0.5, 0.5, 0.0), vec3(0.0, 0.0, 1.0), vec2(0.0, 1.0)),
+    Vertex::new(vec3(-0.5, 0.5, 0.0), vec3(1.0, 1.0, 1.0), vec2(1.0, 1.0)),
+    Vertex::new(vec3(-0.5, -0.5, -0.5), vec3(1.0, 0.0, 0.0), vec2(1.0, 0.0)),
+    Vertex::new(vec3(0.5, -0.5, -0.5), vec3(0.0, 1.0, 0.0), vec2(0.0, 0.0)),
+    Vertex::new(vec3(0.5, 0.5, -0.5), vec3(0.0, 0.0, 1.0), vec2(0.0, 1.0)),
+    Vertex::new(vec3(-0.5, 0.5, -0.5), vec3(1.0, 1.0, 1.0), vec2(1.0, 1.0)),
 ];
 
-static VERTICES_RECTANGLE: [Vertex; 4] = [
-    Vertex::new(vec2(-0.5, -0.5), vec3(1.0, 0.0, 0.0),vec2(1.0,0.0)),
-    Vertex::new(vec2(0.5, -0.5), vec3(0.0, 1.0, 0.0),vec2(0.0,0.0)),
-    Vertex::new(vec2(0.5, 0.5), vec3(0.0, 0.0, 1.0),vec2(0.0,1.0)),
-    Vertex::new(vec2(-0.5, 0.5), vec3(1.0, 1.0, 1.0),vec2(1.0,1.0)),
+const INDICES: &[u16] = &[
+    0, 1, 2, 2, 3, 0,
+    4, 5, 6, 6, 7, 4,
 ];
 
-const INDICES: &[u16] = &[0, 1, 2, 2, 3, 0];
+
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 pub struct VulkanRenderer {
@@ -81,8 +85,9 @@ impl VulkanRenderer {
         create_render_pass(&instance, &device, &mut data)?;
         create_descriptor_set_layout(&device, &mut data)?;
         create_pipeline(&device, &mut data)?;
-        create_framebuffers(&device, &mut data)?;
         create_command_pool(&instance, &device, &mut data)?;
+        create_depth_objects(&instance,&device,&mut data)?;
+        create_framebuffers(&device, &mut data)?;
         create_texture_image(&instance,&device,&mut data)?;
         create_texture_image_view(&device,&mut data)?;
         create_texture_sampler(&device,&mut data)?;
@@ -194,13 +199,14 @@ impl VulkanRenderer {
         Ok(())
     }
 
-    pub unsafe fn recreate_swapchain(&mut self, window: &Window) -> Result<()> {
+    unsafe fn recreate_swapchain(&mut self, window: &Window) -> Result<()> {
         self.device.device_wait_idle()?;
         self.destroy_swapchain();
         create_swapchain(window, &self.instance, &self.device, &mut self.data)?;
         create_swapchain_image_views(&self.device, &mut self.data)?;
         create_render_pass(&self.instance, &self.device, &mut self.data)?;
         create_pipeline(&self.device, &mut self.data)?;
+        create_depth_objects(&self.instance, &self.device, &mut self.data)?;
         create_framebuffers(&self.device, &mut self.data)?;
         create_uniform_buffers(&self.instance, &self.device, &mut self.data)?;
         create_descriptor_pool(&self.device, &mut self.data)?;
@@ -275,8 +281,11 @@ impl VulkanRenderer {
             .for_each(|s| self.device.destroy_semaphore(s, None));
         self.data
             .framebuffers
-            .iter()
-            .for_each(|f| self.device.destroy_framebuffer(*f, None));
+            .drain(..)
+            .for_each(|f| self.device.destroy_framebuffer(f, None));
+        self.device.destroy_image_view(self.data.depth_image_view, None);
+        self.device.destroy_image(self.data.depth_image, None);
+        self.device.free_memory(self.data.depth_image_memory, None);
         self.device.destroy_pipeline(self.data.pipeline, None);
         self.device
             .destroy_pipeline_layout(self.data.pipeline_layout, None);

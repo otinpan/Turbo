@@ -99,7 +99,7 @@ pub unsafe fn create_swapchain_image_views(
     data.swapchain_image_views = data
         .swapchain_images
         .iter()
-        .map(|i| create_image_view(device, *i, data.swapchain_format))
+        .map(|i| create_image_view(device, *i, data.swapchain_format,vk::ImageAspectFlags::COLOR))
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(())
@@ -153,7 +153,7 @@ pub unsafe fn create_framebuffers(device: &Device, data: &mut VulkanData) -> Res
         .swapchain_image_views
         .iter()
         .map(|i| {
-            let attachments = &[*i];
+            let attachments = &[*i,data.depth_image_view];
             let create_info = vk::FramebufferCreateInfo::builder()
                 .render_pass(data.render_pass)
                 .attachments(attachments)

@@ -4,7 +4,7 @@ use vulkanalia::prelude::v1_0::*;
 
 use std::mem::size_of;
 
-use super::VERTICES_RECTANGLE;
+use super::VERTICES;
 use super::buffer::{copy_buffer, create_buffer};
 use super::types::VulkanData;
 
@@ -14,13 +14,13 @@ type Vec3 = cgmath::Vector3<f32>;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct Vertex {
-    pub pos: Vec2,
+    pub pos: Vec3,
     pub color: Vec3,
     pub tex_coord: Vec2,
 }
 
 impl Vertex {
-    pub const fn new(pos: Vec2, color: Vec3,tex_coord: Vec2) -> Self {
+    pub const fn new(pos: Vec3, color: Vec3,tex_coord: Vec2) -> Self {
         Self { pos, color, tex_coord}
     }
     pub fn binding_description() -> vk::VertexInputBindingDescription {
@@ -35,7 +35,7 @@ impl Vertex {
         let pos = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(0)
-            .format(vk::Format::R32G32_SFLOAT)
+            .format(vk::Format::R32G32B32_SFLOAT)
             .offset(0)
             .build();
         let color = vk::VertexInputAttributeDescription::builder()
@@ -62,7 +62,7 @@ pub unsafe fn create_vertex_buffer(
     device: &Device,
     data: &mut VulkanData,
 ) -> Result<()> {
-    let size = (size_of::<Vertex>() * VERTICES_RECTANGLE.len()) as u64;
+    let size = (size_of::<Vertex>() * VERTICES.len()) as u64;
 
     let (staging_buffer, staging_buffer_memory) = create_buffer(
         instance,
@@ -77,9 +77,9 @@ pub unsafe fn create_vertex_buffer(
 
     // memcpy(GPU_MEMORY,VERTICES,SIZE)
     memcpy(
-        VERTICES_RECTANGLE.as_ptr(),
+        VERTICES.as_ptr(),
         memory.cast(),
-        VERTICES_RECTANGLE.len(),
+        VERTICES.len(),
     );
     device.unmap_memory(staging_buffer_memory);
 
