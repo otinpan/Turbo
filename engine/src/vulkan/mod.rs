@@ -9,6 +9,7 @@ mod sync;
 mod types;
 mod uniform;
 mod vertex;
+mod model;
 mod image;
 
 use anyhow::{Result, anyhow};
@@ -40,6 +41,7 @@ use self::image::{
     create_texture_sampler,
     create_depth_objects,
 };
+use self::model::{load_model};
 
 static VERTICES: [Vertex; 8] = [
     Vertex::new(vec3(-0.5, -0.5, 0.0), vec3(1.0, 0.0, 0.0), vec2(1.0, 0.0)),
@@ -91,6 +93,7 @@ impl VulkanRenderer {
         create_texture_image(&instance,&device,&mut data)?;
         create_texture_image_view(&device,&mut data)?;
         create_texture_sampler(&device,&mut data)?;
+        load_model(&mut data)?;
         create_vertex_buffer(&instance, &device, &mut data)?;
         create_index_buffer(&instance, &device, &mut data)?;
         create_uniform_buffers(&instance, &device, &mut data)?;

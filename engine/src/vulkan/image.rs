@@ -15,7 +15,7 @@ pub unsafe fn create_texture_image(
   data: &mut VulkanData,
 ) -> Result<()>{
   // load
-  let image=File::open("src/assets/texture.png")?;
+  let image=File::open("src/assets/viking_room.png")?;
 
   let decoder=png::Decoder::new(image);
   let mut reader=decoder.read_info()?;
@@ -41,6 +41,10 @@ pub unsafe fn create_texture_image(
 
   let size=pixels.len() as u64;
   let (width,height)=reader.info().size();
+
+  if width!=2024 || height!=2024 || reader.info().color_type!=png::ColorType::Rgba{
+    panic!("Invalid texture image.")
+  }
 
   // create (staging)
   let (staging_buffer,staging_buffer_memory)=create_buffer(

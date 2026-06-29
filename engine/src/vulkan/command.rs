@@ -63,7 +63,12 @@ pub unsafe fn create_command_buffers(device: &Device, data: &mut VulkanData) -> 
             data.pipeline,
         );
         device.cmd_bind_vertex_buffers(*command_buffer, 0, &[data.vertex_buffer], &[0]);
-        device.cmd_bind_index_buffer(*command_buffer, data.index_buffer, 0, vk::IndexType::UINT16);
+        device.cmd_bind_index_buffer(
+            *command_buffer,
+            data.index_buffer,
+            0, 
+            vk::IndexType::UINT32
+        );
         // bind descriptro_set to pipeline_layout
         device.cmd_bind_descriptor_sets(
             *command_buffer,

@@ -12,7 +12,7 @@ pub unsafe fn create_index_buffer(
     device: &Device,
     data: &mut VulkanData,
 ) -> Result<()> {
-    let size = (size_of::<u16>() * INDICES.len()) as u64;
+    let size = (size_of::<u32>() * data.indices.len()) as u64;
 
     let (staging_buffer, staging_buffer_memory) = create_buffer(
         instance,

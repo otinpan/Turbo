@@ -1,4 +1,6 @@
 use vulkanalia::prelude::v1_0::*;
+use super::vertex::Vertex;
+
 
 #[derive(Clone, Debug, Default)]
 pub struct VulkanData {
@@ -29,6 +31,9 @@ pub struct VulkanData {
     pub framebuffers: Vec<vk::Framebuffer>,
     // Command Pool
     pub command_pool: vk::CommandPool,
+    // Model
+    pub vertices: Vec<Vertex>,
+    pub indices: Vec<u32>,
     // Buffers
     pub vertex_buffer: vk::Buffer,
     pub vertex_buffer_memory: vk::DeviceMemory,
