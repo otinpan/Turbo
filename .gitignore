@@ -2,3 +2,4 @@
 .intent-tracer/
 tutorial_cpp/build/
 engine/target
+engine/src/assets/

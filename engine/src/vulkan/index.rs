@@ -3,7 +3,6 @@ use std::mem::size_of;
 use std::ptr::copy_nonoverlapping as memcpy;
 use vulkanalia::prelude::v1_0::*;
 
-use super::INDICES;
 use super::buffer::{copy_buffer, create_buffer};
 use super::types::VulkanData;
 
@@ -25,7 +24,7 @@ pub unsafe fn create_index_buffer(
 
     let memory = device.map_memory(staging_buffer_memory, 0, size, vk::MemoryMapFlags::empty())?;
 
-    memcpy(INDICES.as_ptr(), memory.cast(), INDICES.len());
+    memcpy(data.indices.as_ptr(), memory.cast(), data.indices.len());
     device.unmap_memory(staging_buffer_memory);
 
     let (index_buffer, index_buffer_memory) = create_buffer(

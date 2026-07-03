@@ -49,6 +49,7 @@ pub struct VulkanData {
     pub in_flight_fences: Vec<vk::Fence>,
     pub images_in_flight: Vec<vk::Fence>,
     // Texture Image
+    pub mip_levels: u32,
     pub texture_image: vk::Image,
     pub texture_image_memory: vk::DeviceMemory,
     pub texture_image_view: vk::ImageView,

@@ -2,7 +2,7 @@ use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
 use super::types::VulkanData;
-use super::{INDICES, device::QueueFamilyIndices};
+use super::{device::QueueFamilyIndices};
 
 pub unsafe fn create_command_pool(
     instance: &Instance,
@@ -78,7 +78,7 @@ pub unsafe fn create_command_buffers(device: &Device, data: &mut VulkanData) -> 
             &[data.descriptor_sets[i]],
             &[],
         );
-        device.cmd_draw_indexed(*command_buffer, INDICES.len() as u32, 1, 0, 0, 0);
+        device.cmd_draw_indexed(*command_buffer, data.indices.len() as u32, 1, 0, 0, 0);
         device.cmd_end_render_pass(*command_buffer);
 
         device.end_command_buffer(*command_buffer)?;
