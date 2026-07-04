@@ -138,8 +138,7 @@ unsafe fn create_shader_module(device: &Device, bytecode: &[u8]) -> Result<vk::S
     Ok(device.create_shader_module(&info, None)?)
 }
 
-// A render pass describes the rendering operations and
-// the attachments that will be used
+// A render pass describes the rendering operations and the attachments that will be used
 pub unsafe fn create_render_pass(
     instance: &Instance,
     device: &Device,
