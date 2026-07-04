@@ -1,9 +1,13 @@
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
-
+use cgmath::{Deg, vec3};
 use super::types::VulkanData;
 use super::{device::QueueFamilyIndices};
 
+type Mat4 = cgmath::Matrix4<f32>;
+
+// created command buffers are pushed into graphics queue in render()
+// this command buffer is created at once
 pub unsafe fn create_command_pool(
     instance: &Instance,
     device: &Device,
@@ -11,7 +15,9 @@ pub unsafe fn create_command_pool(
 ) -> Result<()> {
     let indices = QueueFamilyIndices::get(instance, data, data.physical_device)?;
 
-    let info = vk::CommandPoolCreateInfo::builder().queue_family_index(indices.graphics);
+    let info = vk::CommandPoolCreateInfo::builder()
+        .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
+        .queue_family_index(indices.graphics);
 
     data.command_pool = device.create_command_pool(&info, None)?;
 
@@ -25,6 +31,14 @@ pub unsafe fn create_command_buffers(device: &Device, data: &mut VulkanData) -> 
         .command_buffer_count(data.framebuffers.len() as u32);
 
     data.command_buffers = device.allocate_command_buffers(&allocate_info)?;
+
+    // Push Constants
+    let model=Mat4::from_axis_angle(vec3(0.0,0.0,1.0),Deg(0.0));
+    let model_bytes=std::slice::from_raw_parts(
+        &model as *const Mat4 as *const u8,
+        size_of::<Mat4>()
+    );
+
 
     for (i, command_buffer) in data.command_buffers.iter().enumerate() {
         let inheritance = vk::CommandBufferInheritanceInfo::builder();
@@ -77,6 +91,20 @@ pub unsafe fn create_command_buffers(device: &Device, data: &mut VulkanData) -> 
             0,
             &[data.descriptor_sets[i]],
             &[],
+        );
+        device.cmd_push_constants(
+            *command_buffer,
+            data.pipeline_layout,
+            vk::ShaderStageFlags::VERTEX,
+            0,
+            model_bytes,
+        );
+        device.cmd_push_constants(
+            *command_buffer,
+            data.pipeline_layout,
+            vk::ShaderStageFlags::FRAGMENT,
+            64,
+            &0.25f32.to_ne_bytes()[..],
         );
         device.cmd_draw_indexed(*command_buffer, data.indices.len() as u32, 1, 0, 0, 0);
         device.cmd_end_render_pass(*command_buffer);

@@ -13,7 +13,6 @@ type Mat4 = cgmath::Matrix4<f32>;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 struct UniformBufferObject {
-    model: Mat4,
     view: Mat4,
     proj: Mat4,
 }
@@ -141,13 +140,6 @@ pub unsafe fn update_uniform_buffer(
     renderer: &mut VulkanRenderer,
     image_index: usize,
 ) -> Result<()> {
-    let time = renderer.start.elapsed().as_secs_f32();
-
-    let model = Mat4::from_axis_angle(
-      vec3(0.0, 0.0, 1.0),
-      Deg(90.0) * time
-    );
-
     // crate camera
     let view = Mat4::look_at_rh(
         point3(2.0, 2.0, 2.0),
@@ -173,7 +165,8 @@ pub unsafe fn update_uniform_buffer(
             10.0,
         );
 
-    let ubo = UniformBufferObject { model, view, proj };
+    let ubo = UniformBufferObject { view, proj };
+
 
     // map gpu memory
     let memory = renderer.device.map_memory(
@@ -190,4 +183,3 @@ pub unsafe fn update_uniform_buffer(
         .unmap_memory(renderer.data.uniform_buffers_memory[image_index]);
     Ok(())
 }
-
