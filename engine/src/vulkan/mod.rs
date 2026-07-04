@@ -60,6 +60,7 @@ pub struct VulkanRenderer {
     pub resized: bool,
     // timer
     pub start: Instant,
+    pub models: usize,
 }
 
 impl VulkanRenderer {
@@ -99,6 +100,7 @@ impl VulkanRenderer {
             frame: 0,
             resized: false,
             start: Instant::now(),
+            models: 1,
         })
     }
 

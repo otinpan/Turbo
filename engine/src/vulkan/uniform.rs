@@ -142,7 +142,7 @@ pub unsafe fn update_uniform_buffer(
 ) -> Result<()> {
     // crate camera
     let view = Mat4::look_at_rh(
-        point3(2.0, 2.0, 2.0),
+        point3(6.0, 0.0, 2.0),
         point3(0.0, 0.0, 0.0),
         vec3(0.0, 0.0, 1.0),
     );

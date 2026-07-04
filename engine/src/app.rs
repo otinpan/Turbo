@@ -1,6 +1,5 @@
 use anyhow::Result;
 use winit::window::Window;
-
 use crate::vulkan::VulkanRenderer;
 
 pub struct App {

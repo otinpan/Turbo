@@ -12,9 +12,11 @@ mod vulkan;
 use anyhow::Result;
 use app::App;
 use winit::dpi::LogicalSize;
-use winit::event::{Event, WindowEvent};
+use winit::event::{ElementState, Event, WindowEvent};
+use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::event_loop::EventLoop;
 use winit::window::WindowBuilder;
+
 
 fn main() -> Result<()> {
     pretty_env_logger::init();
@@ -53,6 +55,15 @@ fn main() -> Result<()> {
                     elwt.exit();
                     unsafe {
                         app.destroy();
+                    }
+                }
+                WindowEvent::KeyboardInput {event,..}=>{
+                    if event.state==ElementState::Pressed{
+                        match event.physical_key{
+                            PhysicalKey::Code(KeyCode::ArrowLeft) if app.renderer.models>1 => app.renderer.models-=1,
+                            PhysicalKey::Code(KeyCode::ArrowRight) if app.renderer.models<4 => app.renderer.models+=1,
+                            _ =>{}
+                        }
                     }
                 }
                 _ => {}
