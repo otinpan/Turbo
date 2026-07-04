@@ -47,6 +47,7 @@ pub struct VulkanData {
     pub uniform_buffers: Vec<vk::Buffer>,
     pub uniform_buffers_memory: Vec<vk::DeviceMemory>,
     // Command Buffers
+    pub command_pools: Vec<vk::CommandPool>,
     pub command_buffers: Vec<vk::CommandBuffer>,
     // Sync Objects
     pub image_available_semaphores: Vec<vk::Semaphore>,

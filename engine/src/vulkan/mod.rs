@@ -22,7 +22,10 @@ use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use vulkanalia::window as vk_window;
 use winit::window::Window;
 
-use self::command::{create_command_buffers, create_command_pool};
+use self::command::{
+    create_command_buffers, create_command_pools,
+    update_command_buffer,
+};
 use self::device::{create_logical_device, pick_physical_device};
 use self::index::create_index_buffer;
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
@@ -51,12 +54,12 @@ pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 pub struct VulkanRenderer {
     entry: Entry,
     instance: Instance,
-    data: VulkanData,
+    pub data: VulkanData,
     device: Device,
     frame: usize,
     pub resized: bool,
     // timer
-    start: Instant,
+    pub start: Instant,
 }
 
 impl VulkanRenderer {
@@ -73,7 +76,7 @@ impl VulkanRenderer {
         create_render_pass(&instance, &device, &mut data)?;
         create_descriptor_set_layout(&device, &mut data)?;
         create_pipeline(&device, &mut data)?;
-        create_command_pool(&instance, &device, &mut data)?;
+        create_command_pools(&instance, &device, &mut data)?;
         create_color_objects(&instance,&device,&mut data)?;
         create_depth_objects(&instance,&device,&mut data)?;
         create_framebuffers(&device, &mut data)?;
@@ -135,6 +138,7 @@ impl VulkanRenderer {
         // uniform_buffer[index] is updated
         // and then reflect shader via descriptor sets which is binding with pipeline
         // uniform buffer <-> descriptor set <-> pipeline layout <-> pipeline <-> shader
+        update_command_buffer(self,image_index)?;
         update_uniform_buffer(self, image_index)?;
 
         // 6. wait image_available_semaphores
@@ -210,11 +214,16 @@ impl VulkanRenderer {
     pub unsafe fn destroy(&mut self) {
         self.device.device_wait_idle().unwrap();
 
+
         self.device.destroy_image_view(self.data.color_image_view,None);
         self.device.free_memory(self.data.color_image_memory,None);
         self.device.destroy_image(self.data.color_image,None);
 
         self.destroy_swapchain();
+        
+        self.data.command_pools
+            .iter()
+            .for_each(|p| self.device.destroy_command_pool(*p,None));
 
         self.device.destroy_sampler(self.data.texture_sampler,None);
 
@@ -256,8 +265,7 @@ impl VulkanRenderer {
     }
 
     unsafe fn destroy_swapchain(&mut self) {
-        self.device
-            .free_command_buffers(self.data.command_pool, &self.data.command_buffers);
+        self.data.command_buffers.clear();
         self.device
             .destroy_descriptor_pool(self.data.descriptor_pool, None);
         self.data
