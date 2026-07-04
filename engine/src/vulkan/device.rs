@@ -28,6 +28,7 @@ pub unsafe fn pick_physical_device(instance: &Instance, data: &mut VulkanData) -
         } else {
             info!("Selected physical device (`{}`).", properties.device_name);
             data.physical_device = physical_device;
+            data.msaa_samples=get_max_msaa_samples(instance,data);
             return Ok(());
         }
     }
@@ -95,7 +96,7 @@ impl QueueFamilyIndices {
         }
     }
 }
-// Logical Device
+// Logical Device ///////////////////////////////////////////////
 pub unsafe fn create_logical_device(
     entry: &Entry,
     instance: &Instance,
@@ -138,7 +139,8 @@ pub unsafe fn create_logical_device(
 
     // Features
     let features = vk::PhysicalDeviceFeatures::builder()
-        .sampler_anisotropy(true);
+        .sampler_anisotropy(true)
+        .sample_rate_shading(true);
 
     // Create
     let info = vk::DeviceCreateInfo::builder()
@@ -172,4 +174,28 @@ unsafe fn check_physical_device_extensions(
             "Missing required device extensions."
         )))
     }
+}
+
+
+// MSAA (MultiSampling)
+unsafe fn get_max_msaa_samples(
+    instance: &Instance,
+    data: &VulkanData,
+) -> vk::SampleCountFlags{
+    let properties=instance.get_physical_device_properties(data.physical_device);
+    let counts=properties.limits.framebuffer_color_sample_counts
+        & properties.limits.framebuffer_depth_sample_counts;
+    [
+        vk::SampleCountFlags::_64,
+        vk::SampleCountFlags::_32,
+        vk::SampleCountFlags::_16,
+        vk::SampleCountFlags::_8,
+        vk::SampleCountFlags::_4,
+        vk::SampleCountFlags::_2,
+    ]
+    .iter()
+    .cloned()
+    .find(|c| counts.contains(*c))
+    .unwrap_or(vk::SampleCountFlags::_1)
+
 }

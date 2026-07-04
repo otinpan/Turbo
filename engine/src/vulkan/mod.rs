@@ -40,6 +40,7 @@ use self::image::{
     create_texture_image_view,
     create_texture_sampler,
     create_depth_objects,
+    create_color_objects,
 };
 use self::model::{load_model};
 
@@ -73,6 +74,7 @@ impl VulkanRenderer {
         create_descriptor_set_layout(&device, &mut data)?;
         create_pipeline(&device, &mut data)?;
         create_command_pool(&instance, &device, &mut data)?;
+        create_color_objects(&instance,&device,&mut data)?;
         create_depth_objects(&instance,&device,&mut data)?;
         create_framebuffers(&device, &mut data)?;
         create_texture_image(&instance,&device,&mut data)?;
@@ -207,6 +209,10 @@ impl VulkanRenderer {
 
     pub unsafe fn destroy(&mut self) {
         self.device.device_wait_idle().unwrap();
+
+        self.device.destroy_image_view(self.data.color_image_view,None);
+        self.device.free_memory(self.data.color_image_memory,None);
+        self.device.destroy_image(self.data.color_image,None);
 
         self.destroy_swapchain();
 

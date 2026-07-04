@@ -10,6 +10,7 @@ pub struct VulkanData {
     pub surface: vk::SurfaceKHR,
     // Physical Device
     pub physical_device: vk::PhysicalDevice,
+    pub msaa_samples: vk::SampleCountFlags,
     pub graphics_queue: vk::Queue,
     pub present_queue: vk::Queue,
     // Swapchain
@@ -31,6 +32,10 @@ pub struct VulkanData {
     pub framebuffers: Vec<vk::Framebuffer>,
     // Command Pool
     pub command_pool: vk::CommandPool,
+    // Color
+    pub color_image: vk::Image,
+    pub color_image_memory: vk::DeviceMemory,
+    pub color_image_view: vk::ImageView,
     // Model
     pub vertices: Vec<Vertex>,
     pub indices: Vec<u32>,

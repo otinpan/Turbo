@@ -76,6 +76,7 @@ pub unsafe fn create_texture_image(
     width,
     height,
     data.mip_levels,
+    vk::SampleCountFlags::_1,
     vk::Format::R8G8B8A8_SRGB,
     vk::ImageTiling::OPTIMAL,
     vk::ImageUsageFlags::SAMPLED
@@ -103,20 +104,11 @@ pub unsafe fn create_texture_image(
   // copy only mipmap_level = 0
   copy_buffer_to_image(device,data,staging_buffer,data.texture_image,width,height)?;
 
-  // change image layout to SHADER_READ_ONLY_OPTIMAL to read from shader
-  transition_image_layout(
-    device,
-    data,
-    data.texture_image,
-    vk::Format::R8G8B8A8_SRGB,
-    vk::ImageLayout::TRANSFER_DST_OPTIMAL,
-    vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-    data.mip_levels,
-  )?;
 
   // clean up
   device.destroy_buffer(staging_buffer,None);
   device.free_memory(staging_buffer_memory,None);
+
 
   // Mipmaps
   // write mipmap_level 1...mipmap_level-1 from level0
@@ -141,6 +133,7 @@ unsafe fn create_image(
   width: u32,
   height: u32,
   mip_levels: u32,
+  samples: vk::SampleCountFlags,
   format: vk::Format,
   tiling: vk::ImageTiling,
   usage: vk::ImageUsageFlags,
@@ -161,7 +154,7 @@ unsafe fn create_image(
     .initial_layout(vk::ImageLayout::UNDEFINED)
     .usage(usage)
     .sharing_mode(vk::SharingMode::EXCLUSIVE)
-    .samples(vk::SampleCountFlags::_1)
+    .samples(samples)
     .flags(vk::ImageCreateFlags::empty());
 
   // create image, but not allocated in GPU memory
@@ -242,7 +235,6 @@ unsafe fn transition_image_layout(
     .aspect_mask(vk::ImageAspectFlags::COLOR)
     .base_mip_level(0)
     .level_count(mip_levels)
-    .level_count(1)
     .base_array_layer(0)
     .layer_count(1);
 
@@ -335,7 +327,8 @@ pub unsafe fn create_texture_image_view(
   Ok(())
 }
 
-
+// tell vulkan how to use this image
+// i.e. this image is 2D, this image is shown in this range
 pub unsafe fn create_image_view(
   device: &Device,
   image: vk::Image,
@@ -346,7 +339,7 @@ pub unsafe fn create_image_view(
   let subresource_range=vk::ImageSubresourceRange::builder()
     .aspect_mask(aspects)
     .base_mip_level(0)
-    .level_count(1)
+    .level_count(mip_levels)
     .base_array_layer(0)
     .layer_count(1);
 
@@ -402,6 +395,7 @@ pub unsafe fn create_depth_objects(
     data.swapchain_extent.width,
     data.swapchain_extent.height,
     1,
+    data.msaa_samples,
     format,
     vk::ImageTiling::OPTIMAL,
     vk::ImageUsageFlags::DEPTH_STENCIL_ATTACHMENT,
@@ -611,5 +605,40 @@ unsafe fn generate_mipmaps(
   );
 
   end_single_time_commands(device,data,command_buffer)?;
+  Ok(())
+}
+
+// Color Object (MultiSampling) /////////////////////////////////////////////////////////
+pub unsafe fn create_color_objects(
+  instance: &Instance,
+  device: &Device,
+  data: &mut VulkanData,
+) -> Result<()>{
+  let (color_image,color_image_memory)=create_image(
+    instance,
+    device,
+    data,
+    data.swapchain_extent.width,
+    data.swapchain_extent.height,
+    1,
+    data.msaa_samples,
+    data.swapchain_format,
+    vk::ImageTiling::OPTIMAL,
+    vk::ImageUsageFlags::COLOR_ATTACHMENT
+      | vk::ImageUsageFlags::TRANSIENT_ATTACHMENT,
+    vk::MemoryPropertyFlags::DEVICE_LOCAL,
+  )?;
+
+  data.color_image=color_image;
+  data.color_image_memory=color_image_memory;
+
+  data.color_image_view=create_image_view(
+    device,
+    data.color_image,
+    data.swapchain_format,
+    vk::ImageAspectFlags::COLOR,
+    1,
+  )?;
+
   Ok(())
 }
