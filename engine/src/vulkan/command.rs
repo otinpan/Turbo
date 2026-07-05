@@ -191,8 +191,8 @@ unsafe fn update_secondary_command_buffer(
     let z=(((model_index/2)as f32)*-2.0)+1.0;
     let time=renderer.start.elapsed().as_secs_f32();
 
-    let model=Mat4::from_axis_angle(
-        vec3(0.0,y,z),
+    let model=Mat4::from_translation(vec3(0.0,y,z)) * Mat4::from_axis_angle(
+        vec3(0.0,0.0,1.0),
         Deg(90.0)*time
     );
 
