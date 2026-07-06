@@ -81,9 +81,10 @@ impl Hash for Vertex{
 pub unsafe fn create_vertex_buffer(
     instance: &Instance,
     device: &Device,
-    data: &mut VulkanData,
-) -> Result<()> {
-    let size = (size_of::<Vertex>() * data.vertices.len()) as u64;
+    data: &VulkanData,
+    vertices: &[Vertex],
+) -> Result<(vk::Buffer,vk::DeviceMemory)> {
+    let size = (size_of::<Vertex>() * vertices.len()) as u64;
 
     let (staging_buffer, staging_buffer_memory) = create_buffer(
         instance,
@@ -98,9 +99,9 @@ pub unsafe fn create_vertex_buffer(
 
     // memcpy(GPU_MEMORY,VERTICES,SIZE)
     memcpy(
-        data.vertices.as_ptr(),
+        vertices.as_ptr(),
         memory.cast(),
-        data.vertices.len(),
+        vertices.len(),
     );
     device.unmap_memory(staging_buffer_memory);
 
@@ -113,13 +114,11 @@ pub unsafe fn create_vertex_buffer(
         vk::MemoryPropertyFlags::DEVICE_LOCAL,
     )?;
 
-    data.vertex_buffer = vertex_buffer;
-    data.vertex_buffer_memory = vertex_buffer_memory;
 
     // copy staging buffer to vertex buffer
     copy_buffer(device, data, staging_buffer, vertex_buffer, size)?;
 
     device.destroy_buffer(staging_buffer, None);
     device.free_memory(staging_buffer_memory, None);
-    Ok(())
+    Ok((vertex_buffer,vertex_buffer_memory))
 }

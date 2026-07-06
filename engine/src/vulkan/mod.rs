@@ -11,9 +11,10 @@ mod uniform;
 mod vertex;
 mod model;
 mod image;
+mod mesh;
 
 use anyhow::{Result, anyhow};
-use cgmath::{vec2, vec3};
+use cgmath::{Matrix4, vec3};
 use std::time::Instant;
 use vulkanalia::prelude::v1_0::*;
 use vulkanalia::vk::ExtDebugUtilsExtensionInstanceCommands;
@@ -27,17 +28,19 @@ use self::command::{
     update_command_buffer,
 };
 use self::device::{create_logical_device, pick_physical_device};
-use self::index::create_index_buffer;
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::pipeline::{create_pipeline, create_render_pass};
 use self::swapchain::{create_framebuffers, create_swapchain,create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
-use self::types::VulkanData;
+use self::types::{
+    VulkanData,
+    Mesh,
+    RenderObject,
+};
 use self::uniform::{
     create_descriptor_pool, create_descriptor_set_layout, create_descriptor_sets,
     create_uniform_buffers, update_uniform_buffer,
 };
-use self::vertex::{Vertex, create_vertex_buffer};
 use self::image::{
     create_texture_image,
     create_texture_image_view,
@@ -45,12 +48,17 @@ use self::image::{
     create_depth_objects,
     create_color_objects,
 };
-use self::model::{load_model};
+use self::model::{MeshData,load_model};
+use self::mesh::{
+    create_mesh,
+};
 
 
 
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
+type Mat4 = Matrix4<f32>;
+
 pub struct VulkanRenderer {
     entry: Entry,
     instance: Instance,
@@ -60,7 +68,8 @@ pub struct VulkanRenderer {
     pub resized: bool,
     // timer
     pub start: Instant,
-    pub models: usize,
+    // model count
+    pub visible_object_count: usize,
 }
 
 impl VulkanRenderer {
@@ -84,9 +93,25 @@ impl VulkanRenderer {
         create_texture_image(&instance,&device,&mut data)?;
         create_texture_image_view(&device,&mut data)?;
         create_texture_sampler(&device,&mut data)?;
-        load_model(&mut data)?;
-        create_vertex_buffer(&instance, &device, &mut data)?;
-        create_index_buffer(&instance, &device, &mut data)?;
+        let mesh_data: MeshData=load_model("src/assets/viking_room.obj")?;
+        let mesh: Mesh=create_mesh(&instance,&device,&data,mesh_data)?;
+        data.meshes.push(mesh);
+        data.render_objects.push(RenderObject {
+            mesh_index: 0,
+            transform: Mat4::from_translation(vec3(0.0, -1.25, 1.0)),
+        });
+        data.render_objects.push(RenderObject {
+            mesh_index: 0,
+            transform: Mat4::from_translation(vec3(0.0, 1.25, 1.0)),
+        });
+        data.render_objects.push(RenderObject {
+            mesh_index: 0,
+            transform: Mat4::from_translation(vec3(0.0, -1.25, -1.0)),
+        });
+        data.render_objects.push(RenderObject {
+            mesh_index: 0,
+            transform: Mat4::from_translation(vec3(0.0, 1.25, -1.0)),
+        });
         create_uniform_buffers(&instance, &device, &mut data)?;
         create_descriptor_pool(&device, &mut data)?;
         create_descriptor_sets(&device, &mut data)?;
@@ -100,7 +125,7 @@ impl VulkanRenderer {
             frame: 0,
             resized: false,
             start: Instant::now(),
-            models: 1,
+            visible_object_count: 1,
         })
     }
 
@@ -248,11 +273,12 @@ impl VulkanRenderer {
             .image_available_semaphores
             .iter()
             .for_each(|s| self.device.destroy_semaphore(*s, None));
-        self.device.free_memory(self.data.index_buffer_memory, None);
-        self.device.destroy_buffer(self.data.index_buffer, None);
-        self.device
-            .free_memory(self.data.vertex_buffer_memory, None);
-        self.device.destroy_buffer(self.data.vertex_buffer, None);
+        self.data.meshes.drain(..).for_each(|mesh| {
+            self.device.free_memory(mesh.index_buffer_memory, None);
+            self.device.destroy_buffer(mesh.index_buffer, None);
+            self.device.free_memory(mesh.vertex_buffer_memory, None);
+            self.device.destroy_buffer(mesh.vertex_buffer, None);
+        });
         self.device
             .destroy_command_pool(self.data.command_pool, None);
         self.device.destroy_device(None);

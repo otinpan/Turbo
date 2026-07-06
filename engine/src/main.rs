@@ -60,8 +60,8 @@ fn main() -> Result<()> {
                 WindowEvent::KeyboardInput {event,..}=>{
                     if event.state==ElementState::Pressed{
                         match event.physical_key{
-                            PhysicalKey::Code(KeyCode::ArrowLeft) if app.renderer.models>1 => app.renderer.models-=1,
-                            PhysicalKey::Code(KeyCode::ArrowRight) if app.renderer.models<4 => app.renderer.models+=1,
+                            PhysicalKey::Code(KeyCode::ArrowLeft) if app.renderer.visible_object_count>1 => app.renderer.visible_object_count-=1,
+                            PhysicalKey::Code(KeyCode::ArrowRight) if app.renderer.visible_object_count<4 => app.renderer.visible_object_count+=1,
                             _ =>{}
                         }
                     }

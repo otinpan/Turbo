@@ -287,7 +287,90 @@ Examples:
 
 For texture upload, a temporary one-time command buffer is used for `cmd_copy_buffer_to_image`.
 
-For normal rendering, command buffers are recorded ahead of time and submitted every frame with `queue_submit`.
+For normal rendering, the renderer uses one primary command buffer per swapchain image and secondary command buffers for object draw commands.
+
+Current flow:
+
+```text
+render()
+-> acquire swapchain image index
+-> update_command_buffer(image_index)
+-> update_uniform_buffer(image_index)
+-> submit primary command buffer
+-> present
+```
+
+The primary command buffer owns the render pass:
+
+```text
+primary command buffer
+-> begin render pass
+-> execute secondary command buffers
+-> end render pass
+```
+
+The render pass is started with:
+
+```rust
+vk::SubpassContents::SECONDARY_COMMAND_BUFFERS
+```
+
+That tells Vulkan that draw commands inside the render pass will be recorded in secondary command buffers.
+
+Each secondary command buffer records the draw work for one `RenderObject`:
+
+```text
+secondary command buffer
+-> inherit render pass/framebuffer
+-> bind graphics pipeline
+-> bind mesh vertex buffer
+-> bind mesh index buffer
+-> bind descriptor set for this swapchain image
+-> push model matrix
+-> push opacity
+-> draw indexed
+```
+
+The renderer decides how many objects to draw with:
+
+```rust
+let draw_count = renderer.models.min(renderer.data.render_objects.len());
+```
+
+Then it records one secondary command buffer for each visible object:
+
+```rust
+(0..draw_count)
+    .map(|i| update_secondary_command_buffer(renderer, image_index, i))
+```
+
+Inside `update_secondary_command_buffer`, `model_index` selects a `RenderObject`.
+
+```rust
+let object = &renderer.data.render_objects[model_index];
+let mesh = &renderer.data.meshes[object.mesh_index];
+```
+
+`RenderObject` decides which mesh to draw and where to place it:
+
+```text
+RenderObject
+  mesh_index -> data.meshes[mesh_index]
+  transform  -> object model matrix
+```
+
+`Mesh` owns the GPU buffers used for drawing:
+
+```text
+Mesh
+  vertex_buffer
+  index_buffer
+  index_count
+```
+
+So the current renderer no longer draws from a single `data.vertex_buffer` / `data.index_buffer`. It draws by looking up the `Mesh` referenced by each `RenderObject`.
+
+The primary command buffer is reset and recorded every frame for the acquired swapchain image. The secondary command buffers are stored per swapchain image and per object index, then re-recorded after the command pool is reset.
 
 ## Per-Frame Data
 
@@ -296,10 +379,12 @@ In the current renderer, the main CPU-to-GPU data updated every frame is the uni
 ```text
 updated every frame:
   uniform buffer matrix data
+  primary command buffer
+  secondary command buffers for visible RenderObjects
 
 uploaded once:
-  vertex buffer
-  index buffer
+  mesh vertex buffers
+  mesh index buffers
   texture image
 
 written by GPU during rendering:

@@ -119,45 +119,14 @@ pub unsafe fn update_command_buffer(
         &info,
         vk::SubpassContents::SECONDARY_COMMAND_BUFFERS);
 
-    let secondary_command_buffers=(0..renderer.models)
+    let draw_count = renderer.visible_object_count.min(renderer.data.render_objects.len());
+    let secondary_command_buffers=(0..draw_count)
         .map(|i| update_secondary_command_buffer(renderer, image_index,i))
         .collect::<Result<Vec<_>,_>>()?;
 
     renderer.device.cmd_execute_commands(command_buffer,&secondary_command_buffers[..]);
     renderer.device.cmd_end_render_pass(command_buffer);
 
-    /*
-    renderer.device.cmd_bind_pipeline(command_buffer, vk::PipelineBindPoint::GRAPHICS, renderer.data.pipeline);
-    renderer.device.cmd_bind_vertex_buffers(command_buffer, 0, &[renderer.data.vertex_buffer], &[0]);
-    renderer.device.cmd_bind_index_buffer(command_buffer, renderer.data.index_buffer, 0, vk::IndexType::UINT32);
-    renderer.device.cmd_bind_descriptor_sets(
-        command_buffer,
-        vk::PipelineBindPoint::GRAPHICS,
-        renderer.data.pipeline_layout,
-        0,
-        &[renderer.data.descriptor_sets[image_index]],
-        &[],
-    );
-    renderer.device.cmd_push_constants(
-        command_buffer,
-        renderer.data.pipeline_layout,
-        vk::ShaderStageFlags::VERTEX,
-        0,
-        model_bytes,
-    );
-    renderer.device.cmd_push_constants(
-        command_buffer,
-        renderer.data.pipeline_layout,
-        vk::ShaderStageFlags::FRAGMENT,
-        64,
-        opacity_bytes,
-    );
-    renderer.device.cmd_draw_indexed(
-        command_buffer,
-        renderer.data.indices.len() as u32,
-        1, 0, 0, 0);
-    renderer.device.cmd_end_render_pass(command_buffer);
-    */
     renderer.device.end_command_buffer(command_buffer)?;
 
     Ok(())
@@ -172,26 +141,28 @@ unsafe fn update_secondary_command_buffer(
     // is smaller than index, add new vec
     renderer.data.secondary_command_buffers.resize_with(image_index+1,Vec::new);
 
-    let command_buffers=&mut renderer.data.secondary_command_buffers[image_index];
+    let command_buffer={
+        let command_buffers=&mut renderer.data.secondary_command_buffers[image_index];
 
-    while model_index >= command_buffers.len(){
-        let allocate_info=vk::CommandBufferAllocateInfo::builder()
-            .command_pool(renderer.data.command_pools[image_index])
-            .level(vk::CommandBufferLevel::SECONDARY)
-            .command_buffer_count(1);
+        while model_index >= command_buffers.len(){
+            let allocate_info=vk::CommandBufferAllocateInfo::builder()
+                .command_pool(renderer.data.command_pools[image_index])
+                .level(vk::CommandBufferLevel::SECONDARY)
+                .command_buffer_count(1);
 
-        let command_buffer=renderer.device.allocate_command_buffers(&allocate_info)?[0];
-        command_buffers.push(command_buffer);
-    }
+            let command_buffer=renderer.device.allocate_command_buffers(&allocate_info)?[0];
+            command_buffers.push(command_buffer);
+        }
 
-    let command_buffer=command_buffers[model_index];
+        command_buffers[model_index]
+    };
 
     //  Model
-    let y=(((model_index%2)as f32) *2.5)-1.25;
-    let z=(((model_index/2)as f32)*-2.0)+1.0;
+    let object=&renderer.data.render_objects[model_index];
+    let mesh=&renderer.data.meshes[object.mesh_index];
     let time=renderer.start.elapsed().as_secs_f32();
 
-    let model=Mat4::from_translation(vec3(0.0,y,z)) * Mat4::from_axis_angle(
+    let model=object.transform * Mat4::from_axis_angle(
         vec3(0.0,0.0,1.0),
         Deg(90.0)*time
     );
@@ -218,8 +189,8 @@ unsafe fn update_secondary_command_buffer(
     renderer.device.begin_command_buffer(command_buffer,&info)?;
 
     renderer.device.cmd_bind_pipeline(command_buffer, vk::PipelineBindPoint::GRAPHICS, renderer.data.pipeline);
-    renderer.device.cmd_bind_vertex_buffers(command_buffer, 0, &[renderer.data.vertex_buffer], &[0]);
-    renderer.device.cmd_bind_index_buffer(command_buffer, renderer.data.index_buffer, 0, vk::IndexType::UINT32);
+    renderer.device.cmd_bind_vertex_buffers(command_buffer, 0, &[mesh.vertex_buffer], &[0]);
+    renderer.device.cmd_bind_index_buffer(command_buffer, mesh.index_buffer, 0, vk::IndexType::UINT32);
     renderer.device.cmd_bind_descriptor_sets(
         command_buffer,
         vk::PipelineBindPoint::GRAPHICS,
@@ -244,7 +215,7 @@ unsafe fn update_secondary_command_buffer(
     );
     renderer.device.cmd_draw_indexed(
         command_buffer,
-        renderer.data.indices.len() as u32,
+        mesh.index_count,
         1, 0, 0, 0);
 
     renderer.device.end_command_buffer(command_buffer)?;

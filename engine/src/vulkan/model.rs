@@ -1,19 +1,19 @@
 use anyhow::Result;
-use vulkanalia::prelude::v1_0::*;
 use std::fs::File;
 use std::collections::HashMap;
 use std::io::BufReader;
 use cgmath::{vec2, vec3};
 
-use super::types::VulkanData;
-
-type Vec2 = cgmath::Vector2<f32>;
-type Vec3 = cgmath::Vector3<f32>;
-
 use super::vertex::Vertex;
 
-pub fn load_model(data: &mut VulkanData) -> Result<()>{
-  let mut reader=BufReader::new(File::open("src/assets/viking_room.obj")?);
+#[derive(Clone,Debug)]
+pub struct MeshData{
+    pub vertices: Vec<Vertex>,
+    pub indices: Vec<u32>,
+}
+
+pub fn load_model(file_path: &str) -> Result<MeshData>{
+  let mut reader=BufReader::new(File::open(file_path)?);
 
   let (models,_)=tobj::load_obj_buf(
     &mut reader,
@@ -22,6 +22,8 @@ pub fn load_model(data: &mut VulkanData) -> Result<()>{
   )?;
 
   let mut unique_vertices=HashMap::new();
+  let mut vertices: Vec<Vertex>=vec![];
+  let mut indices: Vec<u32>=vec![];
 
   for model in &models{
     for index in &model.mesh.indices{
@@ -42,14 +44,14 @@ pub fn load_model(data: &mut VulkanData) -> Result<()>{
       };
 
       if let Some(index)=unique_vertices.get(&vertex){
-        data.indices.push(*index as u32);
+        indices.push(*index as u32);
       }else{
-        let index=data.vertices.len();
+        let index=vertices.len();
         unique_vertices.insert(vertex,index);
-        data.vertices.push(vertex);
-        data.indices.push(index as u32);
+        vertices.push(vertex);
+        indices.push(index as u32);
       }
     }
   }
-  Ok(())
+  Ok(MeshData{vertices,indices})
 }

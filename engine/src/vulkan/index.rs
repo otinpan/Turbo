@@ -9,9 +9,10 @@ use super::types::VulkanData;
 pub unsafe fn create_index_buffer(
     instance: &Instance,
     device: &Device,
-    data: &mut VulkanData,
-) -> Result<()> {
-    let size = (size_of::<u32>() * data.indices.len()) as u64;
+    data: &VulkanData,
+    indices: &[u32]
+) -> Result<(vk::Buffer,vk::DeviceMemory)> {
+    let size = (size_of::<u32>() * indices.len()) as u64;
 
     let (staging_buffer, staging_buffer_memory) = create_buffer(
         instance,
@@ -24,7 +25,7 @@ pub unsafe fn create_index_buffer(
 
     let memory = device.map_memory(staging_buffer_memory, 0, size, vk::MemoryMapFlags::empty())?;
 
-    memcpy(data.indices.as_ptr(), memory.cast(), data.indices.len());
+    memcpy(indices.as_ptr(), memory.cast(), indices.len());
     device.unmap_memory(staging_buffer_memory);
 
     let (index_buffer, index_buffer_memory) = create_buffer(
@@ -36,13 +37,11 @@ pub unsafe fn create_index_buffer(
         vk::MemoryPropertyFlags::DEVICE_LOCAL,
     )?;
 
-    data.index_buffer = index_buffer;
-    data.index_buffer_memory = index_buffer_memory;
 
     copy_buffer(device, data, staging_buffer, index_buffer, size)?;
 
     device.destroy_buffer(staging_buffer, None);
     device.free_memory(staging_buffer_memory, None);
 
-    Ok(())
+    Ok((index_buffer,index_buffer_memory))
 }

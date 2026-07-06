@@ -1,6 +1,7 @@
+use cgmath::Matrix4;
 use vulkanalia::prelude::v1_0::*;
-use super::vertex::Vertex;
 
+use super::vertex::Vertex;
 
 #[derive(Clone, Debug, Default)]
 pub struct VulkanData {
@@ -36,14 +37,10 @@ pub struct VulkanData {
     pub color_image: vk::Image,
     pub color_image_memory: vk::DeviceMemory,
     pub color_image_view: vk::ImageView,
-    // Model
-    pub vertices: Vec<Vertex>,
-    pub indices: Vec<u32>,
+    // Mesh/Object data for the next renderer step.
+    pub meshes: Vec<Mesh>,
+    pub render_objects: Vec<RenderObject>,
     // Buffers
-    pub vertex_buffer: vk::Buffer,
-    pub vertex_buffer_memory: vk::DeviceMemory,
-    pub index_buffer: vk::Buffer,
-    pub index_buffer_memory: vk::DeviceMemory,
     pub uniform_buffers: Vec<vk::Buffer>,
     pub uniform_buffers_memory: Vec<vk::DeviceMemory>,
     // Command Buffers
@@ -66,3 +63,22 @@ pub struct VulkanData {
     pub depth_image_memory: vk::DeviceMemory,
     pub depth_image_view: vk::ImageView,
 }
+
+
+#[derive(Clone, Debug)]
+pub struct Mesh {
+    pub vertices: Vec<Vertex>,
+    pub indices: Vec<u32>,
+    pub vertex_buffer: vk::Buffer,
+    pub vertex_buffer_memory: vk::DeviceMemory,
+    pub index_buffer: vk::Buffer,
+    pub index_buffer_memory: vk::DeviceMemory,
+    pub index_count: u32,
+}
+
+#[derive(Clone, Debug)]
+pub struct RenderObject {
+    pub mesh_index: usize,
+    pub transform: Matrix4<f32>,
+}
+
