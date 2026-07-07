@@ -74,22 +74,6 @@ pub unsafe fn update_command_buffer(
         .flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
     renderer.device.begin_command_buffer(command_buffer, &info)?;
 
-    // Model
-    /*
-    let time=renderer.start.elapsed().as_secs_f32();
-    let model = Mat4::from_axis_angle(
-        vec3(0.0, 0.0, 1.0),
-        Deg(90.0)*time
-    );
-
-    let model_bytes = std::slice::from_raw_parts(
-        &model as *const Mat4 as *const u8,
-        size_of::<Mat4>()
-    );
-
-    let opacity=0.25f32;
-    let opacity_bytes=&opacity.to_ne_bytes()[..];
-    */
 
     let render_area = vk::Rect2D::builder()
         .offset(vk::Offset2D::default())
@@ -162,9 +146,9 @@ unsafe fn update_secondary_command_buffer(
     let mesh=&renderer.data.meshes[object.mesh_index];
     let time=renderer.start.elapsed().as_secs_f32();
 
-    let model=object.transform * Mat4::from_axis_angle(
-        vec3(0.0,0.0,1.0),
-        Deg(90.0)*time
+    let model = object.transform.matrix() * Mat4::from_axis_angle(
+        vec3(0.0, 0.0, 1.0),
+        Deg(90.0) * time,
     );
 
     let model_bytes=std::slice::from_raw_parts(

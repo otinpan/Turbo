@@ -8,6 +8,7 @@
 
 mod app;
 mod vulkan;
+mod transform;
 
 use anyhow::Result;
 use app::App;

@@ -2,6 +2,7 @@ use cgmath::Matrix4;
 use vulkanalia::prelude::v1_0::*;
 
 use super::vertex::Vertex;
+use crate::transform::Transform;
 
 #[derive(Clone, Debug, Default)]
 pub struct VulkanData {
@@ -79,6 +80,6 @@ pub struct Mesh {
 #[derive(Clone, Debug)]
 pub struct RenderObject {
     pub mesh_index: usize,
-    pub transform: Matrix4<f32>,
+    pub transform: Transform,
 }
 

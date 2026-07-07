@@ -22,6 +22,7 @@ use vulkanalia::vk::KhrSurfaceExtensionInstanceCommands;
 use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use vulkanalia::window as vk_window;
 use winit::window::Window;
+use crate::transform::Transform;
 
 use self::command::{
     create_command_buffers, create_command_pools,
@@ -98,19 +99,31 @@ impl VulkanRenderer {
         data.meshes.push(mesh);
         data.render_objects.push(RenderObject {
             mesh_index: 0,
-            transform: Mat4::from_translation(vec3(0.0, -1.25, 1.0)),
+            transform: Transform{
+                position: vec3(0.0, -1.25, 1.0),
+                ..Default::default()
+            }
         });
         data.render_objects.push(RenderObject {
             mesh_index: 0,
-            transform: Mat4::from_translation(vec3(0.0, 1.25, 1.0)),
+            transform: Transform{
+                position: vec3(0.0, 1.25, 1.0),
+                ..Default::default()
+            }
         });
         data.render_objects.push(RenderObject {
             mesh_index: 0,
-            transform: Mat4::from_translation(vec3(0.0, -1.25, -1.0)),
+            transform: Transform{
+                position: vec3(0.0, -1.25, -1.0),
+                ..Default::default()
+            }
         });
         data.render_objects.push(RenderObject {
             mesh_index: 0,
-            transform: Mat4::from_translation(vec3(0.0, 1.25, -1.0)),
+            transform: Transform{
+                position: vec3(0.0, 1.25, -1.0),
+                ..Default::default()
+            }
         });
         create_uniform_buffers(&instance, &device, &mut data)?;
         create_descriptor_pool(&device, &mut data)?;
