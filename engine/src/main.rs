@@ -41,7 +41,13 @@ fn main() -> Result<()> {
             Event::WindowEvent { event, .. } => match event {
                 // Render a frame if our Vulkan app is not being destroyed.
                 WindowEvent::RedrawRequested if !elwt.exiting() && !minimized => {
-                    unsafe { app.render(&window) }.unwrap()
+                    let current_frame=app.renderer.start.elapsed().as_secs_f32();
+                    let delta_time=current_frame-app.last_frame;
+                    app.last_frame=current_frame;
+                    unsafe { 
+                        app.update(delta_time).unwrap();
+                        app.render(&window).unwrap();
+                    }
                 }
                 WindowEvent::Resized(size) => {
                     if size.width == 0 || size.height == 0 {
