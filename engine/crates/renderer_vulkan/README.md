@@ -12,7 +12,7 @@ This renderer sends different kinds of data to the GPU in different ways.
 
 ## Send Texture Image
 
-Texture image data is loaded on the CPU from `src/assets/viking_room.png`.
+Texture image data is loaded on the CPU from `assets/textures/viking_room.png`.
 
 The final texture image is created with `DEVICE_LOCAL` memory, so it is fast for the GPU to read but is not written directly by the CPU. Because of that, the upload uses a staging buffer.
 

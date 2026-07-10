@@ -28,7 +28,7 @@ pub unsafe fn pick_physical_device(instance: &Instance, data: &mut VulkanData) -
         } else {
             info!("Selected physical device (`{}`).", properties.device_name);
             data.physical_device = physical_device;
-            data.msaa_samples=get_max_msaa_samples(instance,data);
+            data.msaa_samples = get_max_msaa_samples(instance, data);
             return Ok(());
         }
     }
@@ -50,8 +50,8 @@ unsafe fn check_physical_device(
     }
 
     // feature for anistropy used in texture sampler
-    let features=instance.get_physical_device_features(physical_device);
-    if features.sampler_anisotropy !=vk::TRUE{
+    let features = instance.get_physical_device_features(physical_device);
+    if features.sampler_anisotropy != vk::TRUE {
         return Err(anyhow!(SuitabilityError("No sampler anisotropy")));
     }
 
@@ -176,14 +176,10 @@ unsafe fn check_physical_device_extensions(
     }
 }
 
-
 // MSAA (MultiSampling)
-unsafe fn get_max_msaa_samples(
-    instance: &Instance,
-    data: &VulkanData,
-) -> vk::SampleCountFlags{
-    let properties=instance.get_physical_device_properties(data.physical_device);
-    let counts=properties.limits.framebuffer_color_sample_counts
+unsafe fn get_max_msaa_samples(instance: &Instance, data: &VulkanData) -> vk::SampleCountFlags {
+    let properties = instance.get_physical_device_properties(data.physical_device);
+    let counts = properties.limits.framebuffer_color_sample_counts
         & properties.limits.framebuffer_depth_sample_counts;
     [
         vk::SampleCountFlags::_64,
@@ -197,5 +193,4 @@ unsafe fn get_max_msaa_samples(
     .cloned()
     .find(|c| counts.contains(*c))
     .unwrap_or(vk::SampleCountFlags::_1)
-
 }

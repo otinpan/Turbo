@@ -6,18 +6,13 @@
     clippy::unnecessary_wraps
 )]
 
-mod app;
-mod vulkan;
-mod transform;
-
 use anyhow::Result;
-use app::App;
+use turbo_engine::App;
 use winit::dpi::LogicalSize;
 use winit::event::{ElementState, Event, WindowEvent};
-use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::event_loop::EventLoop;
+use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::WindowBuilder;
-
 
 fn main() -> Result<()> {
     pretty_env_logger::init();
@@ -41,10 +36,10 @@ fn main() -> Result<()> {
             Event::WindowEvent { event, .. } => match event {
                 // Render a frame if our Vulkan app is not being destroyed.
                 WindowEvent::RedrawRequested if !elwt.exiting() && !minimized => {
-                    let current_frame=app.renderer.start.elapsed().as_secs_f32();
-                    let delta_time=current_frame-app.last_frame;
-                    app.last_frame=current_frame;
-                    unsafe { 
+                    let current_frame = app.renderer.start.elapsed().as_secs_f32();
+                    let delta_time = current_frame - app.last_frame;
+                    app.last_frame = current_frame;
+                    unsafe {
                         app.update(delta_time).unwrap();
                         app.render(&window).unwrap();
                     }
@@ -64,12 +59,20 @@ fn main() -> Result<()> {
                         app.destroy();
                     }
                 }
-                WindowEvent::KeyboardInput {event,..}=>{
-                    if event.state==ElementState::Pressed{
-                        match event.physical_key{
-                            PhysicalKey::Code(KeyCode::ArrowLeft) if app.renderer.visible_object_count>1 => app.renderer.visible_object_count-=1,
-                            PhysicalKey::Code(KeyCode::ArrowRight) if app.renderer.visible_object_count<4 => app.renderer.visible_object_count+=1,
-                            _ =>{}
+                WindowEvent::KeyboardInput { event, .. } => {
+                    if event.state == ElementState::Pressed {
+                        match event.physical_key {
+                            PhysicalKey::Code(KeyCode::ArrowLeft)
+                                if app.renderer.visible_object_count > 1 =>
+                            {
+                                app.renderer.visible_object_count -= 1
+                            }
+                            PhysicalKey::Code(KeyCode::ArrowRight)
+                                if app.renderer.visible_object_count < 4 =>
+                            {
+                                app.renderer.visible_object_count += 1
+                            }
+                            _ => {}
                         }
                     }
                 }

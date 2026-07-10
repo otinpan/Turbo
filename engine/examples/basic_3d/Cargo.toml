@@ -1,0 +1,10 @@
+[package]
+name = "basic_3d"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+pretty_env_logger.workspace = true
+turbo_engine = { path = "../../crates/engine" }
+winit.workspace = true

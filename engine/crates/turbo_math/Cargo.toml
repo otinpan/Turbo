@@ -1,0 +1,7 @@
+[package]
+name = "turbo_math"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+cgmath.workspace = true

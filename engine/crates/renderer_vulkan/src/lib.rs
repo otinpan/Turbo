@@ -1,61 +1,55 @@
+#![allow(
+    dead_code,
+    unsafe_op_in_unsafe_fn,
+    unused_imports,
+    unused_variables,
+    clippy::too_many_arguments,
+    clippy::unnecessary_wraps
+)]
+
 mod buffer;
 mod command;
 mod device;
+mod image;
 mod index;
 mod instance;
+mod mesh;
+mod model;
 mod pipeline;
 mod swapchain;
 mod sync;
 mod types;
 mod uniform;
 mod vertex;
-mod model;
-mod image;
-mod mesh;
 
 use anyhow::{Result, anyhow};
 use cgmath::{Matrix4, vec3};
 use std::time::Instant;
+use turbo_math::Transform;
 use vulkanalia::prelude::v1_0::*;
 use vulkanalia::vk::ExtDebugUtilsExtensionInstanceCommands;
 use vulkanalia::vk::KhrSurfaceExtensionInstanceCommands;
 use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use vulkanalia::window as vk_window;
 use winit::window::Window;
-use crate::transform::Transform;
 
-use self::command::{
-    create_command_buffers, create_command_pools,
-    update_command_buffer,
-};
+use self::command::{create_command_buffers, create_command_pools, update_command_buffer};
 use self::device::{create_logical_device, pick_physical_device};
-use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
-use self::pipeline::{create_pipeline, create_render_pass};
-use self::swapchain::{create_framebuffers, create_swapchain,create_swapchain_image_views};
-use self::sync::{create_render_finished_semaphores, create_sync_objects};
-use self::types::{
-    VulkanData,
-    Mesh,
-    RenderObject,
+use self::image::{
+    create_color_objects, create_depth_objects, create_texture_image, create_texture_image_view,
+    create_texture_sampler,
 };
+use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
+use self::mesh::create_mesh;
+use self::model::{MeshData, load_model};
+use self::pipeline::{create_pipeline, create_render_pass};
+use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
+use self::sync::{create_render_finished_semaphores, create_sync_objects};
+use self::types::{Mesh, RenderObject, VulkanData};
 use self::uniform::{
     create_descriptor_pool, create_descriptor_set_layout, create_descriptor_sets,
     create_uniform_buffers, update_uniform_buffer,
 };
-use self::image::{
-    create_texture_image,
-    create_texture_image_view,
-    create_texture_sampler,
-    create_depth_objects,
-    create_color_objects,
-};
-use self::model::{MeshData,load_model};
-use self::mesh::{
-    create_mesh,
-};
-
-
-
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 type Mat4 = Matrix4<f32>;
@@ -88,42 +82,42 @@ impl VulkanRenderer {
         create_descriptor_set_layout(&device, &mut data)?;
         create_pipeline(&device, &mut data)?;
         create_command_pools(&instance, &device, &mut data)?;
-        create_color_objects(&instance,&device,&mut data)?;
-        create_depth_objects(&instance,&device,&mut data)?;
+        create_color_objects(&instance, &device, &mut data)?;
+        create_depth_objects(&instance, &device, &mut data)?;
         create_framebuffers(&device, &mut data)?;
-        create_texture_image(&instance,&device,&mut data)?;
-        create_texture_image_view(&device,&mut data)?;
-        create_texture_sampler(&device,&mut data)?;
-        let mesh_data: MeshData=load_model("src/assets/viking_room.obj")?;
-        let mesh: Mesh=create_mesh(&instance,&device,&data,mesh_data)?;
+        create_texture_image(&instance, &device, &mut data)?;
+        create_texture_image_view(&device, &mut data)?;
+        create_texture_sampler(&device, &mut data)?;
+        let mesh_data: MeshData = load_model("assets/models/viking_room.obj")?;
+        let mesh: Mesh = create_mesh(&instance, &device, &data, mesh_data)?;
         data.meshes.push(mesh);
         data.render_objects.push(RenderObject {
             mesh_index: 0,
-            transform: Transform{
+            transform: Transform {
                 position: vec3(0.0, -1.25, 1.0),
                 ..Default::default()
-            }
+            },
         });
         data.render_objects.push(RenderObject {
             mesh_index: 0,
-            transform: Transform{
+            transform: Transform {
                 position: vec3(0.0, 1.25, 1.0),
                 ..Default::default()
-            }
+            },
         });
         data.render_objects.push(RenderObject {
             mesh_index: 0,
-            transform: Transform{
+            transform: Transform {
                 position: vec3(0.0, -1.25, -1.0),
                 ..Default::default()
-            }
+            },
         });
         data.render_objects.push(RenderObject {
             mesh_index: 0,
-            transform: Transform{
+            transform: Transform {
                 position: vec3(0.0, 1.25, -1.0),
                 ..Default::default()
-            }
+            },
         });
         create_uniform_buffers(&instance, &device, &mut data)?;
         create_descriptor_pool(&device, &mut data)?;
@@ -178,7 +172,7 @@ impl VulkanRenderer {
         // uniform_buffer[index] is updated
         // and then reflect shader via descriptor sets which is binding with pipeline
         // uniform buffer <-> descriptor set <-> pipeline layout <-> pipeline <-> shader
-        update_command_buffer(self,image_index)?;
+        update_command_buffer(self, image_index)?;
         update_uniform_buffer(self, image_index)?;
 
         // 6. wait image_available_semaphores
@@ -254,23 +248,26 @@ impl VulkanRenderer {
     pub unsafe fn destroy(&mut self) {
         self.device.device_wait_idle().unwrap();
 
-
-        self.device.destroy_image_view(self.data.color_image_view,None);
-        self.device.free_memory(self.data.color_image_memory,None);
-        self.device.destroy_image(self.data.color_image,None);
+        self.device
+            .destroy_image_view(self.data.color_image_view, None);
+        self.device.free_memory(self.data.color_image_memory, None);
+        self.device.destroy_image(self.data.color_image, None);
 
         self.destroy_swapchain();
-        
-        self.data.command_pools
+
+        self.data
+            .command_pools
             .iter()
-            .for_each(|p| self.device.destroy_command_pool(*p,None));
+            .for_each(|p| self.device.destroy_command_pool(*p, None));
 
-        self.device.destroy_sampler(self.data.texture_sampler,None);
+        self.device.destroy_sampler(self.data.texture_sampler, None);
 
-        self.device.destroy_image_view(self.data.texture_image_view,None);
+        self.device
+            .destroy_image_view(self.data.texture_image_view, None);
 
-        self.device.destroy_image(self.data.texture_image,None);
-        self.device.free_memory(self.data.texture_image_memory,None);
+        self.device.destroy_image(self.data.texture_image, None);
+        self.device
+            .free_memory(self.data.texture_image_memory, None);
         self.device
             .destroy_descriptor_set_layout(self.data.descriptor_set_layout, None);
 
@@ -326,7 +323,8 @@ impl VulkanRenderer {
             .framebuffers
             .drain(..)
             .for_each(|f| self.device.destroy_framebuffer(f, None));
-        self.device.destroy_image_view(self.data.depth_image_view, None);
+        self.device
+            .destroy_image_view(self.data.depth_image_view, None);
         self.device.destroy_image(self.data.depth_image, None);
         self.device.free_memory(self.data.depth_image_memory, None);
         self.device.destroy_pipeline(self.data.pipeline, None);

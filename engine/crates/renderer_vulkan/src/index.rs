@@ -10,8 +10,8 @@ pub unsafe fn create_index_buffer(
     instance: &Instance,
     device: &Device,
     data: &VulkanData,
-    indices: &[u32]
-) -> Result<(vk::Buffer,vk::DeviceMemory)> {
+    indices: &[u32],
+) -> Result<(vk::Buffer, vk::DeviceMemory)> {
     let size = (size_of::<u32>() * indices.len()) as u64;
 
     let (staging_buffer, staging_buffer_memory) = create_buffer(
@@ -37,11 +37,10 @@ pub unsafe fn create_index_buffer(
         vk::MemoryPropertyFlags::DEVICE_LOCAL,
     )?;
 
-
     copy_buffer(device, data, staging_buffer, index_buffer, size)?;
 
     device.destroy_buffer(staging_buffer, None);
     device.free_memory(staging_buffer_memory, None);
 
-    Ok((index_buffer,index_buffer_memory))
+    Ok((index_buffer, index_buffer_memory))
 }

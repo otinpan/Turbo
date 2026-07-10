@@ -1,0 +1,10 @@
+[package]
+name = "turbo_engine"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+cgmath.workspace = true
+renderer_vulkan = { path = "../renderer_vulkan" }
+winit.workspace = true

@@ -24,15 +24,14 @@ pub unsafe fn create_descriptor_set_layout(device: &Device, data: &mut VulkanDat
         .descriptor_count(1)
         .stage_flags(vk::ShaderStageFlags::VERTEX);
 
-    let sampler_binding=vk::DescriptorSetLayoutBinding::builder()
+    let sampler_binding = vk::DescriptorSetLayoutBinding::builder()
         .binding(1)
         .descriptor_type(vk::DescriptorType::COMBINED_IMAGE_SAMPLER)
         .descriptor_count(1)
         .stage_flags(vk::ShaderStageFlags::FRAGMENT);
 
-    let bindings = &[ubo_binding,sampler_binding];
-    let info = vk::DescriptorSetLayoutCreateInfo::builder()
-        .bindings(bindings);
+    let bindings = &[ubo_binding, sampler_binding];
+    let info = vk::DescriptorSetLayoutCreateInfo::builder().bindings(bindings);
 
     data.descriptor_set_layout = device.create_descriptor_set_layout(&info, None)?;
 
@@ -64,18 +63,17 @@ pub unsafe fn create_uniform_buffers(
     Ok(())
 }
 
-
 // create pool to record descriptor_set
 pub unsafe fn create_descriptor_pool(device: &Device, data: &mut VulkanData) -> Result<()> {
     let ubo_size = vk::DescriptorPoolSize::builder()
         .type_(vk::DescriptorType::UNIFORM_BUFFER)
         .descriptor_count(data.swapchain_images.len() as u32);
 
-    let sampler_size=vk::DescriptorPoolSize::builder()
+    let sampler_size = vk::DescriptorPoolSize::builder()
         .type_(vk::DescriptorType::COMBINED_IMAGE_SAMPLER)
         .descriptor_count(data.swapchain_images.len() as u32);
 
-    let pool_sizes = &[ubo_size,sampler_size];
+    let pool_sizes = &[ubo_size, sampler_size];
     let info = vk::DescriptorPoolCreateInfo::builder()
         .pool_sizes(pool_sizes)
         .max_sets(data.swapchain_images.len() as u32);
@@ -114,23 +112,20 @@ pub unsafe fn create_descriptor_sets(device: &Device, data: &mut VulkanData) -> 
             .buffer_info(buffer_info);
 
         // sampler
-        let info=vk::DescriptorImageInfo::builder()
+        let info = vk::DescriptorImageInfo::builder()
             .image_layout(vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL)
             .image_view(data.texture_image_view)
             .sampler(data.texture_sampler);
 
-        let image_info=&[info];
-        let sampler_write=vk::WriteDescriptorSet::builder()
+        let image_info = &[info];
+        let sampler_write = vk::WriteDescriptorSet::builder()
             .dst_set(data.descriptor_sets[i])
             .dst_binding(1)
             .dst_array_element(0)
             .descriptor_type(vk::DescriptorType::COMBINED_IMAGE_SAMPLER)
             .image_info(image_info);
 
-        device.update_descriptor_sets(
-            &[ubo_write,sampler_write],
-             &[] as &[vk::CopyDescriptorSet]
-            );
+        device.update_descriptor_sets(&[ubo_write, sampler_write], &[] as &[vk::CopyDescriptorSet]);
     }
 
     Ok(())
@@ -157,16 +152,16 @@ pub unsafe fn update_uniform_buffer(
 
     // how to project
     // when far from camera, then objects are shown smaller.
-    let proj=correction
+    let proj = correction
         * cgmath::perspective(
             Deg(45.0),
-            renderer.data.swapchain_extent.width as f32/renderer.data.swapchain_extent.height as f32,
+            renderer.data.swapchain_extent.width as f32
+                / renderer.data.swapchain_extent.height as f32,
             0.1,
             10.0,
         );
 
     let ubo = UniformBufferObject { view, proj };
-
 
     // map gpu memory
     let memory = renderer.device.map_memory(

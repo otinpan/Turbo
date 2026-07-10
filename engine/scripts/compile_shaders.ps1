@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent $PSScriptRoot
-$ShaderDir = Join-Path $Root "src/shaders"
-$OutDir = Join-Path $ShaderDir "out"
+$ShaderDir = Join-Path $Root "shaders/src"
+$OutDir = Join-Path $Root "shaders/compiled"
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 

@@ -5,8 +5,8 @@ use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use winit::window::Window;
 
 use super::device::QueueFamilyIndices;
+use super::image::create_image_view;
 use super::types::VulkanData;
-use super::image::{create_image_view};
 
 #[derive(Clone, Debug)]
 pub struct SwapchainSupport {
@@ -91,25 +91,23 @@ pub unsafe fn create_swapchain(
     Ok(())
 }
 
-
-pub unsafe fn create_swapchain_image_views(
-    device: &Device, 
-    data: &mut VulkanData
-) -> Result<()> {
+pub unsafe fn create_swapchain_image_views(device: &Device, data: &mut VulkanData) -> Result<()> {
     data.swapchain_image_views = data
         .swapchain_images
         .iter()
-        .map(|i| create_image_view(
-            device,
-             *i,
-            data.swapchain_format,
-            vk::ImageAspectFlags::COLOR,
-            1))
+        .map(|i| {
+            create_image_view(
+                device,
+                *i,
+                data.swapchain_format,
+                vk::ImageAspectFlags::COLOR,
+                1,
+            )
+        })
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(())
 }
-
 
 // An image view describes how Vulkan should access an image.
 pub fn get_swapchain_surface_format(formats: &[vk::SurfaceFormatKHR]) -> vk::SurfaceFormatKHR {
@@ -158,7 +156,7 @@ pub unsafe fn create_framebuffers(device: &Device, data: &mut VulkanData) -> Res
         .swapchain_image_views
         .iter()
         .map(|i| {
-            let attachments = &[data.color_image_view,data.depth_image_view,*i];
+            let attachments = &[data.color_image_view, data.depth_image_view, *i];
             let create_info = vk::FramebufferCreateInfo::builder()
                 .render_pass(data.render_pass)
                 .attachments(attachments)

@@ -1,8 +1,7 @@
 use anyhow::Result;
+use cgmath::vec3;
+use renderer_vulkan::VulkanRenderer;
 use winit::window::Window;
-use crate::vulkan::VulkanRenderer;
-
-use cgmath::{Deg,vec3};
 
 pub struct App {
     pub renderer: VulkanRenderer,
@@ -22,10 +21,10 @@ impl App {
         self.renderer.render(window)
     }
 
-    pub unsafe fn update(&mut self,delta_time:f32) -> Result<()>{
-        let rotation_speed=vec3(200.0,0.0,0.0);
-        for object in &mut self.renderer.data.render_objects{
-            object.transform.rotate(rotation_speed*delta_time);
+    pub unsafe fn update(&mut self, delta_time: f32) -> Result<()> {
+        let rotation_speed = vec3(200.0, 0.0, 0.0);
+        for object in &mut self.renderer.data.render_objects {
+            object.transform.rotate(rotation_speed * delta_time);
         }
         Ok(())
     }

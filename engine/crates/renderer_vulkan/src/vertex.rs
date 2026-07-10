@@ -1,7 +1,7 @@
 use anyhow::Result;
+use std::hash::{Hash, Hasher};
 use std::ptr::copy_nonoverlapping as memcpy;
 use vulkanalia::prelude::v1_0::*;
-use std::hash::{Hash,Hasher};
 
 use std::mem::size_of;
 
@@ -20,8 +20,12 @@ pub struct Vertex {
 }
 
 impl Vertex {
-    pub const fn new(pos: Vec3, color: Vec3,tex_coord: Vec2) -> Self {
-        Self { pos, color, tex_coord}
+    pub const fn new(pos: Vec3, color: Vec3, tex_coord: Vec2) -> Self {
+        Self {
+            pos,
+            color,
+            tex_coord,
+        }
     }
     pub fn binding_description() -> vk::VertexInputBindingDescription {
         vk::VertexInputBindingDescription::builder()
@@ -44,27 +48,27 @@ impl Vertex {
             .format(vk::Format::R32G32B32_SFLOAT)
             .offset(size_of::<Vec3>() as u32)
             .build();
-        let tex_coord=vk::VertexInputAttributeDescription::builder()
+        let tex_coord = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(2)
             .format(vk::Format::R32G32_SFLOAT)
             .offset((size_of::<Vec3>() + size_of::<Vec3>()) as u32)
             .build();
 
-        [pos, color,tex_coord]
+        [pos, color, tex_coord]
     }
 }
 
-impl PartialEq for Vertex{
-    fn eq(&self, other: &Self)->bool{
-        self.pos==other.pos && self.color==other.color && self.tex_coord==other.tex_coord
+impl PartialEq for Vertex {
+    fn eq(&self, other: &Self) -> bool {
+        self.pos == other.pos && self.color == other.color && self.tex_coord == other.tex_coord
     }
 }
 
-impl Eq for Vertex{}
+impl Eq for Vertex {}
 
-impl Hash for Vertex{
-    fn hash<H: Hasher>(&self,state: &mut H){
+impl Hash for Vertex {
+    fn hash<H: Hasher>(&self, state: &mut H) {
         self.pos[0].to_bits().hash(state);
         self.pos[1].to_bits().hash(state);
         self.pos[2].to_bits().hash(state);
@@ -83,7 +87,7 @@ pub unsafe fn create_vertex_buffer(
     device: &Device,
     data: &VulkanData,
     vertices: &[Vertex],
-) -> Result<(vk::Buffer,vk::DeviceMemory)> {
+) -> Result<(vk::Buffer, vk::DeviceMemory)> {
     let size = (size_of::<Vertex>() * vertices.len()) as u64;
 
     let (staging_buffer, staging_buffer_memory) = create_buffer(
@@ -98,11 +102,7 @@ pub unsafe fn create_vertex_buffer(
     let memory = device.map_memory(staging_buffer_memory, 0, size, vk::MemoryMapFlags::empty())?;
 
     // memcpy(GPU_MEMORY,VERTICES,SIZE)
-    memcpy(
-        vertices.as_ptr(),
-        memory.cast(),
-        vertices.len(),
-    );
+    memcpy(vertices.as_ptr(), memory.cast(), vertices.len());
     device.unmap_memory(staging_buffer_memory);
 
     let (vertex_buffer, vertex_buffer_memory) = create_buffer(
@@ -114,11 +114,10 @@ pub unsafe fn create_vertex_buffer(
         vk::MemoryPropertyFlags::DEVICE_LOCAL,
     )?;
 
-
     // copy staging buffer to vertex buffer
     copy_buffer(device, data, staging_buffer, vertex_buffer, size)?;
 
     device.destroy_buffer(staging_buffer, None);
     device.free_memory(staging_buffer_memory, None);
-    Ok((vertex_buffer,vertex_buffer_memory))
+    Ok((vertex_buffer, vertex_buffer_memory))
 }

@@ -1,0 +1,15 @@
+[package]
+name = "renderer_vulkan"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+cgmath.workspace = true
+log.workspace = true
+png.workspace = true
+thiserror.workspace = true
+tobj.workspace = true
+turbo_math = { path = "../turbo_math" }
+vulkanalia.workspace = true
+winit.workspace = true
