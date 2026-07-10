@@ -1,11 +1,17 @@
 use anyhow::Result;
-use cgmath::vec3;
 use renderer_vulkan::VulkanRenderer;
+use winit::event::WindowEvent;
 use winit::window::Window;
+
+use super::Input;
+use super::Time;
+use super::World;
 
 pub struct App {
     pub renderer: VulkanRenderer,
-    pub last_frame: f32,
+    pub world: World,
+    pub input: Input,
+    pub time: Time,
 }
 
 impl App {
@@ -13,19 +19,24 @@ impl App {
         let renderer = VulkanRenderer::create(window)?;
         Ok(Self {
             renderer,
-            last_frame: 0.0f32,
+            world: World::default(),
+            input: Input::default(),
+            time: Time::default(),
         })
+    }
+
+    pub fn handle_event(&mut self, event: &WindowEvent) {
+        self.input.handle_event(event);
     }
 
     pub unsafe fn render(&mut self, window: &Window) -> Result<()> {
         self.renderer.render(window)
     }
 
-    pub unsafe fn update(&mut self, delta_time: f32) -> Result<()> {
-        let rotation_speed = vec3(200.0, 0.0, 0.0);
-        for object in &mut self.renderer.data.render_objects {
-            object.transform.rotate(rotation_speed * delta_time);
-        }
+    pub fn update(&mut self) -> Result<()> {
+        self.time.update();
+        self.world.update(self.time.delta_seconds())?;
+        self.input.clear_transitions();
         Ok(())
     }
 

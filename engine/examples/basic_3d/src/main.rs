@@ -33,51 +33,50 @@ fn main() -> Result<()> {
         match event {
             // Request a redraw when all events were processed.
             Event::AboutToWait => window.request_redraw(),
-            Event::WindowEvent { event, .. } => match event {
-                // Render a frame if our Vulkan app is not being destroyed.
-                WindowEvent::RedrawRequested if !elwt.exiting() && !minimized => {
-                    let current_frame = app.renderer.start.elapsed().as_secs_f32();
-                    let delta_time = current_frame - app.last_frame;
-                    app.last_frame = current_frame;
-                    unsafe {
-                        app.update(delta_time).unwrap();
+            Event::WindowEvent { event, .. } => {
+                app.handle_event(&event);
+
+                match event {
+                    // Render a frame if our Vulkan app is not being destroyed.
+                    WindowEvent::RedrawRequested if !elwt.exiting() && !minimized => unsafe {
+                        app.update().unwrap();
                         app.render(&window).unwrap();
-                    }
-                }
-                WindowEvent::Resized(size) => {
-                    if size.width == 0 || size.height == 0 {
-                        minimized = true;
-                    } else {
-                        minimized = false;
-                        app.renderer.resized = true;
-                    }
-                }
-                // Destroy our Vulkan app.
-                WindowEvent::CloseRequested => {
-                    elwt.exit();
-                    unsafe {
-                        app.destroy();
-                    }
-                }
-                WindowEvent::KeyboardInput { event, .. } => {
-                    if event.state == ElementState::Pressed {
-                        match event.physical_key {
-                            PhysicalKey::Code(KeyCode::ArrowLeft)
-                                if app.renderer.visible_object_count > 1 =>
-                            {
-                                app.renderer.visible_object_count -= 1
-                            }
-                            PhysicalKey::Code(KeyCode::ArrowRight)
-                                if app.renderer.visible_object_count < 4 =>
-                            {
-                                app.renderer.visible_object_count += 1
-                            }
-                            _ => {}
+                    },
+                    WindowEvent::Resized(size) => {
+                        if size.width == 0 || size.height == 0 {
+                            minimized = true;
+                        } else {
+                            minimized = false;
+                            app.renderer.resized = true;
                         }
                     }
+                    // Destroy our Vulkan app.
+                    WindowEvent::CloseRequested => {
+                        elwt.exit();
+                        unsafe {
+                            app.destroy();
+                        }
+                    }
+                    WindowEvent::KeyboardInput { event, .. } => {
+                        if event.state == ElementState::Pressed {
+                            match event.physical_key {
+                                PhysicalKey::Code(KeyCode::ArrowLeft)
+                                    if app.renderer.visible_object_count > 1 =>
+                                {
+                                    app.renderer.visible_object_count -= 1
+                                }
+                                PhysicalKey::Code(KeyCode::ArrowRight)
+                                    if app.renderer.visible_object_count < 4 =>
+                                {
+                                    app.renderer.visible_object_count += 1
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                    _ => {}
                 }
-                _ => {}
-            },
+            }
             _ => {}
         }
     })?;

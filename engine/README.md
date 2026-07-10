@@ -1,11 +1,50 @@
 # Turbo Engine TODO
+* `App`、`World`、`Renderer`、`Input`、`Time`の責務を分ける
+* Entityを導入 -> ゲーム内オブジェクトをIDで管理する
+* Transform、MeshRenderer、Cameraなどのコンポーネント構造を決める
+* カメラの作成
+* 入力、更新、描画を分けてゲームループを作る
+* カメラを操作できるように、キーボード入力を作る
+  - press
+  - down
+  - up
+* 2D図形のヘルパー関数
+* マテリアル
+
+## ログ表示
+```rust
+log::trace!("trace"); // 詳細情報
+log::debug!("debug"); // デバッグに役立つ内部情報
+log::info!("info"); // 主要イベント
+log::warn!("warn"); // 処理は継続できるが注意が必要
+log::error!("error");
+```
+
+```
+RUST_LOG=debug cargo run --release
+RUST_LOG=debug cargo run
+```
+では
+```
+debug
+info
+warn
+error
+```
+が表示される
+
+```rust
+#[cfg(debug_assertions)]
+log::debug!("camera = {:?}, camera");
+```
+はreleaseではコンパイルされない
 
 ## コアシステム
-* アサーション
+* ~~アサーション~~
 * メモリ管理
 * 数学ライブラリ
-* Debugビルド用の設定
-* Releaseビルド用の設定
+* ~~Debugビルド用の設定~~
+* ~~Releaseビルド用の設定~~
 * 独自のアルゴリズムやデータ構造
   - Handle: オブジェクト識別子
   ```rust
@@ -17,7 +56,7 @@
   ```
 
 ## グラフィックス
-* Transformを作成し、`RenderObject`が個別に動けるようにする
+* ~~Transformを作成し、`RenderObject`が個別に動けるようにする~~
 * マテリアル
 * カメラの作成
   - 簡単なカメラ操作
