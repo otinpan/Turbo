@@ -14,4 +14,4 @@ mod world;
 pub use app::App;
 pub use input::Input;
 pub use time::Time;
-pub use world::World;
+pub use world::{MeshHandle, World, WorldObject};

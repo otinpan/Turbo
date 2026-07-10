@@ -1316,6 +1316,7 @@ dependencies = [
  "anyhow",
  "cgmath",
  "renderer_vulkan",
+ "turbo_math",
  "winit",
 ]
 

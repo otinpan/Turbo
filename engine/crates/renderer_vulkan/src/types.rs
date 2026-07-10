@@ -40,7 +40,7 @@ pub struct VulkanData {
     pub color_image_view: vk::ImageView,
     // Mesh/Object data for the next renderer step.
     pub meshes: Vec<Mesh>,
-    pub render_objects: Vec<RenderObject>,
+    pub render_objects: Vec<RenderItem>,
     // Buffers
     pub uniform_buffers: Vec<vk::Buffer>,
     pub uniform_buffers_memory: Vec<vk::DeviceMemory>,
@@ -77,7 +77,7 @@ pub struct Mesh {
 }
 
 #[derive(Clone, Debug)]
-pub struct RenderObject {
+pub struct RenderItem {
     pub mesh_index: usize,
     pub transform: Transform,
 }

@@ -180,7 +180,6 @@ mod tests {
         assert!(!input.mouse_button_pressed(MouseButton::Left));
     }
 
-
     #[test]
     fn mouse_position_is_updated() {
         let mut input = Input::default();

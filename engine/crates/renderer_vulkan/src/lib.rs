@@ -23,8 +23,7 @@ mod uniform;
 mod vertex;
 
 use anyhow::{Result, anyhow};
-use cgmath::{Matrix4, vec3};
-use std::time::Instant;
+use cgmath::Matrix4;
 use turbo_math::Transform;
 use vulkanalia::prelude::v1_0::*;
 use vulkanalia::vk::ExtDebugUtilsExtensionInstanceCommands;
@@ -41,11 +40,12 @@ use self::image::{
 };
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::mesh::create_mesh;
-use self::model::{MeshData, load_model};
+use self::model::load_model;
 use self::pipeline::{create_pipeline, create_render_pass};
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
-use self::types::{Mesh, RenderObject, VulkanData};
+pub use self::types::RenderItem;
+use self::types::{Mesh, VulkanData};
 use self::uniform::{
     create_descriptor_pool, create_descriptor_set_layout, create_descriptor_sets,
     create_uniform_buffers, update_uniform_buffer,
@@ -61,8 +61,6 @@ pub struct VulkanRenderer {
     device: Device,
     frame: usize,
     pub resized: bool,
-    // timer
-    pub start: Instant,
     // model count
     pub visible_object_count: usize,
 }
@@ -88,37 +86,6 @@ impl VulkanRenderer {
         create_texture_image(&instance, &device, &mut data)?;
         create_texture_image_view(&device, &mut data)?;
         create_texture_sampler(&device, &mut data)?;
-        let mesh_data: MeshData = load_model("assets/models/viking_room.obj")?;
-        let mesh: Mesh = create_mesh(&instance, &device, &data, mesh_data)?;
-        data.meshes.push(mesh);
-        data.render_objects.push(RenderObject {
-            mesh_index: 0,
-            transform: Transform {
-                position: vec3(0.0, -1.25, 1.0),
-                ..Default::default()
-            },
-        });
-        data.render_objects.push(RenderObject {
-            mesh_index: 0,
-            transform: Transform {
-                position: vec3(0.0, 1.25, 1.0),
-                ..Default::default()
-            },
-        });
-        data.render_objects.push(RenderObject {
-            mesh_index: 0,
-            transform: Transform {
-                position: vec3(0.0, -1.25, -1.0),
-                ..Default::default()
-            },
-        });
-        data.render_objects.push(RenderObject {
-            mesh_index: 0,
-            transform: Transform {
-                position: vec3(0.0, 1.25, -1.0),
-                ..Default::default()
-            },
-        });
         create_uniform_buffers(&instance, &device, &mut data)?;
         create_descriptor_pool(&device, &mut data)?;
         create_descriptor_sets(&device, &mut data)?;
@@ -131,7 +98,6 @@ impl VulkanRenderer {
             device,
             frame: 0,
             resized: false,
-            start: Instant::now(),
             visible_object_count: 1,
         })
     }
@@ -225,6 +191,22 @@ impl VulkanRenderer {
         self.frame = (self.frame + 1) % MAX_FRAMES_IN_FLIGHT;
 
         Ok(())
+    }
+
+    pub unsafe fn load_mesh(&mut self, path: &str) -> Result<usize> {
+        let mesh_data = load_model(path)?;
+        let mesh = create_mesh(&self.instance, &self.device, &self.data, mesh_data)?;
+        self.data.meshes.push(mesh);
+
+        Ok(self.data.meshes.len() - 1)
+    }
+
+    pub fn set_render_items(&mut self, render_items: Vec<RenderItem>) {
+        self.data.render_objects = render_items;
+    }
+
+    pub fn clear_render_items(&mut self) {
+        self.data.render_objects.clear();
     }
 
     unsafe fn recreate_swapchain(&mut self, window: &Window) -> Result<()> {
