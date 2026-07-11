@@ -3,6 +3,7 @@ use cgmath::vec3;
 use renderer_vulkan::{RenderItem, VulkanRenderer};
 use turbo_math::Transform;
 use winit::event::WindowEvent;
+use winit::keyboard::KeyCode;
 use winit::window::Window;
 
 use super::Input;
@@ -10,11 +11,15 @@ use super::MeshHandle;
 use super::Time;
 use super::World;
 
+pub type Vec3=cgmath::Vector3<f32>;
+
 pub struct App {
     pub renderer: VulkanRenderer,
     pub world: World,
     pub input: Input,
     pub time: Time,
+    mesh: MeshHandle,
+    positions: Vec<Vec3>,
 }
 
 impl App {
@@ -23,40 +28,19 @@ impl App {
         let mut world = World::default();
 
         let mesh = MeshHandle(renderer.load_mesh("assets/models/viking_room.obj")?);
-        world.spawn(
-            mesh,
-            Transform {
-                position: vec3(0.0, -1.25, 1.0),
-                ..Default::default()
-            },
-        );
-        world.spawn(
-            mesh,
-            Transform {
-                position: vec3(0.0, 1.25, 1.0),
-                ..Default::default()
-            },
-        );
-        world.spawn(
-            mesh,
-            Transform {
-                position: vec3(0.0, -1.25, -1.0),
-                ..Default::default()
-            },
-        );
-        world.spawn(
-            mesh,
-            Transform {
-                position: vec3(0.0, 1.25, -1.0),
-                ..Default::default()
-            },
-        );
+        let mut positions: Vec<Vec3>=vec![];
+        positions.push(vec3(0.0, -1.25, 1.0));
+        positions.push(vec3(0.0,1.25,1.0));
+        positions.push(vec3(0.0,-1.25,-1.0));
+        positions.push(vec3(0.0,1.25,-1.0));
 
         let mut app = Self {
             renderer,
             world,
             input: Input::default(),
             time: Time::default(),
+            mesh,
+            positions,
         };
         app.sync_renderer();
 
@@ -74,10 +58,26 @@ impl App {
     pub fn update(&mut self) -> Result<()> {
         self.time.update();
         self.world.update(self.time.delta_seconds())?;
+
+        if self.input.key_pressed(KeyCode::ArrowLeft) {
+            self.world.despawn_last();
+        }
+        if self.input.key_pressed(KeyCode::ArrowRight) {
+            if self.positions.len()>self.world.objects().len(){
+                self.world.spawn(
+                    self.mesh,
+                    Transform {
+                        position: self.positions[self.world.objects().len()],
+                        ..Default::default()
+                    }
+                )
+            }
+        }
         self.sync_renderer();
         self.input.clear_transitions();
         Ok(())
     }
+
 
     pub unsafe fn destroy(&mut self) {
         self.renderer.destroy();

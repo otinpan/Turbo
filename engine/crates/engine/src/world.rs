@@ -14,9 +14,14 @@ impl World {
         self.objects.push(WorldObject { transform, mesh });
     }
 
+    pub fn despawn_last(&mut self) -> Option<WorldObject>{
+        self.objects.pop()
+    }
+
     pub fn objects(&self) -> &[WorldObject] {
         &self.objects
     }
+
 
     pub fn update(&mut self, delta_time: f32) -> Result<()> {
         for object in &mut self.objects {

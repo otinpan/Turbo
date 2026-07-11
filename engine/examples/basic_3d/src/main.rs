@@ -9,9 +9,8 @@
 use anyhow::Result;
 use turbo_engine::App;
 use winit::dpi::LogicalSize;
-use winit::event::{ElementState, Event, WindowEvent};
+use winit::event::{Event, WindowEvent};
 use winit::event_loop::EventLoop;
-use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::WindowBuilder;
 
 fn main() -> Result<()> {
@@ -55,23 +54,6 @@ fn main() -> Result<()> {
                         elwt.exit();
                         unsafe {
                             app.destroy();
-                        }
-                    }
-                    WindowEvent::KeyboardInput { event, .. } => {
-                        if event.state == ElementState::Pressed {
-                            match event.physical_key {
-                                PhysicalKey::Code(KeyCode::ArrowLeft)
-                                    if app.renderer.visible_object_count > 1 =>
-                                {
-                                    app.renderer.visible_object_count -= 1
-                                }
-                                PhysicalKey::Code(KeyCode::ArrowRight)
-                                    if app.renderer.visible_object_count < 4 =>
-                                {
-                                    app.renderer.visible_object_count += 1
-                                }
-                                _ => {}
-                            }
                         }
                     }
                     _ => {}

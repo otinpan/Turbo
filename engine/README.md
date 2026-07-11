@@ -1,5 +1,5 @@
 # Turbo Engine TODO
-* `App`、`World`、`Renderer`、`Input`、`Time`の責務を分ける
+* ~~`App`、`World`、`Renderer`、`Input`、`Time`の責務を分ける~~
 * Entityを導入 -> ゲーム内オブジェクトをIDで管理する
 * Transform、MeshRenderer、Cameraなどのコンポーネント構造を決める
 * カメラの作成
@@ -75,8 +75,7 @@ log::debug!("camera = {:?}, camera");
 
 
 ## ゲームループとアプリ構造
-* 入力、更新、描画を分けたゲームループにする
-* `App`、`World`、`Renderer`、`Input`、`Time`の責務を分ける
+* ~~`App`、`World`、`Renderer`、`Input`、`Time`の責務を分ける~~
 * ウィンドウイベント処理をアプリ本体から切り出す
 * シーンの読み込み、更新、破棄のライフサイクルを作成
 * Entityを導入し、ゲーム内オブジェクトをIDで管理する

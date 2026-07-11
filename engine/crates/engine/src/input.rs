@@ -55,6 +55,7 @@ impl Input {
         }
     }
 
+
     pub fn press_key(&mut self, key: KeyCode) {
         if self.keys_down.insert(key) {
             self.keys_pressed.insert(key);

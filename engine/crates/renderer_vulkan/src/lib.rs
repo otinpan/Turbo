@@ -61,8 +61,6 @@ pub struct VulkanRenderer {
     device: Device,
     frame: usize,
     pub resized: bool,
-    // model count
-    pub visible_object_count: usize,
 }
 
 impl VulkanRenderer {
@@ -98,7 +96,6 @@ impl VulkanRenderer {
             device,
             frame: 0,
             resized: false,
-            visible_object_count: 1,
         })
     }
 
