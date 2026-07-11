@@ -2,7 +2,6 @@ use anyhow::Result;
 use turbo_math::Transform;
 pub type Vec3 = cgmath::Vector3<f32>;
 
-use super::MeshHandle;
 use super::MeshRenderer;
 use super::CameraComponent;
 
@@ -74,6 +73,10 @@ impl World {
         self.objects.iter_mut().find(|object| object.id == id)
     }
 
+    pub fn active_camera(&self) -> Option<&WorldObject>{
+        self.objects.iter().find(|object| object.camera.is_some())
+    }
+
     pub fn update(&mut self, delta_time: f32) -> Result<()> {
         for object in &mut self.objects {
             object.transform.rotate(object.rotate_speed * delta_time);
@@ -97,6 +100,7 @@ impl Default for World {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::MeshHandle;
     use cgmath::vec3;
 
     fn spawn_renderable(world: &mut World, mesh: MeshHandle, transform: Transform) -> EntityId {

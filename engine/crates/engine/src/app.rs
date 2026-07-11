@@ -1,6 +1,6 @@
 use anyhow::Result;
 use cgmath::vec3;
-use renderer_vulkan::{RenderItem, VulkanRenderer};
+use renderer_vulkan::{RenderCamera, RenderItem, VulkanRenderer};
 use turbo_math::Transform;
 use winit::event::WindowEvent;
 use winit::keyboard::KeyCode;
@@ -9,6 +9,7 @@ use winit::window::Window;
 use super::Input;
 use super::MeshHandle;
 use super::MeshRenderer;
+use super::CameraComponent;
 use super::Time;
 use super::World;
 
@@ -26,7 +27,7 @@ pub struct App {
 impl App {
     pub unsafe fn create(window: &Window) -> Result<Self> {
         let mut renderer = VulkanRenderer::create(window)?;
-        let world = World::default();
+        let mut world = World::default();
 
         let mesh = MeshHandle(renderer.load_mesh("assets/models/viking_room.obj")?);
         let positions = vec![
@@ -35,6 +36,22 @@ impl App {
             vec3(0.0, -1.25, -1.0),
             vec3(0.0, 1.25, -1.0),
         ];
+
+        world.spawn(
+            Transform {
+                position: vec3(5.0, 0.0, 0.0),
+                ..Default::default()
+            },
+            None,
+            Some(CameraComponent {
+                target: vec3(0.0, 0.0, 0.0),
+                fov_y: 45.0,
+                near: 0.1,
+                far: 100.0,
+            }),
+            vec3(0.0, 0.0, 0.0),
+        );
+
 
         let mut app = Self {
             renderer,
@@ -59,7 +76,10 @@ impl App {
 
     pub fn update(&mut self) -> Result<()> {
         self.time.update();
+
+        // TODO: later move to systems/rotator.rs
         self.world.update(self.time.delta_seconds())?;
+        self.update_camera_controls();
 
         if self.input.key_pressed(KeyCode::ArrowLeft) {
             let id = self.world.objects().last().map(|object| object.id);
@@ -69,7 +89,13 @@ impl App {
             }
         }
         if self.input.key_pressed(KeyCode::ArrowRight) {
-            let index = self.world.objects().len();
+            let index = self
+                .world
+                .objects()
+                .iter()
+                .filter(|object| object.mesh_renderer.is_some())
+                .count();
+
             if self.positions.len() > index {
                 self.world.spawn(
                     Transform {
@@ -87,6 +113,48 @@ impl App {
         self.sync_renderer();
         self.input.clear_transitions();
         Ok(())
+    }
+
+    // TODO: later move to systems/camera_control.rs
+    fn update_camera_controls(&mut self) {
+        let delta = self.time.delta_seconds();
+        let speed = 3.0;
+
+        let Some(camera_id) = self.world.active_camera().map(|object| object.id) else {
+            return;
+        };
+
+        let Some(camera_object) = self.world.get_mut(camera_id) else {
+            return;
+        };
+
+        // focus at target(0,0,0)
+        if self.input.key_down(KeyCode::KeyW) {
+            camera_object.transform.position.z += speed * delta;
+        }
+        if self.input.key_down(KeyCode::KeyS) {
+            camera_object.transform.position.z -= speed * delta;
+        }
+        if self.input.key_down(KeyCode::KeyA) {
+            camera_object.transform.position.y -= speed * delta;
+        }
+        if self.input.key_down(KeyCode::KeyD) {
+            camera_object.transform.position.y += speed * delta;
+        }
+
+        let target = vec3(
+            camera_object.transform.position.x + 0.5,
+            0.0,
+            0.0,
+            /*
+            camera_object.transform.position.y,
+            camera_object.transform.position.z,
+            */
+        );
+
+        if let Some(camera) = camera_object.camera.as_mut() {
+            camera.target = target;
+        }
     }
 
     pub unsafe fn destroy(&mut self) {
@@ -109,5 +177,19 @@ impl App {
             .collect();
 
         self.renderer.set_render_items(render_items);
+
+        // send camera to vulkan
+        if let Some(camera_object) = self.world.active_camera() {
+            if let Some(camera) = camera_object.camera.as_ref() {
+                self.renderer.set_camera(RenderCamera {
+                    position: camera_object.transform.position,
+                    target: camera.target,
+                    up: vec3(0.0, 0.0, 1.0),
+                    fov_y: camera.fov_y,
+                    near: camera.near,
+                    far: camera.far,
+                });
+            }
+        }
     }
 }

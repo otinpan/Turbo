@@ -44,7 +44,7 @@ use self::model::load_model;
 use self::pipeline::{create_pipeline, create_render_pass};
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
-pub use self::types::RenderItem;
+pub use self::types::{RenderItem, RenderCamera};
 use self::types::{Mesh, VulkanData};
 use self::uniform::{
     create_descriptor_pool, create_descriptor_set_layout, create_descriptor_sets,
@@ -204,6 +204,10 @@ impl VulkanRenderer {
 
     pub fn clear_render_items(&mut self) {
         self.data.render_objects.clear();
+    }
+
+    pub fn set_camera(&mut self,camera: RenderCamera){
+        self.data.camera=camera;
     }
 
     unsafe fn recreate_swapchain(&mut self, window: &Window) -> Result<()> {

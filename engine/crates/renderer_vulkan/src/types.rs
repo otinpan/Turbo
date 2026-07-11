@@ -1,4 +1,4 @@
-use cgmath::Matrix4;
+use cgmath::{Matrix4,vec3};
 use vulkanalia::prelude::v1_0::*;
 
 use super::vertex::Vertex;
@@ -63,6 +63,8 @@ pub struct VulkanData {
     pub depth_image: vk::Image,
     pub depth_image_memory: vk::DeviceMemory,
     pub depth_image_view: vk::ImageView,
+    // Camera
+    pub camera: RenderCamera,
 }
 
 #[derive(Clone, Debug)]
@@ -80,4 +82,28 @@ pub struct Mesh {
 pub struct RenderItem {
     pub mesh_index: usize,
     pub transform: Transform,
+}
+
+// Camera
+#[derive(Clone,Debug)]
+pub struct RenderCamera{
+    pub position: cgmath::Vector3<f32>,
+    pub target: cgmath::Vector3<f32>,
+    pub up: cgmath::Vector3<f32>,
+    pub fov_y: f32,
+    pub near: f32,
+    pub far: f32,
+}
+
+impl Default for RenderCamera{
+    fn default() -> Self{
+        Self{
+            position: vec3(0.0,0.0,-5.0),
+            target: vec3(0.0,0.0,0.0),
+            up: vec3(0.0,1.0,0.0),
+            fov_y: 0.0,
+            near: 0.0,
+            far: 0.0
+        }
+    }
 }

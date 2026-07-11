@@ -1,4 +1,5 @@
 use anyhow::Result;
+use cgmath::num_traits::clamp_max;
 use cgmath::{Deg, point3, vec3};
 use std::mem::size_of;
 use std::ptr::copy_nonoverlapping as memcpy;
@@ -136,10 +137,12 @@ pub unsafe fn update_uniform_buffer(
     image_index: usize,
 ) -> Result<()> {
     // crate camera
-    let view = Mat4::look_at_rh(
-        point3(6.0, 0.0, 2.0),
-        point3(0.0, 0.0, 0.0),
-        vec3(0.0, 0.0, 1.0),
+    let camera=&renderer.data.camera;
+
+    let view=Mat4::look_at_rh(
+        point3(camera.position.x,camera.position.y,camera.position.z),
+        point3(camera.target.x,camera.target.y,camera.target.z),
+        camera.up,
     );
 
     #[rustfmt::skip]
@@ -152,13 +155,13 @@ pub unsafe fn update_uniform_buffer(
 
     // how to project
     // when far from camera, then objects are shown smaller.
-    let proj = correction
+    let proj=correction
         * cgmath::perspective(
-            Deg(45.0),
+            Deg(camera.fov_y),
             renderer.data.swapchain_extent.width as f32
                 / renderer.data.swapchain_extent.height as f32,
-            0.1,
-            10.0,
+            camera.near,
+            camera.far,
         );
 
     let ubo = UniformBufferObject { view, proj };
