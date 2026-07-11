@@ -8,10 +8,11 @@ use winit::window::Window;
 
 use super::Input;
 use super::MeshHandle;
+use super::MeshRenderer;
 use super::Time;
 use super::World;
 
-pub type Vec3=cgmath::Vector3<f32>;
+pub type Vec3 = cgmath::Vector3<f32>;
 
 pub struct App {
     pub renderer: VulkanRenderer,
@@ -25,14 +26,15 @@ pub struct App {
 impl App {
     pub unsafe fn create(window: &Window) -> Result<Self> {
         let mut renderer = VulkanRenderer::create(window)?;
-        let mut world = World::default();
+        let world = World::default();
 
         let mesh = MeshHandle(renderer.load_mesh("assets/models/viking_room.obj")?);
-        let mut positions: Vec<Vec3>=vec![];
-        positions.push(vec3(0.0, -1.25, 1.0));
-        positions.push(vec3(0.0,1.25,1.0));
-        positions.push(vec3(0.0,-1.25,-1.0));
-        positions.push(vec3(0.0,1.25,-1.0));
+        let positions = vec![
+            vec3(0.0, -1.25, 1.0),
+            vec3(0.0, 1.25, 1.0),
+            vec3(0.0, -1.25, -1.0),
+            vec3(0.0, 1.25, -1.0),
+        ];
 
         let mut app = Self {
             renderer,
@@ -60,30 +62,32 @@ impl App {
         self.world.update(self.time.delta_seconds())?;
 
         if self.input.key_pressed(KeyCode::ArrowLeft) {
-            let id=self.world.objects().last()
-                .map(|object| object.id);
+            let id = self.world.objects().last().map(|object| object.id);
 
-            if let Some(id) = id{
+            if let Some(id) = id {
                 self.world.despawn(id);
             }
         }
         if self.input.key_pressed(KeyCode::ArrowRight) {
-            if self.positions.len()>self.world.objects().len(){
-                let id=self.world.spawn(
-                    self.mesh,
+            let index = self.world.objects().len();
+            if self.positions.len() > index {
+                self.world.spawn(
                     Transform {
-                        position: self.positions[self.world.objects().len()],
+                        position: self.positions[index],
                         ..Default::default()
-                    }
+                    },
+                    Some(MeshRenderer {
+                        mesh: self.mesh,
+                    }),
+                    None,
+                    vec3(20.0, 0.0, 0.0),
                 );
             }
-
         }
         self.sync_renderer();
         self.input.clear_transitions();
         Ok(())
     }
-
 
     pub unsafe fn destroy(&mut self) {
         self.renderer.destroy();
@@ -94,9 +98,13 @@ impl App {
             .world
             .objects()
             .iter()
-            .map(|object| RenderItem {
-                mesh_index: object.mesh.0,
-                transform: object.transform.clone(),
+            .filter_map(|object| {
+                let mesh_renderer = object.mesh_renderer.as_ref()?;
+
+                Some(RenderItem {
+                    mesh_index: mesh_renderer.mesh.0,
+                    transform: object.transform.clone(),
+                })
             })
             .collect();
 

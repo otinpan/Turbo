@@ -10,8 +10,10 @@ mod app;
 mod input;
 mod time;
 mod world;
+mod component;
 
 pub use app::App;
 pub use input::Input;
 pub use time::Time;
-pub use world::{MeshHandle, World, WorldObject};
+pub use world::{World, WorldObject};
+pub use component::{CameraComponent,MeshHandle,MeshRenderer};

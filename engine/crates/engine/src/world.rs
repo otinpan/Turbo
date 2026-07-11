@@ -1,26 +1,52 @@
 use anyhow::Result;
-use cgmath::vec3;
 use turbo_math::Transform;
 pub type Vec3 = cgmath::Vector3<f32>;
+
+use super::MeshHandle;
+use super::MeshRenderer;
+use super::CameraComponent;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct EntityId(u64);
 
+// World Object ////////////////////////////////////
+#[derive(Clone, Debug)]
+pub struct WorldObject {
+    pub id: EntityId,
+    pub transform: Transform,
+    pub mesh_renderer: Option<MeshRenderer>,
+    pub camera: Option<CameraComponent>,
+    rotate_speed: Vec3,
+}
+
+
+
+
+// World ///////////////////////////////////////////
 #[derive(Clone, Debug)]
 pub struct World {
     next_entity_id: u64,
     objects: Vec<WorldObject>,
 }
 
+
 impl World {
-    pub fn spawn(&mut self, mesh: MeshHandle, transform: Transform) -> EntityId {
+    pub fn spawn(
+        &mut self,
+        transform: Transform,
+        mesh_renderer: Option<MeshRenderer>,
+        camera: Option<CameraComponent>,
+        rotate_speed: Vec3,
+    ) -> EntityId {
         let id = EntityId(self.next_entity_id);
         self.next_entity_id += 1;
+
         self.objects.push(WorldObject {
             id,
-            rotate_speed: vec3(20.0, 0.0, 0.0),
             transform,
-            mesh,
+            mesh_renderer,
+            camera,
+            rotate_speed,
         });
 
         id
@@ -66,30 +92,29 @@ impl Default for World {
     }
 }
 
-// World Object ////////////////////////////////////
-#[derive(Clone, Debug)]
-pub struct WorldObject {
-    pub id: EntityId,
-    pub transform: Transform,
-    rotate_speed: Vec3,
-    pub mesh: MeshHandle,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct MeshHandle(pub usize);
 
 // test ///////////////////////////////////////////
 #[cfg(test)]
 mod tests {
     use super::*;
+    use cgmath::vec3;
+
+    fn spawn_renderable(world: &mut World, mesh: MeshHandle, transform: Transform) -> EntityId {
+        world.spawn(
+            transform,
+            Some(MeshRenderer { mesh }),
+            None,
+            vec3(20.0, 0.0, 0.0),
+        )
+    }
 
     #[test]
     fn spawn_adds_object_and_returns_unique_entity_ids() {
         let mut world = World::default();
         let mesh = MeshHandle(0);
 
-        let first = world.spawn(mesh, Transform::default());
-        let second = world.spawn(mesh, Transform::default());
+        let first = spawn_renderable(&mut world, mesh, Transform::default());
+        let second = spawn_renderable(&mut world, mesh, Transform::default());
 
         assert_eq!(world.object_count(), 2);
         assert_ne!(first, second);
@@ -107,11 +132,18 @@ mod tests {
             scale: vec3(1.0, 2.0, 3.0),
         };
 
-        let id = world.spawn(mesh, transform.clone());
+        let id = spawn_renderable(&mut world, mesh, transform.clone());
 
         let object = world.get(id).expect("spawned entity should exist");
         assert_eq!(object.id, id);
-        assert_eq!(object.mesh, mesh);
+        assert_eq!(
+            object
+                .mesh_renderer
+                .as_ref()
+                .expect("spawned entity should have a mesh renderer")
+                .mesh,
+            mesh
+        );
         assert_eq!(object.transform.position, transform.position);
         assert_eq!(object.transform.rotation, transform.rotation);
         assert_eq!(object.transform.scale, transform.scale);
@@ -120,7 +152,7 @@ mod tests {
     #[test]
     fn get_mut_can_change_object_transform() {
         let mut world = World::default();
-        let id = world.spawn(MeshHandle(0), Transform::default());
+        let id = spawn_renderable(&mut world, MeshHandle(0), Transform::default());
 
         world
             .get_mut(id)
@@ -137,8 +169,8 @@ mod tests {
     #[test]
     fn despawn_removes_only_matching_entity() {
         let mut world = World::default();
-        let first = world.spawn(MeshHandle(0), Transform::default());
-        let second = world.spawn(MeshHandle(1), Transform::default());
+        let first = spawn_renderable(&mut world, MeshHandle(0), Transform::default());
+        let second = spawn_renderable(&mut world, MeshHandle(1), Transform::default());
 
         let removed = world.despawn(first).expect("entity should be removed");
 
@@ -159,13 +191,20 @@ mod tests {
     #[test]
     fn update_rotates_objects_by_their_rotate_speed() {
         let mut world = World::default();
-        let id = world.spawn(MeshHandle(0), Transform::default());
+        let id = world.spawn(
+            Transform::default(),
+            Some(MeshRenderer {
+                mesh: MeshHandle(0),
+            }),
+            None,
+            vec3(40.0, 0.0, 0.0),
+        );
 
         world.update(0.5).unwrap();
 
         assert_eq!(
             world.get(id).expect("spawned entity should exist").transform.rotation,
-            vec3(10.0, 0.0, 0.0)
+            vec3(20.0, 0.0, 0.0)
         );
     }
 }
