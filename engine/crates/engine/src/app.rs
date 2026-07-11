@@ -60,18 +60,24 @@ impl App {
         self.world.update(self.time.delta_seconds())?;
 
         if self.input.key_pressed(KeyCode::ArrowLeft) {
-            self.world.despawn_last();
+            let id=self.world.objects().last()
+                .map(|object| object.id);
+
+            if let Some(id) = id{
+                self.world.despawn(id);
+            }
         }
         if self.input.key_pressed(KeyCode::ArrowRight) {
             if self.positions.len()>self.world.objects().len(){
-                self.world.spawn(
+                let id=self.world.spawn(
                     self.mesh,
                     Transform {
                         position: self.positions[self.world.objects().len()],
                         ..Default::default()
                     }
-                )
+                );
             }
+
         }
         self.sync_renderer();
         self.input.clear_transitions();
