@@ -9,6 +9,7 @@
 mod app;
 mod component;
 mod input;
+mod primitive;
 mod time;
 mod world;
 

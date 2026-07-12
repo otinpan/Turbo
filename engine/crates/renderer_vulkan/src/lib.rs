@@ -50,7 +50,7 @@ use self::uniform::{
     create_descriptor_pool, create_descriptor_set_layout, create_descriptor_sets,
     create_uniform_buffers, update_uniform_buffer,
 };
-use self::vertex::Vertex;
+pub use self::vertex::Vertex;
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 type Mat4 = Matrix4<f32>;

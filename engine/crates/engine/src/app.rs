@@ -1,10 +1,12 @@
 use anyhow::Result;
-use cgmath::{InnerSpace, vec3};
+use cgmath::{InnerSpace, vec2, vec3};
 use renderer_vulkan::{RenderCamera, RenderItem, VulkanRenderer};
 use turbo_math::Transform;
 use winit::event::{MouseButton, WindowEvent};
 use winit::keyboard::KeyCode;
 use winit::window::Window;
+
+use crate::primitive::{create_triangle_mesh, spawn_triangle};
 
 use super::CameraComponent;
 use super::Input;
@@ -20,7 +22,8 @@ pub struct App {
     pub world: World,
     pub input: Input,
     pub time: Time,
-    mesh: MeshHandle,
+    model_mesh: MeshHandle,
+    triangle_mesh: MeshHandle,
     positions: Vec<Vec3>,
 }
 
@@ -29,7 +32,17 @@ impl App {
         let mut renderer = VulkanRenderer::create(window)?;
         let mut world = World::default();
 
-        let mesh = MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?);
+        let model_mesh =
+            MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?);
+        let triangle_mesh = create_triangle_mesh(
+            &mut renderer,
+            [
+                vec3(0.0, 0.5, 0.0),
+                vec3(-0.5, -0.5, 0.0),
+                vec3(0.5, -0.5, 0.0),
+            ],
+            vec3(1.0, 1.0, 1.0),
+        )?;
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
             vec3(0.0, 1.25, 1.0),
@@ -54,12 +67,17 @@ impl App {
             vec3(0.0, 0.0, 0.0),
         );
 
+        let mut input = Input::default();
+        let window_size = window.inner_size();
+        input.set_window_size(vec2(window_size.width as f32, window_size.height as f32));
+
         let mut app = Self {
             renderer,
             world,
-            input: Input::default(),
+            input,
             time: Time::default(),
-            mesh,
+            model_mesh,
+            triangle_mesh,
             positions,
         };
         app.prepare_renderer();
@@ -114,13 +132,40 @@ impl App {
                         position: self.positions[index],
                         ..Default::default()
                     },
-                    Some(MeshRenderer { mesh: self.mesh }),
+                    Some(MeshRenderer {
+                        mesh: self.model_mesh,
+                    }),
                     None,
                     vec3(20.0, 0.0, 0.0),
                 );
-
             }
         }
+
+        if self.input.key_pressed(KeyCode::KeyT) {
+            let position = self.mouse_position_on_spawn_plane();
+            let _id = spawn_triangle(
+                &mut self.world,
+                self.triangle_mesh,
+                Transform {
+                    position,
+                    ..Default::default()
+                },
+            );
+        }
+    }
+
+    fn mouse_position_on_spawn_plane(&self) -> Vec3 {
+        let mouse = self.input.mouse_position();
+        let window_size = self.input.window_size();
+        let width = window_size.x.max(1.0);
+        let height = window_size.y.max(1.0);
+        let aspect = width / height;
+        let world_height = 4.0;
+
+        let x = mouse.x / width - 0.5;
+        let y = 0.5 - mouse.y / height;
+
+        vec3(0.0, x * world_height * aspect, y * world_height)
     }
 
     // TODO: later move to systems/camera.rs

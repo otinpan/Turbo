@@ -12,6 +12,7 @@ pub struct Input {
     keys_released: HashSet<KeyCode>,
     mouse_position: Vec2,
     mouse_delta: Vec2,
+    window_size: Vec2,
     mouse_buttons_down: HashSet<MouseButton>,
     mouse_buttons_pressed: HashSet<MouseButton>,
     mouse_buttons_released: HashSet<MouseButton>,
@@ -44,6 +45,9 @@ impl Input {
             }
             WindowEvent::CursorMoved { position, .. } => {
                 self.set_mouse_position(vec2(position.x as f32, position.y as f32));
+            }
+            WindowEvent::Resized(size) => {
+                self.set_window_size(vec2(size.width as f32, size.height as f32));
             }
             WindowEvent::MouseInput { state, button, .. } => match state {
                 ElementState::Pressed => {
@@ -89,9 +93,17 @@ impl Input {
         self.mouse_delta
     }
 
+    pub fn window_size(&self) -> Vec2 {
+        self.window_size
+    }
+
     pub fn set_mouse_position(&mut self, position: Vec2) {
         self.mouse_delta += position - self.mouse_position;
         self.mouse_position = position;
+    }
+
+    pub fn set_window_size(&mut self, size: Vec2) {
+        self.window_size = size;
     }
 
     pub fn press_mouse_button(&mut self, button: MouseButton) {
@@ -127,6 +139,7 @@ impl Default for Input {
             keys_released: HashSet::new(),
             mouse_position: vec2(0.0, 0.0),
             mouse_delta: vec2(0.0, 0.0),
+            window_size: vec2(1.0, 1.0),
             mouse_buttons_down: HashSet::new(),
             mouse_buttons_pressed: HashSet::new(),
             mouse_buttons_released: HashSet::new(),
