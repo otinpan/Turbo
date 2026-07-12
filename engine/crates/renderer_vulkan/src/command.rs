@@ -107,8 +107,11 @@ pub unsafe fn update_command_buffer(
         vk::SubpassContents::SECONDARY_COMMAND_BUFFERS,
     );
 
-    let draw_count = renderer.data.render_objects.len();
-    let secondary_command_buffers = (0..draw_count)
+    let visible_indices = (0..renderer.data.render_objects.len())
+        .filter(|&i| renderer.data.render_objects[i].is_visible)
+        .collect::<Vec<_>>();
+    let secondary_command_buffers = visible_indices
+        .into_iter()
         .map(|i| update_secondary_command_buffer(renderer, image_index, i))
         .collect::<Result<Vec<_>, _>>()?;
 

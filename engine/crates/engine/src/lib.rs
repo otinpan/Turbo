@@ -16,4 +16,4 @@ pub use app::App;
 pub use component::{CameraComponent, MeshHandle, MeshRenderer};
 pub use input::Input;
 pub use time::Time;
-pub use world::{World, WorldObject};
+pub use world::{EntityId, World, WorldObject};

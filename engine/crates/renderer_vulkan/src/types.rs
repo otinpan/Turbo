@@ -82,6 +82,7 @@ pub struct Mesh {
 pub struct RenderItem {
     pub mesh_index: usize,
     pub transform: Transform,
+    pub is_visible: bool,
 }
 
 // Camera

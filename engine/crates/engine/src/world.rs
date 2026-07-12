@@ -8,6 +8,12 @@ use super::MeshRenderer;
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct EntityId(u64);
 
+impl EntityId {
+    pub const fn value(self) -> u64 {
+        self.0
+    }
+}
+
 // World Object ////////////////////////////////////
 #[derive(Clone, Debug)]
 pub struct WorldObject {
@@ -16,6 +22,17 @@ pub struct WorldObject {
     pub mesh_renderer: Option<MeshRenderer>,
     pub camera: Option<CameraComponent>,
     rotate_speed: Vec3,
+    is_visible: bool,
+}
+
+impl WorldObject {
+    pub fn set_visible(&mut self, is_visible: bool) {
+        self.is_visible = is_visible;
+    }
+
+    pub fn get_visible(&self) -> bool {
+        self.is_visible
+    }
 }
 
 // World ///////////////////////////////////////////
@@ -42,6 +59,7 @@ impl World {
             mesh_renderer,
             camera,
             rotate_speed,
+            is_visible: true,
         });
 
         id

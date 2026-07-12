@@ -40,7 +40,7 @@ use self::image::{
 };
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::mesh::create_mesh;
-use self::model::load_model;
+use self::model::{MeshData, load_model};
 use self::pipeline::{create_pipeline, create_render_pass};
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
@@ -50,6 +50,7 @@ use self::uniform::{
     create_descriptor_pool, create_descriptor_set_layout, create_descriptor_sets,
     create_uniform_buffers, update_uniform_buffer,
 };
+use self::vertex::Vertex;
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 type Mat4 = Matrix4<f32>;
@@ -190,8 +191,21 @@ impl VulkanRenderer {
         Ok(())
     }
 
-    pub unsafe fn load_mesh(&mut self, path: &str) -> Result<usize> {
-        let mesh_data = load_model(path)?;
+    // load mesh from model from designated path
+    pub unsafe fn load_mesh_from_model(&mut self, path: &str) -> Result<usize> {
+        self.load_mesh_from_data(load_model(path)?)
+    }
+
+    // load mesh for simple polygon i.e. triangle, rectangle ..
+    pub unsafe fn load_mesh_from_vertices(
+        &mut self,
+        vertices: Vec<Vertex>,
+        indices: Vec<u32>,
+    ) -> Result<usize> {
+        self.load_mesh_from_data(MeshData { vertices, indices })
+    }
+
+    unsafe fn load_mesh_from_data(&mut self, mesh_data: MeshData) -> Result<usize> {
         let mesh = create_mesh(&self.instance, &self.device, &self.data, mesh_data)?;
         self.data.meshes.push(mesh);
 

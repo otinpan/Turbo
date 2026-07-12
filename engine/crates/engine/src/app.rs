@@ -29,7 +29,7 @@ impl App {
         let mut renderer = VulkanRenderer::create(window)?;
         let mut world = World::default();
 
-        let mesh = MeshHandle(renderer.load_mesh("assets/models/viking_room.obj")?);
+        let mesh = MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?);
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
             vec3(0.0, 1.25, 1.0),
@@ -109,7 +109,7 @@ impl App {
                 .count();
 
             if self.positions.len() > index {
-                self.world.spawn(
+                let id = self.world.spawn(
                     Transform {
                         position: self.positions[index],
                         ..Default::default()
@@ -118,6 +118,7 @@ impl App {
                     None,
                     vec3(20.0, 0.0, 0.0),
                 );
+
             }
         }
     }
@@ -155,9 +156,8 @@ impl App {
         )
         .normalize();
         let right = vec3(-direction.y, direction.x, 0.0).normalize();
-        let up=vec3(0.0,0.0,1.0);
+        let up = vec3(0.0, 0.0, 1.0);
 
-        
         if self.input.key_down(KeyCode::KeyW) {
             camera_object.transform.position += direction * move_speed * delta;
         }
@@ -170,11 +170,11 @@ impl App {
         if self.input.key_down(KeyCode::KeyD) {
             camera_object.transform.position += right * move_speed * delta;
         }
-        if self.input.key_down(KeyCode::ArrowUp){
-            camera_object.transform.position  += up*move_speed*delta;
+        if self.input.key_down(KeyCode::ArrowUp) {
+            camera_object.transform.position += up * move_speed * delta;
         }
-        if self.input.key_down(KeyCode::ArrowDown){
-            camera_object.transform.position-=up*move_speed*delta;
+        if self.input.key_down(KeyCode::ArrowDown) {
+            camera_object.transform.position -= up * move_speed * delta;
         }
 
         camera.target = camera_object.transform.position + direction;
@@ -195,6 +195,7 @@ impl App {
                 Some(RenderItem {
                     mesh_index: mesh_renderer.mesh.0,
                     transform: object.transform.clone(),
+                    is_visible: object.get_visible(),
                 })
             })
             .collect();
