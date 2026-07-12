@@ -11,6 +11,7 @@ pub struct Input {
     keys_pressed: HashSet<KeyCode>,
     keys_released: HashSet<KeyCode>,
     mouse_position: Vec2,
+    mouse_delta: Vec2,
     mouse_buttons_down: HashSet<MouseButton>,
     mouse_buttons_pressed: HashSet<MouseButton>,
     mouse_buttons_released: HashSet<MouseButton>,
@@ -20,6 +21,7 @@ impl Input {
     pub fn clear_transitions(&mut self) {
         self.keys_pressed.clear();
         self.keys_released.clear();
+        self.mouse_delta = vec2(0.0, 0.0);
         self.mouse_buttons_pressed.clear();
         self.mouse_buttons_released.clear();
     }
@@ -55,7 +57,6 @@ impl Input {
         }
     }
 
-
     pub fn press_key(&mut self, key: KeyCode) {
         if self.keys_down.insert(key) {
             self.keys_pressed.insert(key);
@@ -84,7 +85,12 @@ impl Input {
         self.mouse_position
     }
 
+    pub fn mouse_delta(&self) -> Vec2 {
+        self.mouse_delta
+    }
+
     pub fn set_mouse_position(&mut self, position: Vec2) {
+        self.mouse_delta += position - self.mouse_position;
         self.mouse_position = position;
     }
 
@@ -120,6 +126,7 @@ impl Default for Input {
             keys_pressed: HashSet::new(),
             keys_released: HashSet::new(),
             mouse_position: vec2(0.0, 0.0),
+            mouse_delta: vec2(0.0, 0.0),
             mouse_buttons_down: HashSet::new(),
             mouse_buttons_pressed: HashSet::new(),
             mouse_buttons_released: HashSet::new(),
@@ -188,5 +195,19 @@ mod tests {
         input.set_mouse_position(vec2(12.0, 34.0));
 
         assert_eq!(input.mouse_position(), vec2(12.0, 34.0));
+    }
+
+    #[test]
+    fn mouse_delta_tracks_movement_until_transitions_are_cleared() {
+        let mut input = Input::default();
+
+        input.set_mouse_position(vec2(12.0, 34.0));
+        input.set_mouse_position(vec2(15.0, 30.0));
+
+        assert_eq!(input.mouse_delta(), vec2(15.0, 30.0));
+
+        input.clear_transitions();
+
+        assert_eq!(input.mouse_delta(), vec2(0.0, 0.0));
     }
 }

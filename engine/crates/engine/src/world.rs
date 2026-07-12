@@ -2,8 +2,8 @@ use anyhow::Result;
 use turbo_math::Transform;
 pub type Vec3 = cgmath::Vector3<f32>;
 
-use super::MeshRenderer;
 use super::CameraComponent;
+use super::MeshRenderer;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct EntityId(u64);
@@ -18,16 +18,12 @@ pub struct WorldObject {
     rotate_speed: Vec3,
 }
 
-
-
-
 // World ///////////////////////////////////////////
 #[derive(Clone, Debug)]
 pub struct World {
     next_entity_id: u64,
     objects: Vec<WorldObject>,
 }
-
 
 impl World {
     pub fn spawn(
@@ -73,7 +69,7 @@ impl World {
         self.objects.iter_mut().find(|object| object.id == id)
     }
 
-    pub fn active_camera(&self) -> Option<&WorldObject>{
+    pub fn active_camera(&self) -> Option<&WorldObject> {
         self.objects.iter().find(|object| object.camera.is_some())
     }
 
@@ -94,7 +90,6 @@ impl Default for World {
         }
     }
 }
-
 
 // test ///////////////////////////////////////////
 #[cfg(test)]
@@ -165,7 +160,11 @@ mod tests {
             .position = vec3(1.0, 2.0, 3.0);
 
         assert_eq!(
-            world.get(id).expect("spawned entity should exist").transform.position,
+            world
+                .get(id)
+                .expect("spawned entity should exist")
+                .transform
+                .position,
             vec3(1.0, 2.0, 3.0)
         );
     }
@@ -207,7 +206,11 @@ mod tests {
         world.update(0.5).unwrap();
 
         assert_eq!(
-            world.get(id).expect("spawned entity should exist").transform.rotation,
+            world
+                .get(id)
+                .expect("spawned entity should exist")
+                .transform
+                .rotation,
             vec3(20.0, 0.0, 0.0)
         );
     }

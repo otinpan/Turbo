@@ -137,11 +137,11 @@ pub unsafe fn update_uniform_buffer(
     image_index: usize,
 ) -> Result<()> {
     // crate camera
-    let camera=&renderer.data.camera;
+    let camera = &renderer.data.camera;
 
-    let view=Mat4::look_at_rh(
-        point3(camera.position.x,camera.position.y,camera.position.z),
-        point3(camera.target.x,camera.target.y,camera.target.z),
+    let view = Mat4::look_at_rh(
+        point3(camera.position.x, camera.position.y, camera.position.z),
+        point3(camera.target.x, camera.target.y, camera.target.z),
         camera.up,
     );
 
@@ -155,7 +155,7 @@ pub unsafe fn update_uniform_buffer(
 
     // how to project
     // when far from camera, then objects are shown smaller.
-    let proj=correction
+    let proj = correction
         * cgmath::perspective(
             Deg(camera.fov_y),
             renderer.data.swapchain_extent.width as f32

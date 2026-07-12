@@ -9,6 +9,5 @@
 mod camera;
 mod mesh_renderer;
 
-
-pub use mesh_renderer::{MeshRenderer,MeshHandle};
-pub use camera::{CameraComponent};
+pub use camera::CameraComponent;
+pub use mesh_renderer::{MeshHandle, MeshRenderer};

@@ -107,15 +107,15 @@ pub unsafe fn update_command_buffer(
         vk::SubpassContents::SECONDARY_COMMAND_BUFFERS,
     );
 
-    let draw_count=renderer.data.render_objects.len();
+    let draw_count = renderer.data.render_objects.len();
     let secondary_command_buffers = (0..draw_count)
         .map(|i| update_secondary_command_buffer(renderer, image_index, i))
         .collect::<Result<Vec<_>, _>>()?;
 
-    if !secondary_command_buffers.is_empty(){
+    if !secondary_command_buffers.is_empty() {
         renderer
             .device
-            .cmd_execute_commands(command_buffer,&secondary_command_buffers[..]);
+            .cmd_execute_commands(command_buffer, &secondary_command_buffers[..]);
     }
     renderer.device.cmd_end_render_pass(command_buffer);
 

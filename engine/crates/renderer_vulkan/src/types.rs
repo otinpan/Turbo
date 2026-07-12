@@ -1,4 +1,4 @@
-use cgmath::{Matrix4,vec3};
+use cgmath::{Matrix4, vec3};
 use vulkanalia::prelude::v1_0::*;
 
 use super::vertex::Vertex;
@@ -85,8 +85,8 @@ pub struct RenderItem {
 }
 
 // Camera
-#[derive(Clone,Debug)]
-pub struct RenderCamera{
+#[derive(Clone, Debug)]
+pub struct RenderCamera {
     pub position: cgmath::Vector3<f32>,
     pub target: cgmath::Vector3<f32>,
     pub up: cgmath::Vector3<f32>,
@@ -95,15 +95,15 @@ pub struct RenderCamera{
     pub far: f32,
 }
 
-impl Default for RenderCamera{
-    fn default() -> Self{
-        Self{
-            position: vec3(0.0,0.0,-5.0),
-            target: vec3(0.0,0.0,0.0),
-            up: vec3(0.0,1.0,0.0),
+impl Default for RenderCamera {
+    fn default() -> Self {
+        Self {
+            position: vec3(0.0, 0.0, -5.0),
+            target: vec3(0.0, 0.0, 0.0),
+            up: vec3(0.0, 1.0, 0.0),
             fov_y: 0.0,
             near: 0.0,
-            far: 0.0
+            far: 0.0,
         }
     }
 }

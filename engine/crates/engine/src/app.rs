@@ -1,15 +1,15 @@
 use anyhow::Result;
-use cgmath::vec3;
+use cgmath::{InnerSpace, vec3};
 use renderer_vulkan::{RenderCamera, RenderItem, VulkanRenderer};
 use turbo_math::Transform;
-use winit::event::WindowEvent;
+use winit::event::{MouseButton, WindowEvent};
 use winit::keyboard::KeyCode;
 use winit::window::Window;
 
+use super::CameraComponent;
 use super::Input;
 use super::MeshHandle;
 use super::MeshRenderer;
-use super::CameraComponent;
 use super::Time;
 use super::World;
 
@@ -48,10 +48,11 @@ impl App {
                 fov_y: 45.0,
                 near: 0.1,
                 far: 100.0,
+                yaw: std::f32::consts::PI,
+                pitch: 0.0,
             }),
             vec3(0.0, 0.0, 0.0),
         );
-
 
         let mut app = Self {
             renderer,
@@ -61,7 +62,7 @@ impl App {
             mesh,
             positions,
         };
-        app.sync_renderer();
+        app.prepare_renderer();
 
         Ok(app)
     }
@@ -78,9 +79,20 @@ impl App {
         self.time.update();
 
         // TODO: later move to systems/rotator.rs
-        self.world.update(self.time.delta_seconds())?;
-        self.update_camera_controls();
+        self.process_input();
+        self.update_world()?;
+        self.update_camera();
 
+        self.prepare_renderer();
+        self.input.clear_transitions();
+        Ok(())
+    }
+
+    fn update_world(&mut self) -> Result<()> {
+        self.world.update(self.time.delta_seconds())
+    }
+
+    fn process_input(&mut self) {
         if self.input.key_pressed(KeyCode::ArrowLeft) {
             let id = self.world.objects().last().map(|object| object.id);
 
@@ -102,23 +114,20 @@ impl App {
                         position: self.positions[index],
                         ..Default::default()
                     },
-                    Some(MeshRenderer {
-                        mesh: self.mesh,
-                    }),
+                    Some(MeshRenderer { mesh: self.mesh }),
                     None,
                     vec3(20.0, 0.0, 0.0),
                 );
             }
         }
-        self.sync_renderer();
-        self.input.clear_transitions();
-        Ok(())
     }
 
-    // TODO: later move to systems/camera_control.rs
-    fn update_camera_controls(&mut self) {
+    // TODO: later move to systems/camera.rs
+    fn update_camera(&mut self) {
         let delta = self.time.delta_seconds();
-        let speed = 3.0;
+        let move_speed = 3.0;
+        let mouse_sensitivity = 0.003;
+        let max_pitch = std::f32::consts::FRAC_PI_2 - 0.01;
 
         let Some(camera_id) = self.world.active_camera().map(|object| object.id) else {
             return;
@@ -128,40 +137,54 @@ impl App {
             return;
         };
 
-        // focus at target(0,0,0)
+        let Some(camera) = camera_object.camera.as_mut() else {
+            return;
+        };
+
+        let mouse_delta = self.input.mouse_delta();
+        if self.input.mouse_button_down(MouseButton::Right) {
+            camera.yaw -= mouse_delta.x * mouse_sensitivity;
+            camera.pitch -= mouse_delta.y * mouse_sensitivity;
+            camera.pitch = camera.pitch.clamp(-max_pitch, max_pitch);
+        }
+
+        let direction = vec3(
+            camera.yaw.cos() * camera.pitch.cos(),
+            camera.yaw.sin() * camera.pitch.cos(),
+            camera.pitch.sin(),
+        )
+        .normalize();
+        let right = vec3(-direction.y, direction.x, 0.0).normalize();
+        let up=vec3(0.0,0.0,1.0);
+
+        
         if self.input.key_down(KeyCode::KeyW) {
-            camera_object.transform.position.z += speed * delta;
+            camera_object.transform.position += direction * move_speed * delta;
         }
         if self.input.key_down(KeyCode::KeyS) {
-            camera_object.transform.position.z -= speed * delta;
+            camera_object.transform.position -= direction * move_speed * delta;
         }
         if self.input.key_down(KeyCode::KeyA) {
-            camera_object.transform.position.y -= speed * delta;
+            camera_object.transform.position -= right * move_speed * delta;
         }
         if self.input.key_down(KeyCode::KeyD) {
-            camera_object.transform.position.y += speed * delta;
+            camera_object.transform.position += right * move_speed * delta;
+        }
+        if self.input.key_down(KeyCode::ArrowUp){
+            camera_object.transform.position  += up*move_speed*delta;
+        }
+        if self.input.key_down(KeyCode::ArrowDown){
+            camera_object.transform.position-=up*move_speed*delta;
         }
 
-        let target = vec3(
-            camera_object.transform.position.x + 0.5,
-            0.0,
-            0.0,
-            /*
-            camera_object.transform.position.y,
-            camera_object.transform.position.z,
-            */
-        );
-
-        if let Some(camera) = camera_object.camera.as_mut() {
-            camera.target = target;
-        }
+        camera.target = camera_object.transform.position + direction;
     }
 
     pub unsafe fn destroy(&mut self) {
         self.renderer.destroy();
     }
 
-    fn sync_renderer(&mut self) {
+    fn prepare_renderer(&mut self) {
         let render_items = self
             .world
             .objects()
