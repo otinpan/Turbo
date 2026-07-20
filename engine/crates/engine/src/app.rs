@@ -6,7 +6,14 @@ use winit::event::{MouseButton, WindowEvent};
 use winit::keyboard::KeyCode;
 use winit::window::Window;
 
-use crate::primitive::{create_triangle_mesh, spawn_triangle};
+use crate::primitive::{
+    create_triangle_mesh,
+    spawn_triangle,
+    create_rectangle_mesh,
+    spawn_rectangle,
+    create_cube_mesh,
+    spawn_cube,
+};
 
 use super::CameraComponent;
 use super::Input;
@@ -24,6 +31,8 @@ pub struct App {
     pub time: Time,
     model_mesh: MeshHandle,
     triangle_mesh: MeshHandle,
+    rectangle_mesh: MeshHandle,
+    cube_mesh: MeshHandle,
     positions: Vec<Vec3>,
 }
 
@@ -32,6 +41,7 @@ impl App {
         let mut renderer = VulkanRenderer::create(window)?;
         let mut world = World::default();
 
+        // intialize_mesh
         let model_mesh =
             MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?);
         let triangle_mesh = create_triangle_mesh(
@@ -43,12 +53,39 @@ impl App {
             ],
             vec3(1.0, 1.0, 1.0),
         )?;
+        let rectangle_mesh=create_rectangle_mesh(
+            &mut renderer,
+            [
+                vec3(0.0,-0.5,0.5),
+                vec3(0.0,-0.5,-0.5),
+                vec3(0.0,0.5,-0.5),
+                vec3(0.0,0.5,0.5),
+            ],
+            vec3(1.0,1.0,1.0),
+        )?;
+        let cube_mesh=create_cube_mesh(
+            &mut renderer,
+            [
+                vec3(0.5,-0.5,0.5),
+                vec3(0.5,0.5,0.5),
+                vec3(-0.5,0.5,0.5),
+                vec3(-0.5,-0.5,0.5),
+                vec3(0.5,-0.5,-0.5),
+                vec3(0.5,0.5,-0.5),
+                vec3(-0.5,0.5,-0.5),
+                vec3(-0.5,-0.5,-0.5),
+            ],
+            vec3(1.0,1.0,1.0),
+        )?;
+
+
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
             vec3(0.0, 1.25, 1.0),
             vec3(0.0, -1.25, -1.0),
             vec3(0.0, 1.25, -1.0),
         ];
+
 
         world.spawn(
             Transform {
@@ -78,6 +115,8 @@ impl App {
             time: Time::default(),
             model_mesh,
             triangle_mesh,
+            rectangle_mesh,
+            cube_mesh,
             positions,
         };
         app.prepare_renderer();
@@ -144,6 +183,7 @@ impl App {
                     vec3(20.0, 0.0, 0.0),
                 );
             }
+            
         }
 
         if self.input.key_pressed(KeyCode::KeyT) {
@@ -152,6 +192,30 @@ impl App {
                 &mut self.world,
                 self.triangle_mesh,
                 Transform {
+                    position,
+                    ..Default::default()
+                },
+            );
+        }
+
+        if self.input.key_pressed(KeyCode::KeyR){
+            let position=self.mouse_position_on_spawn_plane();
+            let _id=spawn_rectangle(
+                &mut self.world,
+                self.rectangle_mesh,
+                Transform{
+                    position,
+                    ..Default::default()
+                },
+            );
+        }
+
+        if self.input.key_pressed(KeyCode::KeyC){
+            let position=self.mouse_position_on_spawn_plane();
+            let _id=spawn_cube(
+                &mut self.world,
+                self.cube_mesh,
+                Transform{
                     position,
                     ..Default::default()
                 },
@@ -267,3 +331,7 @@ impl App {
         }
     }
 }
+
+
+
+// test ///////////////////////////////////////////////////

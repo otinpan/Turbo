@@ -27,8 +27,8 @@ impl Transform {
         self.rotation += delta;
     }
 
-    pub fn scale(&mut self, delta: Vec3) {
-        self.scale += delta;
+    pub fn scale(&mut self, scale: Vec3) {
+        self.scale += scale;
     }
 }
 
@@ -110,7 +110,7 @@ mod tests {
 
         assert_eq!(t.position, vec3(0.0, 0.0, 0.0));
         assert_eq!(t.rotation, vec3(0.0, 0.0, 0.0));
-        assert_eq!(t.scale, vec3(2.0, 3.0, 4.0));
+        assert_eq!(t.scale, vec3(1.0, 2.0, 3.0));
     }
 
     #[test]
