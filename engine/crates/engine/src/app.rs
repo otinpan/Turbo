@@ -7,12 +7,8 @@ use winit::keyboard::KeyCode;
 use winit::window::Window;
 
 use crate::primitive::{
-    create_triangle_mesh,
+    create_cube_mesh, create_rectangle_mesh, create_triangle_mesh, spawn_cube, spawn_rectangle,
     spawn_triangle,
-    create_rectangle_mesh,
-    spawn_rectangle,
-    create_cube_mesh,
-    spawn_cube,
 };
 
 use super::CameraComponent;
@@ -53,31 +49,30 @@ impl App {
             ],
             vec3(1.0, 1.0, 1.0),
         )?;
-        let rectangle_mesh=create_rectangle_mesh(
+        let rectangle_mesh = create_rectangle_mesh(
             &mut renderer,
             [
-                vec3(0.0,-0.5,0.5),
-                vec3(0.0,-0.5,-0.5),
-                vec3(0.0,0.5,-0.5),
-                vec3(0.0,0.5,0.5),
+                vec3(0.0, -0.5, 0.5),
+                vec3(0.0, -0.5, -0.5),
+                vec3(0.0, 0.5, -0.5),
+                vec3(0.0, 0.5, 0.5),
             ],
-            vec3(1.0,1.0,1.0),
+            vec3(1.0, 1.0, 1.0),
         )?;
-        let cube_mesh=create_cube_mesh(
+        let cube_mesh = create_cube_mesh(
             &mut renderer,
             [
-                vec3(0.5,-0.5,0.5),
-                vec3(0.5,0.5,0.5),
-                vec3(-0.5,0.5,0.5),
-                vec3(-0.5,-0.5,0.5),
-                vec3(0.5,-0.5,-0.5),
-                vec3(0.5,0.5,-0.5),
-                vec3(-0.5,0.5,-0.5),
-                vec3(-0.5,-0.5,-0.5),
+                vec3(0.5, -0.5, 0.5),
+                vec3(0.5, 0.5, 0.5),
+                vec3(-0.5, 0.5, 0.5),
+                vec3(-0.5, -0.5, 0.5),
+                vec3(0.5, -0.5, -0.5),
+                vec3(0.5, 0.5, -0.5),
+                vec3(-0.5, 0.5, -0.5),
+                vec3(-0.5, -0.5, -0.5),
             ],
-            vec3(1.0,1.0,1.0),
+            vec3(1.0, 1.0, 1.0),
         )?;
-
 
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
@@ -85,7 +80,6 @@ impl App {
             vec3(0.0, -1.25, -1.0),
             vec3(0.0, 1.25, -1.0),
         ];
-
 
         world.spawn(
             Transform {
@@ -183,7 +177,6 @@ impl App {
                     vec3(20.0, 0.0, 0.0),
                 );
             }
-            
         }
 
         if self.input.key_pressed(KeyCode::KeyT) {
@@ -198,24 +191,24 @@ impl App {
             );
         }
 
-        if self.input.key_pressed(KeyCode::KeyR){
-            let position=self.mouse_position_on_spawn_plane();
-            let _id=spawn_rectangle(
+        if self.input.key_pressed(KeyCode::KeyR) {
+            let position = self.mouse_position_on_spawn_plane();
+            let _id = spawn_rectangle(
                 &mut self.world,
                 self.rectangle_mesh,
-                Transform{
+                Transform {
                     position,
                     ..Default::default()
                 },
             );
         }
 
-        if self.input.key_pressed(KeyCode::KeyC){
-            let position=self.mouse_position_on_spawn_plane();
-            let _id=spawn_cube(
+        if self.input.key_pressed(KeyCode::KeyC) {
+            let position = self.mouse_position_on_spawn_plane();
+            let _id = spawn_cube(
                 &mut self.world,
                 self.cube_mesh,
-                Transform{
+                Transform {
                     position,
                     ..Default::default()
                 },
@@ -332,6 +325,38 @@ impl App {
     }
 }
 
-
-
 // test ///////////////////////////////////////////////////
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn created_world_object_count_matches_created_entity_id_count() {
+        let mut world = World::default();
+        let triangle_mesh = MeshHandle(0);
+        let rectangle_mesh = MeshHandle(1);
+        let cube_mesh = MeshHandle(2);
+
+        let ids = vec![
+            world.spawn(
+                Transform::default(),
+                None,
+                Some(CameraComponent {
+                    target: vec3(0.0, 0.0, 0.0),
+                    fov_y: 45.0,
+                    near: 0.1,
+                    far: 100.0,
+                    yaw: 0.0,
+                    pitch: 0.0,
+                }),
+                vec3(0.0, 0.0, 0.0),
+            ),
+            spawn_triangle(&mut world, triangle_mesh, Transform::default()).unwrap(),
+            spawn_rectangle(&mut world, rectangle_mesh, Transform::default()).unwrap(),
+            spawn_cube(&mut world, cube_mesh, Transform::default()).unwrap(),
+        ];
+
+        assert_eq!(world.objects().len(), ids.len());
+        assert!(ids.iter().all(|id| world.get(*id).is_some()));
+    }
+}

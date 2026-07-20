@@ -28,7 +28,7 @@ impl Transform {
     }
 
     pub fn scale(&mut self, scale: Vec3) {
-        self.scale += scale;
+        self.scale = scale;
     }
 }
 
