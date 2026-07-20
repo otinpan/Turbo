@@ -37,9 +37,9 @@ impl App {
         let triangle_mesh = create_triangle_mesh(
             &mut renderer,
             [
-                vec3(0.0, 0.5, 0.0),
-                vec3(-0.5, -0.5, 0.0),
-                vec3(0.5, -0.5, 0.0),
+                vec3(0.0, 0.0, 0.5),
+                vec3(0.0, -0.5, -0.5),
+                vec3(0.0, 0.5, -0.5),
             ],
             vec3(1.0, 1.0, 1.0),
         )?;
@@ -123,7 +123,12 @@ impl App {
                 .world
                 .objects()
                 .iter()
-                .filter(|object| object.mesh_renderer.is_some())
+                .filter(|object| {
+                    object
+                        .mesh_renderer
+                        .as_ref()
+                        .is_some_and(|mesh_renderer| mesh_renderer.mesh == self.model_mesh)
+                })
                 .count();
 
             if self.positions.len() > index {
@@ -200,7 +205,7 @@ impl App {
             camera.pitch.sin(),
         )
         .normalize();
-        let right = vec3(-direction.y, direction.x, 0.0).normalize();
+        let left = vec3(-direction.y, direction.x, 0.0).normalize();
         let up = vec3(0.0, 0.0, 1.0);
 
         if self.input.key_down(KeyCode::KeyW) {
@@ -210,10 +215,10 @@ impl App {
             camera_object.transform.position -= direction * move_speed * delta;
         }
         if self.input.key_down(KeyCode::KeyA) {
-            camera_object.transform.position -= right * move_speed * delta;
+            camera_object.transform.position += left * move_speed * delta;
         }
         if self.input.key_down(KeyCode::KeyD) {
-            camera_object.transform.position += right * move_speed * delta;
+            camera_object.transform.position -= left * move_speed * delta;
         }
         if self.input.key_down(KeyCode::ArrowUp) {
             camera_object.transform.position += up * move_speed * delta;

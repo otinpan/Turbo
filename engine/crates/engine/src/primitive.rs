@@ -44,3 +44,4 @@ pub fn spawn_triangle(
         vec3(0.0, 0.0, 0.0),
     ))
 }
+
