@@ -16,7 +16,7 @@ type Vec3 = cgmath::Vector3<f32>;
 pub struct Vertex {
     pub pos: Vec3,
     pub color: Vec3,
-    pub tex_coord: Vec2,
+    pub tex_coord: Vec2, // points of a texture
 }
 
 impl Vertex {
