@@ -100,6 +100,15 @@ impl App {
                     color: vec3(1.0, 1.0, 1.0),
                 },
             )?,
+            create_primitive_mesh(
+                &mut renderer,
+                PrimitiveShape::Sphere { 
+                    radius: 1.0, 
+                    rings: 32, 
+                    segments: 32, 
+                    color: vec3(1.0,1.0,1.0)
+                }
+            )?,
         ];
 
         let positions = vec![
@@ -275,6 +284,20 @@ impl App {
             }
         }
 
+        if self.input.key_pressed(KeyCode::KeyE){
+            let position=self.mouse_position_on_spawn_plane();
+            if let Some(mesh)=self.primitive_handle(PrimitiveType::Sphere){
+                let _id=spawn_primitive(
+                    &mut self.world,
+                    mesh,
+                    Transform {
+                        position,
+                        ..Default::default()
+                    }
+                );
+            }
+        }
+
         // change all polygons' figure
         if self.input.key_pressed(KeyCode::KeyU) {
             if let Some(mesh) = self.primitive_mesh(PrimitiveType::Polygon) {
@@ -291,6 +314,20 @@ impl App {
                                 vec3(0.0, -0.5, -0.45),
                             ],
                             color: vec3(1.0, 1.0, 1.0),
+                        },
+                    )?;
+                }
+            }
+            if let Some(mesh)=self.primitive_mesh(PrimitiveType::Sphere){
+                unsafe{
+                    update_primitive_mesh(
+                        &mut self.renderer,
+                        mesh,
+                        PrimitiveShape::Sphere { 
+                            radius: 2.0, 
+                            rings: 20, 
+                            segments: 20, 
+                            color: vec3(1.0,1.0,1.0), 
                         },
                     )?;
                 }

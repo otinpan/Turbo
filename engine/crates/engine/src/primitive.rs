@@ -16,6 +16,7 @@ pub enum PrimitiveType {
     Cube,
     Circle,
     Polygon,
+    Sphere,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -47,6 +48,12 @@ pub enum PrimitiveShape {
         points: Vec<Vec3>,
         color: Vec3,
     },
+    Sphere{
+        radius: f32,
+        rings: u32, // the number of rings (parallel to the latitude)
+        segments: u32, // the number of segments (parallel to the latitude)
+        color: Vec3,
+    }
 }
 
 impl PrimitiveShape {
@@ -57,6 +64,7 @@ impl PrimitiveShape {
             Self::Cube { .. } => PrimitiveType::Cube,
             Self::Circle { .. } => PrimitiveType::Circle,
             Self::Polygon { .. } => PrimitiveType::Polygon,
+            Self::Sphere { .. } => PrimitiveType::Sphere,
         }
     }
 }
@@ -87,6 +95,7 @@ pub fn build_primitive_mesh(shape: PrimitiveShape) -> (Vec<Vertex>, Vec<u32>) {
             color,
         } => build_circle_mesh(radius, segments, color),
         PrimitiveShape::Polygon { points, color } => build_polygon_mesh(points, color),
+        PrimitiveShape::Sphere {radius, rings,segments,color} => build_sphere_mesh(radius,rings,segments,color),
     }
 }
 
@@ -317,6 +326,59 @@ fn fan_triangulate(size: usize) -> Vec<u32> {
     indices
 }
 
+fn build_sphere_mesh(
+    radius: f32,
+    rings: u32,
+    segments: u32,
+    color: Vec3
+) -> (Vec<Vertex>, Vec<u32>) {
+    let rings=rings.max(2);
+    let segments=segments.max(3);
+
+    let vertex_count=(rings+1)*(segments+1);
+    let index_count=rings*segments*6;
+    
+    let mut vertices=Vec::with_capacity(vertex_count as usize);
+    let mut indices=Vec::with_capacity(index_count as usize);
+
+    for ring in 0..rings{
+        let v=ring as f32/rings as f32;
+        let theta=std::f32::consts::PI*v;
+
+        for segment in 0..segments{
+            let u=segment as f32/segments as f32;
+            let phi=std::f32::consts::TAU*u;
+
+            let x=radius*theta.sin()*phi.cos();
+            let y=radius*theta.sin()*phi.sin();
+            let z=radius*theta.cos();
+
+            vertices.push(Vertex::new(
+                vec3(x,y,z),
+                color,
+                vec2(u,v),
+            ));
+        }
+    }
+
+    let columns=segments+1;
+
+    for ring in 0..rings{
+        for segment in 0..segments{
+            let a=ring*columns+segment;
+            let b=a+columns;
+            let c=b+1;
+            let d=a+1;
+            indices.extend_from_slice(&[
+                a,b,d,
+                d,b,c,
+            ]);
+        }
+    }
+
+    (vertices,indices)
+}
+
 // spawn primitice object //////////////////////////////////////////////
 pub fn spawn_primitive(
     world: &mut World,
@@ -406,6 +468,15 @@ mod tests {
                     color: white(),
                 },
                 PrimitiveType::Circle,
+            ),
+            (
+                PrimitiveShape::Sphere { 
+                    radius: 1.0, 
+                    rings: 32, 
+                    segments: 22, 
+                    color: vec3(1.0,1.0,1.0)
+                },
+                PrimitiveType::Sphere,
             ),
         ];
 
