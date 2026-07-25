@@ -1,5 +1,5 @@
 pub type Vec3 = cgmath::Vector3<f32>;
-use anyhow::Result;
+use anyhow::{Result, bail};
 use cgmath::{vec2, vec3};
 use renderer_vulkan::{Vertex, VulkanRenderer};
 use turbo_math::Transform;
@@ -24,64 +24,72 @@ pub struct PrimitiveMesh {
     pub primitive_type: PrimitiveType,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum PrimitiveShape {
+    Triangle {
+        points: [Vec3; 3],
+        color: Vec3,
+    },
+    Rectangle {
+        points: [Vec3; 4],
+        color: Vec3,
+    },
+    Cube {
+        points: [Vec3; 8],
+        color: Vec3,
+    },
+    Circle {
+        radius: f32,
+        segments: u32,
+        color: Vec3,
+    },
+    Polygon {
+        points: Vec<Vec3>,
+        color: Vec3,
+    },
+}
+
+impl PrimitiveShape {
+    pub fn primitive_type(&self) -> PrimitiveType {
+        match self {
+            Self::Triangle { .. } => PrimitiveType::Triangle,
+            Self::Rectangle { .. } => PrimitiveType::Rectangle,
+            Self::Cube { .. } => PrimitiveType::Cube,
+            Self::Circle { .. } => PrimitiveType::Circle,
+            Self::Polygon { .. } => PrimitiveType::Polygon,
+        }
+    }
+}
+
 // create mesh ////////////////////////////////////////////
-pub unsafe fn create_triangle_mesh(
+pub unsafe fn create_primitive_mesh(
     renderer: &mut VulkanRenderer,
-    points: [Vec3; 3],
-    color: Vec3,
-) -> Result<MeshHandle> {
-    let (vertices, indices) = build_triangle_mesh(points, color);
-    Ok(MeshHandle(
-        renderer.load_mesh_from_vertices(vertices, indices)?,
-    ))
-}
+    shape: PrimitiveShape,
+) -> Result<PrimitiveMesh> {
+    let primitive_type = shape.primitive_type();
+    let (vertices, indices) = build_primitive_mesh(shape);
 
-pub unsafe fn create_rectangle_mesh(
-    renderer: &mut VulkanRenderer,
-    points: [Vec3; 4],
-    color: Vec3,
-) -> Result<MeshHandle> {
-    let (vertices, indices) = build_rectangle_mesh(points, color);
-    Ok(MeshHandle(
-        renderer.load_mesh_from_vertices(vertices, indices)?,
-    ))
-}
-
-pub unsafe fn create_cube_mesh(
-    renderer: &mut VulkanRenderer,
-    points: [Vec3; 8],
-    color: Vec3,
-) -> Result<MeshHandle> {
-    let (vertices, indices) = build_cube_mesh(points, color);
-    Ok(MeshHandle(
-        renderer.load_mesh_from_vertices(vertices, indices)?,
-    ))
-}
-
-pub unsafe fn create_circle_mesh(
-    renderer: &mut VulkanRenderer,
-    radius: f32,
-    segments: u32,
-    color: Vec3,
-) -> Result<MeshHandle> {
-    let (vertices, indices) = build_circle_mesh(radius, segments, color);
-    Ok(MeshHandle(
-        renderer.load_mesh_from_vertices(vertices, indices)?,
-    ))
-}
-
-pub unsafe fn create_polygon_mesh(
-    renderer: &mut VulkanRenderer,
-    points: Vec<Vec3>,
-    color: Vec3,
-) -> Result<MeshHandle> {
-    let (vertices, indices) = build_polygon_mesh(points, color);
-    Ok(MeshHandle(
-        renderer.load_mesh_from_vertices(vertices, indices)?,
-    ))
+    Ok(PrimitiveMesh {
+        handle: MeshHandle(renderer.load_mesh_from_vertices(vertices, indices)?),
+        primitive_type,
+    })
 }
 
 // build mesh. create vertices and indices from points //////////////////////////////////////////////////
+pub fn build_primitive_mesh(shape: PrimitiveShape) -> (Vec<Vertex>, Vec<u32>) {
+    match shape {
+        PrimitiveShape::Triangle { points, color } => build_triangle_mesh(points, color),
+        PrimitiveShape::Rectangle { points, color } => build_rectangle_mesh(points, color),
+        PrimitiveShape::Cube { points, color } => build_cube_mesh(points, color),
+        PrimitiveShape::Circle {
+            radius,
+            segments,
+            color,
+        } => build_circle_mesh(radius, segments, color),
+        PrimitiveShape::Polygon { points, color } => build_polygon_mesh(points, color),
+    }
+}
+
 fn build_triangle_mesh(points: [Vec3; 3], color: Vec3) -> (Vec<Vertex>, Vec<u32>) {
     let vertices = vec![
         Vertex::new(points[0], color, vec2(0.0, 0.0)),
@@ -334,23 +342,178 @@ pub unsafe fn update_mesh(
     renderer.update_mesh_from_vertices(mesh.0, vertices, indices)
 }
 
-pub unsafe fn update_polygon_mesh(
+pub unsafe fn update_primitive_mesh(
     renderer: &mut VulkanRenderer,
-    mesh: MeshHandle,
-    points: Vec<Vec3>,
-    color: Vec3,
+    mesh: PrimitiveMesh,
+    shape: PrimitiveShape,
 ) -> Result<()> {
-    
-    let (vertices, indices) = build_polygon_mesh(points, color);
-    update_mesh(renderer, mesh, vertices, indices)
+    if mesh.primitive_type != shape.primitive_type() {
+        bail!(
+            "Primitive shape {:?} does not match mesh type {:?}.",
+            shape.primitive_type(),
+            mesh.primitive_type
+        );
+    }
+
+    let (vertices, indices) = build_primitive_mesh(shape);
+    update_mesh(renderer, mesh.handle, vertices, indices)
 }
 
-pub unsafe fn update_triangle_mesh(
-    renderer: &mut VulkanRenderer,
-    mesh: MeshHandle,
-    points: [Vec3; 3],
-    color: Vec3,
-) -> Result<()> {
-    let (vertices, indices) = build_triangle_mesh(points, color);
-    update_mesh(renderer, mesh, vertices, indices)
+
+
+
+
+// test ///////////////////////////////////////////////////////////////////////
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use cgmath::vec3;
+
+    fn white() -> Vec3 {
+        vec3(1.0, 1.0, 1.0)
+    }
+
+    #[test]
+    fn primitive_shape_reports_matching_type() {
+        let cases = [
+            (
+                PrimitiveShape::Triangle {
+                    points: [
+                        vec3(0.0, 0.0, 0.0),
+                        vec3(0.0, 1.0, 0.0),
+                        vec3(0.0, 0.0, 1.0),
+                    ],
+                    color: white(),
+                },
+                PrimitiveType::Triangle,
+            ),
+            (
+                PrimitiveShape::Rectangle {
+                    points: [
+                        vec3(0.0, -1.0, 1.0),
+                        vec3(0.0, -1.0, -1.0),
+                        vec3(0.0, 1.0, -1.0),
+                        vec3(0.0, 1.0, 1.0),
+                    ],
+                    color: white(),
+                },
+                PrimitiveType::Rectangle,
+            ),
+            (
+                PrimitiveShape::Circle {
+                    radius: 1.0,
+                    segments: 8,
+                    color: white(),
+                },
+                PrimitiveType::Circle,
+            ),
+        ];
+
+        for (shape, primitive_type) in cases {
+            assert_eq!(shape.primitive_type(), primitive_type);
+        }
+    }
+
+    #[test]
+    fn build_primitive_mesh_creates_expected_triangle_counts() {
+        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Triangle {
+            points: [
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 1.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+            ],
+            color: white(),
+        });
+
+        assert_eq!(vertices.len(), 3);
+        assert_eq!(indices, vec![0, 1, 2]);
+    }
+
+    #[test]
+    fn build_primitive_mesh_creates_expected_rectangle_counts() {
+        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Rectangle {
+            points: [
+                vec3(0.0, -1.0, 1.0),
+                vec3(0.0, -1.0, -1.0),
+                vec3(0.0, 1.0, -1.0),
+                vec3(0.0, 1.0, 1.0),
+            ],
+            color: white(),
+        });
+
+        assert_eq!(vertices.len(), 4);
+        assert_eq!(indices, vec![0, 1, 2, 2, 3, 0]);
+    }
+
+    #[test]
+    fn build_primitive_mesh_creates_expected_cube_counts() {
+        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Cube {
+            points: [
+                vec3(0.5, -0.5, 0.5),
+                vec3(0.5, 0.5, 0.5),
+                vec3(-0.5, 0.5, 0.5),
+                vec3(-0.5, -0.5, 0.5),
+                vec3(0.5, -0.5, -0.5),
+                vec3(0.5, 0.5, -0.5),
+                vec3(-0.5, 0.5, -0.5),
+                vec3(-0.5, -0.5, -0.5),
+            ],
+            color: white(),
+        });
+
+        assert_eq!(vertices.len(), 24);
+        assert_eq!(indices.len(), 36);
+    }
+
+    #[test]
+    fn build_primitive_mesh_creates_expected_circle_counts() {
+        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Circle {
+            radius: 1.0,
+            segments: 8,
+            color: white(),
+        });
+
+        assert_eq!(vertices.len(), 9);
+        assert_eq!(indices.len(), 24);
+    }
+
+    #[test]
+    fn build_primitive_mesh_clamps_circle_segments_to_three() {
+        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Circle {
+            radius: 1.0,
+            segments: 1,
+            color: white(),
+        });
+
+        assert_eq!(vertices.len(), 4);
+        assert_eq!(indices.len(), 9);
+    }
+
+    #[test]
+    fn build_primitive_mesh_creates_expected_polygon_counts() {
+        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Polygon {
+            points: vec![
+                vec3(0.0, -0.7, 0.7),
+                vec3(0.0, -0.4, 0.5),
+                vec3(0.0, 0.7, 0.5),
+                vec3(0.0, 0.0, -0.6),
+                vec3(0.0, -0.5, -0.4),
+            ],
+            color: white(),
+        });
+
+        assert_eq!(vertices.len(), 5);
+        assert_eq!(indices.len(), 9);
+    }
+
+    #[test]
+    fn build_primitive_mesh_returns_empty_polygon_for_too_few_points() {
+        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Polygon {
+            points: vec![vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0)],
+            color: white(),
+        });
+
+        assert!(vertices.is_empty());
+        assert!(indices.is_empty());
+    }
 }

@@ -7,8 +7,8 @@ use winit::keyboard::KeyCode;
 use winit::window::Window;
 
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveType, create_circle_mesh, create_cube_mesh, create_polygon_mesh,
-    create_rectangle_mesh, create_triangle_mesh, spawn_primitive, update_polygon_mesh,
+    PrimitiveMesh, PrimitiveShape, PrimitiveType, create_primitive_mesh, spawn_primitive,
+    update_primitive_mesh,
 };
 
 use super::CameraComponent;
@@ -39,77 +39,68 @@ impl App {
         let model_mesh =
             MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?);
 
-        let mut primitive_meshes: Vec<PrimitiveMesh> = vec![];
-        // triangle //////////////////////////////////////////////////
-        let triangle_mesh = create_triangle_mesh(
-            &mut renderer,
-            [
-                vec3(0.0, 0.0, 0.5),
-                vec3(0.0, -0.5, -0.5),
-                vec3(0.0, 0.5, -0.5),
-            ],
-            vec3(1.0, 1.0, 1.0),
-        )?;
-        primitive_meshes.push(PrimitiveMesh {
-            handle: triangle_mesh,
-            primitive_type: PrimitiveType::Triangle,
-        });
-        // rectangle ////////////////////////////////////////////////////////
-        let rectangle_mesh = create_rectangle_mesh(
-            &mut renderer,
-            [
-                vec3(0.0, -0.5, 0.5),
-                vec3(0.0, -0.5, -0.5),
-                vec3(0.0, 0.5, -0.5),
-                vec3(0.0, 0.5, 0.5),
-            ],
-            vec3(1.0, 1.0, 1.0),
-        )?;
-        primitive_meshes.push(PrimitiveMesh {
-            handle: rectangle_mesh,
-            primitive_type: PrimitiveType::Rectangle,
-        });
-        // Cube ////////////////////////////////////////////////////////////////
-        let cube_mesh = create_cube_mesh(
-            &mut renderer,
-            [
-                vec3(0.5, -0.5, 0.5),
-                vec3(0.5, 0.5, 0.5),
-                vec3(-0.5, 0.5, 0.5),
-                vec3(-0.5, -0.5, 0.5),
-                vec3(0.5, -0.5, -0.5),
-                vec3(0.5, 0.5, -0.5),
-                vec3(-0.5, 0.5, -0.5),
-                vec3(-0.5, -0.5, -0.5),
-            ],
-            vec3(1.0, 1.0, 1.0),
-        )?;
-        primitive_meshes.push(PrimitiveMesh {
-            handle: cube_mesh,
-            primitive_type: PrimitiveType::Cube,
-        });
-        // Circle ///////////////////////////////////////////////////////////
-        let circle_mesh = create_circle_mesh(&mut renderer, 1.0, 32, vec3(1.0, 1.0, 1.0))?;
-        primitive_meshes.push(PrimitiveMesh {
-            handle: circle_mesh,
-            primitive_type: PrimitiveType::Circle,
-        });
-        // Polygon //////////////////////////////////////////////
-        let polygon_mesh = create_polygon_mesh(
-            &mut renderer,
-            vec![
-                vec3(0.0, -0.7, 0.7),
-                vec3(0.0, -0.4, 0.5),
-                vec3(0.0, 0.7, 0.5),
-                vec3(0.0, 0.0, -0.6),
-                vec3(0.0, -0.5, -0.4),
-            ],
-            vec3(1.0, 1.0, 1.0),
-        )?;
-        primitive_meshes.push(PrimitiveMesh {
-            handle: polygon_mesh,
-            primitive_type: PrimitiveType::Polygon,
-        });
+        let primitive_meshes = vec![
+            create_primitive_mesh(
+                &mut renderer,
+                PrimitiveShape::Triangle {
+                    points: [
+                        vec3(0.0, 0.0, 0.5),
+                        vec3(0.0, -0.5, -0.5),
+                        vec3(0.0, 0.5, -0.5),
+                    ],
+                    color: vec3(1.0, 1.0, 1.0),
+                },
+            )?,
+            create_primitive_mesh(
+                &mut renderer,
+                PrimitiveShape::Rectangle {
+                    points: [
+                        vec3(0.0, -0.5, 0.5),
+                        vec3(0.0, -0.5, -0.5),
+                        vec3(0.0, 0.5, -0.5),
+                        vec3(0.0, 0.5, 0.5),
+                    ],
+                    color: vec3(1.0, 1.0, 1.0),
+                },
+            )?,
+            create_primitive_mesh(
+                &mut renderer,
+                PrimitiveShape::Cube {
+                    points: [
+                        vec3(0.5, -0.5, 0.5),
+                        vec3(0.5, 0.5, 0.5),
+                        vec3(-0.5, 0.5, 0.5),
+                        vec3(-0.5, -0.5, 0.5),
+                        vec3(0.5, -0.5, -0.5),
+                        vec3(0.5, 0.5, -0.5),
+                        vec3(-0.5, 0.5, -0.5),
+                        vec3(-0.5, -0.5, -0.5),
+                    ],
+                    color: vec3(1.0, 1.0, 1.0),
+                },
+            )?,
+            create_primitive_mesh(
+                &mut renderer,
+                PrimitiveShape::Circle {
+                    radius: 1.0,
+                    segments: 32,
+                    color: vec3(1.0, 1.0, 1.0),
+                },
+            )?,
+            create_primitive_mesh(
+                &mut renderer,
+                PrimitiveShape::Polygon {
+                    points: vec![
+                        vec3(0.0, -0.7, 0.7),
+                        vec3(0.0, -0.4, 0.5),
+                        vec3(0.0, 0.7, 0.5),
+                        vec3(0.0, 0.0, -0.6),
+                        vec3(0.0, -0.5, -0.4),
+                    ],
+                    color: vec3(1.0, 1.0, 1.0),
+                },
+            )?,
+        ];
 
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
@@ -286,17 +277,22 @@ impl App {
 
         // change all polygons' figure
         if self.input.key_pressed(KeyCode::KeyU) {
-            let points = vec![
-                vec3(0.0, -0.7, 0.3),
-                vec3(0.0, -0.4, 0.2),
-                vec3(0.0, 0.7, 0.5),
-                vec3(0.0, 0.2, -0.2),
-                vec3(0.0, -0.5, -0.45),
-            ];
-            let color = vec3(1.0, 1.0, 1.0);
-            if let Some(mesh) = self.primitive_handle(PrimitiveType::Polygon) {
+            if let Some(mesh) = self.primitive_mesh(PrimitiveType::Polygon) {
                 unsafe {
-                    update_polygon_mesh(&mut self.renderer, mesh, points, color)?;
+                    update_primitive_mesh(
+                        &mut self.renderer,
+                        mesh,
+                        PrimitiveShape::Polygon {
+                            points: vec![
+                                vec3(0.0, -0.7, 0.3),
+                                vec3(0.0, -0.4, 0.2),
+                                vec3(0.0, 0.7, 0.5),
+                                vec3(0.0, 0.2, -0.2),
+                                vec3(0.0, -0.5, -0.45),
+                            ],
+                            color: vec3(1.0, 1.0, 1.0),
+                        },
+                    )?;
                 }
             }
         }
@@ -305,10 +301,14 @@ impl App {
     }
 
     fn primitive_handle(&self, primitive_type: PrimitiveType) -> Option<MeshHandle> {
+        self.primitive_mesh(primitive_type).map(|mesh| mesh.handle)
+    }
+
+    fn primitive_mesh(&self, primitive_type: PrimitiveType) -> Option<PrimitiveMesh> {
         self.primitive_meshes
             .iter()
             .find(|mesh| mesh.primitive_type == primitive_type)
-            .map(|mesh| mesh.handle)
+            .copied()
     }
 
     fn mouse_position_on_spawn_plane(&self) -> Vec3 {
