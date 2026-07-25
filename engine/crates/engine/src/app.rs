@@ -7,11 +7,8 @@ use winit::keyboard::KeyCode;
 use winit::window::Window;
 
 use crate::primitive::{
-    create_circle_mesh, create_cube_mesh, 
-    create_polygon_mesh, create_rectangle_mesh,
-    create_triangle_mesh, 
-    spawn_primitive,
-    update_triangle_mesh,update_polygon_mesh,
+    PrimitiveMesh, PrimitiveType, create_circle_mesh, create_cube_mesh, create_polygon_mesh,
+    create_rectangle_mesh, create_triangle_mesh, spawn_primitive, update_polygon_mesh,
 };
 
 use super::CameraComponent;
@@ -29,11 +26,7 @@ pub struct App {
     pub input: Input,
     pub time: Time,
     model_mesh: MeshHandle,
-    triangle_mesh: MeshHandle,
-    rectangle_mesh: MeshHandle,
-    cube_mesh: MeshHandle,
-    circle_mesh: MeshHandle,
-    polygon_mesh: MeshHandle,
+    primitive_meshes: Vec<PrimitiveMesh>,
     positions: Vec<Vec3>,
 }
 
@@ -45,6 +38,9 @@ impl App {
         // intialize_mesh
         let model_mesh =
             MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?);
+
+        let mut primitive_meshes: Vec<PrimitiveMesh> = vec![];
+        // triangle //////////////////////////////////////////////////
         let triangle_mesh = create_triangle_mesh(
             &mut renderer,
             [
@@ -54,6 +50,11 @@ impl App {
             ],
             vec3(1.0, 1.0, 1.0),
         )?;
+        primitive_meshes.push(PrimitiveMesh {
+            handle: triangle_mesh,
+            primitive_type: PrimitiveType::Triangle,
+        });
+        // rectangle ////////////////////////////////////////////////////////
         let rectangle_mesh = create_rectangle_mesh(
             &mut renderer,
             [
@@ -64,6 +65,11 @@ impl App {
             ],
             vec3(1.0, 1.0, 1.0),
         )?;
+        primitive_meshes.push(PrimitiveMesh {
+            handle: rectangle_mesh,
+            primitive_type: PrimitiveType::Rectangle,
+        });
+        // Cube ////////////////////////////////////////////////////////////////
         let cube_mesh = create_cube_mesh(
             &mut renderer,
             [
@@ -78,9 +84,17 @@ impl App {
             ],
             vec3(1.0, 1.0, 1.0),
         )?;
+        primitive_meshes.push(PrimitiveMesh {
+            handle: cube_mesh,
+            primitive_type: PrimitiveType::Cube,
+        });
+        // Circle ///////////////////////////////////////////////////////////
         let circle_mesh = create_circle_mesh(&mut renderer, 1.0, 32, vec3(1.0, 1.0, 1.0))?;
-
-        // TODO: later create update_mesh not to reload mesh when creating polygon
+        primitive_meshes.push(PrimitiveMesh {
+            handle: circle_mesh,
+            primitive_type: PrimitiveType::Circle,
+        });
+        // Polygon //////////////////////////////////////////////
         let polygon_mesh = create_polygon_mesh(
             &mut renderer,
             vec![
@@ -92,6 +106,10 @@ impl App {
             ],
             vec3(1.0, 1.0, 1.0),
         )?;
+        primitive_meshes.push(PrimitiveMesh {
+            handle: polygon_mesh,
+            primitive_type: PrimitiveType::Polygon,
+        });
 
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
@@ -127,11 +145,7 @@ impl App {
             input,
             time: Time::default(),
             model_mesh,
-            triangle_mesh,
-            rectangle_mesh,
-            cube_mesh,
-            circle_mesh,
-            polygon_mesh,
+            primitive_meshes,
             positions,
         };
         app.prepare_renderer();
@@ -164,7 +178,7 @@ impl App {
         self.world.update(self.time.delta_seconds())
     }
 
-    fn process_input(&mut self) -> Result<()>{
+    fn process_input(&mut self) -> Result<()> {
         if self.input.key_pressed(KeyCode::ArrowLeft) {
             let id = self.world.objects().last().map(|object| object.id);
 
@@ -202,80 +216,99 @@ impl App {
 
         if self.input.key_pressed(KeyCode::KeyT) {
             let position = self.mouse_position_on_spawn_plane();
-            let _id = spawn_primitive(
-                &mut self.world,
-                self.triangle_mesh,
-                Transform {
-                    position,
-                    ..Default::default()
-                },
-            );
+            if let Some(mesh) = self.primitive_handle(PrimitiveType::Triangle) {
+                let _id = spawn_primitive(
+                    &mut self.world,
+                    mesh,
+                    Transform {
+                        position,
+                        ..Default::default()
+                    },
+                );
+            }
         }
 
         if self.input.key_pressed(KeyCode::KeyR) {
             let position = self.mouse_position_on_spawn_plane();
-            let _id = spawn_primitive(
-                &mut self.world,
-                self.rectangle_mesh,
-                Transform {
-                    position,
-                    ..Default::default()
-                },
-            );
+            if let Some(mesh) = self.primitive_handle(PrimitiveType::Rectangle) {
+                let _id = spawn_primitive(
+                    &mut self.world,
+                    mesh,
+                    Transform {
+                        position,
+                        ..Default::default()
+                    },
+                );
+            }
         }
 
         if self.input.key_pressed(KeyCode::KeyC) {
             let position = self.mouse_position_on_spawn_plane();
-            let _id = spawn_primitive(
-                &mut self.world,
-                self.cube_mesh,
-                Transform {
-                    position,
-                    ..Default::default()
-                },
-            );
+            if let Some(mesh) = self.primitive_handle(PrimitiveType::Cube) {
+                let _id = spawn_primitive(
+                    &mut self.world,
+                    mesh,
+                    Transform {
+                        position,
+                        ..Default::default()
+                    },
+                );
+            }
         }
 
         if self.input.key_pressed(KeyCode::KeyI) {
             let position = self.mouse_position_on_spawn_plane();
-            let _id = spawn_primitive(
-                &mut self.world,
-                self.circle_mesh,
-                Transform {
-                    position,
-                    ..Default::default()
-                },
-            );
+            if let Some(mesh) = self.primitive_handle(PrimitiveType::Circle) {
+                let _id = spawn_primitive(
+                    &mut self.world,
+                    mesh,
+                    Transform {
+                        position,
+                        ..Default::default()
+                    },
+                );
+            }
         }
 
         if self.input.key_pressed(KeyCode::KeyP) {
             let position = self.mouse_position_on_spawn_plane();
-            let _id = spawn_primitive(
-                &mut self.world,
-                self.polygon_mesh,
-                Transform {
-                    position,
-                    ..Default::default()
-                },
-            );
+            if let Some(mesh) = self.primitive_handle(PrimitiveType::Polygon) {
+                let _id = spawn_primitive(
+                    &mut self.world,
+                    mesh,
+                    Transform {
+                        position,
+                        ..Default::default()
+                    },
+                );
+            }
         }
 
-        // change all polygos' figure
-        if self.input.key_pressed(KeyCode::KeyU){
-            let points=vec![
+        // change all polygons' figure
+        if self.input.key_pressed(KeyCode::KeyU) {
+            let points = vec![
                 vec3(0.0, -0.7, 0.3),
                 vec3(0.0, -0.4, 0.2),
                 vec3(0.0, 0.7, 0.5),
                 vec3(0.0, 0.2, -0.2),
                 vec3(0.0, -0.5, -0.45),
             ];
-            let color=vec3(1.0,1.0,1.0);
-            unsafe{
-                update_polygon_mesh(&mut self.renderer,self.polygon_mesh,points,color)?;
+            let color = vec3(1.0, 1.0, 1.0);
+            if let Some(mesh) = self.primitive_handle(PrimitiveType::Polygon) {
+                unsafe {
+                    update_polygon_mesh(&mut self.renderer, mesh, points, color)?;
+                }
             }
         }
 
         Ok(())
+    }
+
+    fn primitive_handle(&self, primitive_type: PrimitiveType) -> Option<MeshHandle> {
+        self.primitive_meshes
+            .iter()
+            .find(|mesh| mesh.primitive_type == primitive_type)
+            .map(|mesh| mesh.handle)
     }
 
     fn mouse_position_on_spawn_plane(&self) -> Vec3 {

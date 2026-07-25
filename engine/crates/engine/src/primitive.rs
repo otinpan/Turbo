@@ -9,6 +9,20 @@ use super::MeshHandle;
 use super::MeshRenderer;
 use super::World;
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub enum PrimitiveType {
+    Triangle,
+    Rectangle,
+    Cube,
+    Circle,
+    Polygon,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct PrimitiveMesh {
+    pub handle: MeshHandle,
+    pub primitive_type: PrimitiveType,
+}
 
 // create mesh ////////////////////////////////////////////
 pub unsafe fn create_triangle_mesh(
@@ -326,6 +340,7 @@ pub unsafe fn update_polygon_mesh(
     points: Vec<Vec3>,
     color: Vec3,
 ) -> Result<()> {
+    
     let (vertices, indices) = build_polygon_mesh(points, color);
     update_mesh(renderer, mesh, vertices, indices)
 }
