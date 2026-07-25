@@ -24,6 +24,8 @@ mod vertex;
 
 use anyhow::{Result, anyhow};
 use cgmath::Matrix4;
+use std::mem::size_of;
+use std::ptr::copy_nonoverlapping as memcpy;
 use turbo_math::Transform;
 use vulkanalia::prelude::v1_0::*;
 use vulkanalia::vk::ExtDebugUtilsExtensionInstanceCommands;
@@ -32,6 +34,7 @@ use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use vulkanalia::window as vk_window;
 use winit::window::Window;
 
+use self::buffer::{copy_buffer, create_buffer};
 use self::command::{create_command_buffers, create_command_pools, update_command_buffer};
 use self::device::{create_logical_device, pick_physical_device};
 use self::image::{
@@ -203,6 +206,74 @@ impl VulkanRenderer {
         indices: Vec<u32>,
     ) -> Result<usize> {
         self.load_mesh_from_data(MeshData { vertices, indices })
+    }
+
+    pub unsafe fn update_mesh_from_vertices(
+        &mut self,
+        mesh_index: usize,
+        vertices: Vec<Vertex>,
+        indices: Vec<u32>,
+    ) -> Result<()> {
+        if vertices.is_empty() || indices.is_empty() {
+            return Err(anyhow!("Mesh vertices and indices must not be empty."));
+        }
+
+        let mesh = self
+            .data
+            .meshes
+            .get(mesh_index)
+            .ok_or_else(|| anyhow!("Mesh index out of range: {mesh_index}"))?;
+
+        // if the number of new vertex match that of old vertex, then update old to new
+        // else destroy old buffer and recreate new buffer
+        if mesh.vertices.len() == vertices.len() && mesh.indices.len() == indices.len() {
+            self.upload_to_buffer(mesh.vertex_buffer, &vertices)?;
+            self.upload_to_buffer(mesh.index_buffer, &indices)?;
+
+            let mesh = &mut self.data.meshes[mesh_index];
+            mesh.vertices = vertices;
+            mesh.indices = indices;
+            mesh.index_count = mesh.indices.len() as u32;
+        } else {
+            let mesh_data = MeshData { vertices, indices };
+            let new_mesh = create_mesh(&self.instance, &self.device, &self.data, mesh_data)?;
+
+            self.device.device_wait_idle()?;
+
+            let old_mesh = std::mem::replace(&mut self.data.meshes[mesh_index], new_mesh);
+            self.device.free_memory(old_mesh.index_buffer_memory, None);
+            self.device.destroy_buffer(old_mesh.index_buffer, None);
+            self.device.free_memory(old_mesh.vertex_buffer_memory, None);
+            self.device.destroy_buffer(old_mesh.vertex_buffer, None);
+        }
+
+        Ok(())
+    }
+
+    unsafe fn upload_to_buffer<T>(&self, destination: vk::Buffer, values: &[T]) -> Result<()> {
+        let size = (size_of::<T>() * values.len()) as vk::DeviceSize;
+        let (staging_buffer, staging_buffer_memory) = create_buffer(
+            &self.instance,
+            &self.device,
+            &self.data,
+            size,
+            vk::BufferUsageFlags::TRANSFER_SRC,
+            vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
+        )?;
+
+        let memory =
+            self.device
+                .map_memory(staging_buffer_memory, 0, size, vk::MemoryMapFlags::empty())?;
+
+        memcpy(values.as_ptr(), memory.cast(), values.len());
+        self.device.unmap_memory(staging_buffer_memory);
+
+        copy_buffer(&self.device, &self.data, staging_buffer, destination, size)?;
+
+        self.device.destroy_buffer(staging_buffer, None);
+        self.device.free_memory(staging_buffer_memory, None);
+
+        Ok(())
     }
 
     unsafe fn load_mesh_from_data(&mut self, mesh_data: MeshData) -> Result<usize> {

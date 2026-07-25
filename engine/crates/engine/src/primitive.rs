@@ -9,6 +9,8 @@ use super::MeshHandle;
 use super::MeshRenderer;
 use super::World;
 
+
+// create mesh ////////////////////////////////////////////
 pub unsafe fn create_triangle_mesh(
     renderer: &mut VulkanRenderer,
     points: [Vec3; 3],
@@ -65,6 +67,7 @@ pub unsafe fn create_polygon_mesh(
     ))
 }
 
+// build mesh. create vertices and indices from points //////////////////////////////////////////////////
 fn build_triangle_mesh(points: [Vec3; 3], color: Vec3) -> (Vec<Vertex>, Vec<u32>) {
     let vertices = vec![
         Vertex::new(points[0], color, vec2(0.0, 0.0)),
@@ -189,7 +192,6 @@ fn build_polygon_mesh(points: Vec<Vec3>, color: Vec3) -> (Vec<Vertex>, Vec<u32>)
     (vertices, indices)
 }
 
-
 // create triangle from polygon using era clipping
 fn triangulate_polygon_yz(points: &[Vec3]) -> Vec<u32> {
     let size = points.len();
@@ -293,6 +295,7 @@ fn fan_triangulate(size: usize) -> Vec<u32> {
     indices
 }
 
+// spawn primitice object //////////////////////////////////////////////
 pub fn spawn_primitive(
     world: &mut World,
     mesh: MeshHandle,
@@ -304,4 +307,35 @@ pub fn spawn_primitive(
         None,
         vec3(0.0, 0.0, 0.0),
     ))
+}
+
+// update mesh ///////////////////////////////////////////////////////////
+// refered mesh in VulkanData update vertices and indices
+pub unsafe fn update_mesh(
+    renderer: &mut VulkanRenderer,
+    mesh: MeshHandle,
+    vertices: Vec<Vertex>,
+    indices: Vec<u32>,
+) -> Result<()> {
+    renderer.update_mesh_from_vertices(mesh.0, vertices, indices)
+}
+
+pub unsafe fn update_polygon_mesh(
+    renderer: &mut VulkanRenderer,
+    mesh: MeshHandle,
+    points: Vec<Vec3>,
+    color: Vec3,
+) -> Result<()> {
+    let (vertices, indices) = build_polygon_mesh(points, color);
+    update_mesh(renderer, mesh, vertices, indices)
+}
+
+pub unsafe fn update_triangle_mesh(
+    renderer: &mut VulkanRenderer,
+    mesh: MeshHandle,
+    points: [Vec3; 3],
+    color: Vec3,
+) -> Result<()> {
+    let (vertices, indices) = build_triangle_mesh(points, color);
+    update_mesh(renderer, mesh, vertices, indices)
 }

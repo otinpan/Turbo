@@ -7,8 +7,11 @@ use winit::keyboard::KeyCode;
 use winit::window::Window;
 
 use crate::primitive::{
-    create_circle_mesh, create_cube_mesh, create_polygon_mesh, create_rectangle_mesh,
-    create_triangle_mesh, spawn_primitive,
+    create_circle_mesh, create_cube_mesh, 
+    create_polygon_mesh, create_rectangle_mesh,
+    create_triangle_mesh, 
+    spawn_primitive,
+    update_triangle_mesh,update_polygon_mesh,
 };
 
 use super::CameraComponent;
@@ -148,7 +151,7 @@ impl App {
         self.time.update();
 
         // TODO: later move to systems/rotator.rs
-        self.process_input();
+        self.process_input()?;
         self.update_world()?;
         self.update_camera();
 
@@ -161,7 +164,7 @@ impl App {
         self.world.update(self.time.delta_seconds())
     }
 
-    fn process_input(&mut self) {
+    fn process_input(&mut self) -> Result<()>{
         if self.input.key_pressed(KeyCode::ArrowLeft) {
             let id = self.world.objects().last().map(|object| object.id);
 
@@ -256,6 +259,23 @@ impl App {
                 },
             );
         }
+
+        // change all polygos' figure
+        if self.input.key_pressed(KeyCode::KeyU){
+            let points=vec![
+                vec3(0.0, -0.7, 0.3),
+                vec3(0.0, -0.4, 0.2),
+                vec3(0.0, 0.7, 0.5),
+                vec3(0.0, 0.2, -0.2),
+                vec3(0.0, -0.5, -0.45),
+            ];
+            let color=vec3(1.0,1.0,1.0);
+            unsafe{
+                update_polygon_mesh(&mut self.renderer,self.polygon_mesh,points,color)?;
+            }
+        }
+
+        Ok(())
     }
 
     fn mouse_position_on_spawn_plane(&self) -> Vec3 {
