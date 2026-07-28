@@ -14,7 +14,10 @@ mod time;
 mod world;
 
 pub use app::App;
-pub use component::{CameraComponent, MeshHandle, MeshRenderer};
+pub use component::{
+    CameraComponent, MeshHandle, MeshRenderer,
+    Material,
+};
 pub use input::Input;
 pub use time::Time;
 pub use world::{EntityId, World, WorldObject};

@@ -24,6 +24,7 @@ use super::MeshHandle;
 use super::MeshRenderer;
 use super::Time;
 use super::World;
+use super::Material;
 
 pub type Vec3 = cgmath::Vector3<f32>;
 
@@ -55,7 +56,6 @@ impl App {
                         vec3(0.0, -0.5, -0.5),
                         vec3(0.0, 0.5, -0.5),
                     ],
-                    color: vec3(1.0, 1.0, 1.0),
                 },
             )?,
             create_primitive_mesh(
@@ -67,7 +67,6 @@ impl App {
                         vec3(0.0, 0.5, -0.5),
                         vec3(0.0, 0.5, 0.5),
                     ],
-                    color: vec3(1.0, 1.0, 1.0),
                 },
             )?,
             create_primitive_mesh(
@@ -83,7 +82,6 @@ impl App {
                         vec3(-0.5, 0.5, -0.5),
                         vec3(-0.5, -0.5, -0.5),
                     ],
-                    color: vec3(1.0, 1.0, 1.0),
                 },
             )?,
             create_primitive_mesh(
@@ -91,7 +89,6 @@ impl App {
                 PrimitiveShape::Circle {
                     radius: 1.0,
                     segments: 32,
-                    color: vec3(1.0, 1.0, 1.0),
                 },
             )?,
             create_primitive_mesh(
@@ -104,7 +101,6 @@ impl App {
                         vec3(0.0, 0.0, -0.6),
                         vec3(0.0, -0.5, -0.4),
                     ],
-                    color: vec3(1.0, 1.0, 1.0),
                 },
             )?,
             create_primitive_mesh(
@@ -113,7 +109,6 @@ impl App {
                     radius: 1.0, 
                     rings: 32, 
                     segments: 32, 
-                    color: vec3(1.0,1.0,1.0)
                 }
             )?,
         ];
@@ -306,6 +301,7 @@ impl App {
                     },
                     Some(MeshRenderer {
                         mesh: self.model_mesh,
+                        material: Material::default(),
                     }),
                     None,
                     vec3(20.0, 0.0, 0.0),
@@ -319,6 +315,7 @@ impl App {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
+                    Material::default(),
                     Transform {
                         position,
                         ..Default::default()
@@ -333,6 +330,7 @@ impl App {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
+                    Material::default(),
                     Transform {
                         position,
                         ..Default::default()
@@ -347,6 +345,7 @@ impl App {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
+                    Material::default(),
                     Transform {
                         position,
                         ..Default::default()
@@ -361,6 +360,7 @@ impl App {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
+                    Material::default(),
                     Transform {
                         position,
                         ..Default::default()
@@ -375,6 +375,7 @@ impl App {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
+                    Material::default(),
                     Transform {
                         position,
                         ..Default::default()
@@ -389,6 +390,7 @@ impl App {
                 let _id=spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
+                    Material::default(),
                     Transform {
                         position,
                         ..Default::default()
@@ -412,7 +414,6 @@ impl App {
                                 vec3(0.0, 0.2, -0.2),
                                 vec3(0.0, -0.5, -0.45),
                             ],
-                            color: vec3(1.0, 1.0, 1.0),
                         },
                     )?;
                 }
@@ -426,7 +427,6 @@ impl App {
                             radius: 2.0, 
                             rings: 20, 
                             segments: 20, 
-                            color: vec3(1.0,1.0,1.0), 
                         },
                     )?;
                 }
@@ -686,9 +686,9 @@ mod tests {
                 }),
                 vec3(0.0, 0.0, 0.0),
             ),
-            spawn_primitive_from_mesh(&mut world, triangle_mesh, Transform::default()).unwrap(),
-            spawn_primitive_from_mesh(&mut world, rectangle_mesh, Transform::default()).unwrap(),
-            spawn_primitive_from_mesh(&mut world, cube_mesh, Transform::default()).unwrap(),
+            spawn_primitive_from_mesh(&mut world, triangle_mesh, Material::default(),Transform::default()).unwrap(),
+            spawn_primitive_from_mesh(&mut world, rectangle_mesh, Material::default(),Transform::default()).unwrap(),
+            spawn_primitive_from_mesh(&mut world, cube_mesh, Material::default(),Transform::default()).unwrap(),
         ];
 
         assert_eq!(world.objects().len(), ids.len());

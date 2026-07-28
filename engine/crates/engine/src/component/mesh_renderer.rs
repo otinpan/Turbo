@@ -1,8 +1,10 @@
-// MeshRenderer ///////////////////////////////////////
+use super::Material;
+
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct MeshHandle(pub usize);
 
 #[derive(Clone, Debug)]
 pub struct MeshRenderer {
     pub mesh: MeshHandle,
+    pub material: Material,
 }

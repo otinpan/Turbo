@@ -7,6 +7,7 @@ use super::EntityId;
 use super::MeshHandle;
 use super::MeshRenderer;
 use super::World;
+use super::Material;
 
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Vec2=cgmath::Vector2<f32>;
@@ -27,34 +28,32 @@ pub struct PrimitiveMesh {
     pub primitive_type: PrimitiveType,
 }
 
+fn default_color()->Vec3{
+    vec3(1.0,1.0,1.0)
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum PrimitiveShape {
     Triangle {
         points: [Vec3; 3],
-        color: Vec3,
     },
     Rectangle {
         points: [Vec3; 4],
-        color: Vec3,
     },
     Cube {
         points: [Vec3; 8],
-        color: Vec3,
     },
     Circle {
         radius: f32,
         segments: u32,
-        color: Vec3,
     },
     Polygon {
         points: Vec<Vec3>,
-        color: Vec3,
     },
     Sphere{
         radius: f32,
         rings: u32, // the number of rings (parallel to the latitude)
         segments: u32, // the number of segments (parallel to the latitude)
-        color: Vec3,
     }
 }
 
@@ -88,20 +87,20 @@ pub unsafe fn create_primitive_mesh(
 // build mesh. create vertices and indices from points //////////////////////////////////////////////////
 pub fn build_primitive_mesh(shape: PrimitiveShape) -> (Vec<Vertex>, Vec<u32>) {
     match shape {
-        PrimitiveShape::Triangle { points, color } => build_triangle_mesh(points, color),
-        PrimitiveShape::Rectangle { points, color } => build_rectangle_mesh(points, color),
-        PrimitiveShape::Cube { points, color } => build_cube_mesh(points, color),
+        PrimitiveShape::Triangle { points } => build_triangle_mesh(points),
+        PrimitiveShape::Rectangle { points} => build_rectangle_mesh(points),
+        PrimitiveShape::Cube { points } => build_cube_mesh(points),
         PrimitiveShape::Circle {
             radius,
             segments,
-            color,
-        } => build_circle_mesh(radius, segments, color),
-        PrimitiveShape::Polygon { points, color } => build_polygon_mesh(points, color),
-        PrimitiveShape::Sphere {radius, rings,segments,color} => build_sphere_mesh(radius,rings,segments,color),
+        } => build_circle_mesh(radius, segments),
+        PrimitiveShape::Polygon { points} => build_polygon_mesh(points),
+        PrimitiveShape::Sphere {radius, rings,segments} => build_sphere_mesh(radius,rings,segments),
     }
 }
 
-fn build_triangle_mesh(points: [Vec3; 3], color: Vec3) -> (Vec<Vertex>, Vec<u32>) {
+fn build_triangle_mesh(points: [Vec3; 3]) -> (Vec<Vertex>, Vec<u32>) {
+    let color=default_color();
     let vertices = vec![
         Vertex::new(points[0], color, vec2(0.0, 0.0)),
         Vertex::new(points[1], color, vec2(1.0, 0.0)),
@@ -113,7 +112,8 @@ fn build_triangle_mesh(points: [Vec3; 3], color: Vec3) -> (Vec<Vertex>, Vec<u32>
     (vertices, indices)
 }
 
-fn build_rectangle_mesh(points: [Vec3; 4], color: Vec3) -> (Vec<Vertex>, Vec<u32>) {
+fn build_rectangle_mesh(points: [Vec3; 4]) -> (Vec<Vertex>, Vec<u32>) {
+    let color=default_color();
     let vertices = vec![
         Vertex::new(points[0], color, vec2(0.0, 0.0)),
         Vertex::new(points[1], color, vec2(1.0, 0.0)),
@@ -126,7 +126,8 @@ fn build_rectangle_mesh(points: [Vec3; 4], color: Vec3) -> (Vec<Vertex>, Vec<u32
     (vertices, indices)
 }
 
-pub fn build_cube_mesh(points: [Vec3; 8], color: Vec3) -> (Vec<Vertex>, Vec<u32>) {
+pub fn build_cube_mesh(points: [Vec3; 8]) -> (Vec<Vertex>, Vec<u32>) {
+    let color=default_color();
     let faces = [
         [0, 1, 2, 3],
         [4, 7, 6, 5],
@@ -153,7 +154,8 @@ pub fn build_cube_mesh(points: [Vec3; 8], color: Vec3) -> (Vec<Vertex>, Vec<u32>
     (vertices, indices)
 }
 
-pub fn build_circle_mesh(radius: f32, segments: u32, color: Vec3) -> (Vec<Vertex>, Vec<u32>) {
+pub fn build_circle_mesh(radius: f32, segments: u32) -> (Vec<Vertex>, Vec<u32>) {
+    let color=default_color();
     let segments = segments.max(3);
     let mut vertices = Vec::with_capacity(segments as usize + 1);
     let mut indices = Vec::with_capacity(segments as usize * 3);
@@ -180,7 +182,8 @@ pub fn build_circle_mesh(radius: f32, segments: u32, color: Vec3) -> (Vec<Vertex
     (vertices, indices)
 }
 
-fn build_polygon_mesh(points: Vec<Vec3>, color: Vec3) -> (Vec<Vertex>, Vec<u32>) {
+fn build_polygon_mesh(points: Vec<Vec3>) -> (Vec<Vertex>, Vec<u32>) {
+    let color=default_color();
     let size = points.len();
 
     if size < 3 {
@@ -332,8 +335,8 @@ fn build_sphere_mesh(
     radius: f32,
     rings: u32,
     segments: u32,
-    color: Vec3
 ) -> (Vec<Vertex>, Vec<u32>) {
+    let color=default_color();
     let rings=rings.max(2);
     let segments=segments.max(3);
 
@@ -385,11 +388,17 @@ fn build_sphere_mesh(
 pub fn spawn_primitive_from_mesh(
     world: &mut World,
     mesh: MeshHandle,
+    material: Material,
     transform: Transform,
 ) -> Result<EntityId> {
     Ok(world.spawn(
         transform,
-        Some(MeshRenderer { mesh }),
+        Some(
+            MeshRenderer { 
+                mesh,
+                material
+            }
+        ),
         None,
         vec3(0.0, 0.0, 0.0),
     ))
@@ -414,7 +423,6 @@ pub unsafe fn spawn_triangle(
                 p1-center,
                 p2-center,
             ], 
-            color
         },
     )?;
 
@@ -423,6 +431,7 @@ pub unsafe fn spawn_triangle(
     spawn_primitive_from_mesh(
         world,
         primitive_mesh.handle,
+        Material::default(),
         Transform{
             position: center,
             ..Default::default()
@@ -453,7 +462,6 @@ pub unsafe fn spawn_rectangle(
                 vec3(0.0,half_width,-half_height),
                 vec3(0.0,half_width,half_height),
             ], 
-            color,
         },
     )?;
 
@@ -462,6 +470,7 @@ pub unsafe fn spawn_rectangle(
     spawn_primitive_from_mesh(
         world,
         primitive_mesh.handle,
+        Material::default(),
         Transform { position: pos, ..Default::default() },
     )
 }
@@ -489,7 +498,6 @@ pub unsafe fn spawn_cube(
                 vec3(-h,  h, -h),
                 vec3(-h, -h, -h),
             ],
-            color,
         }
     )?;
 
@@ -498,6 +506,7 @@ pub unsafe fn spawn_cube(
     spawn_primitive_from_mesh(
         world,
         primitive_mesh.handle,
+        Material::default(),
         Transform{position: pos,..Default::default()},
     )
 }
@@ -517,7 +526,6 @@ pub unsafe fn spawn_circle(
         PrimitiveShape::Circle { 
             radius,
             segments,
-            color,
         },
     )?;
 
@@ -526,6 +534,7 @@ pub unsafe fn spawn_circle(
     spawn_primitive_from_mesh(
         world,
         primitive_mesh.handle,
+        Material::default(),
         Transform{position: pos,..Default::default()},
     )
 }
@@ -549,7 +558,6 @@ pub unsafe fn spawn_polygon(
         renderer,
         PrimitiveShape::Polygon { 
             points: local_points,
-            color,
         },
     )?;
 
@@ -558,6 +566,7 @@ pub unsafe fn spawn_polygon(
     spawn_primitive_from_mesh(
         world,
         primitive_mesh.handle,
+        Material::default(),
         Transform { position: center, ..Default::default() }
     )
 }
@@ -578,7 +587,6 @@ pub unsafe fn spawn_sphere(
             radius,
             rings, 
             segments, 
-            color
         },
     )?;
 
@@ -587,6 +595,7 @@ pub unsafe fn spawn_sphere(
     spawn_primitive_from_mesh(
         world,
         primitive_mesh.handle,
+        Material::default(),
         Transform { position: center, ..Default::default()},
     )
 }
@@ -642,7 +651,6 @@ mod tests {
                         vec3(0.0, 1.0, 0.0),
                         vec3(0.0, 0.0, 1.0),
                     ],
-                    color: white(),
                 },
                 PrimitiveType::Triangle,
             ),
@@ -654,7 +662,6 @@ mod tests {
                         vec3(0.0, 1.0, -1.0),
                         vec3(0.0, 1.0, 1.0),
                     ],
-                    color: white(),
                 },
                 PrimitiveType::Rectangle,
             ),
@@ -662,7 +669,6 @@ mod tests {
                 PrimitiveShape::Circle {
                     radius: 1.0,
                     segments: 8,
-                    color: white(),
                 },
                 PrimitiveType::Circle,
             ),
@@ -671,7 +677,6 @@ mod tests {
                     radius: 1.0, 
                     rings: 32, 
                     segments: 22, 
-                    color: vec3(1.0,1.0,1.0)
                 },
                 PrimitiveType::Sphere,
             ),
@@ -690,7 +695,6 @@ mod tests {
                 vec3(0.0, 1.0, 0.0),
                 vec3(0.0, 0.0, 1.0),
             ],
-            color: white(),
         });
 
         assert_eq!(vertices.len(), 3);
@@ -706,7 +710,6 @@ mod tests {
                 vec3(0.0, 1.0, -1.0),
                 vec3(0.0, 1.0, 1.0),
             ],
-            color: white(),
         });
 
         assert_eq!(vertices.len(), 4);
@@ -726,7 +729,6 @@ mod tests {
                 vec3(-0.5, 0.5, -0.5),
                 vec3(-0.5, -0.5, -0.5),
             ],
-            color: white(),
         });
 
         assert_eq!(vertices.len(), 24);
@@ -738,7 +740,6 @@ mod tests {
         let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Circle {
             radius: 1.0,
             segments: 8,
-            color: white(),
         });
 
         assert_eq!(vertices.len(), 9);
@@ -750,7 +751,6 @@ mod tests {
         let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Circle {
             radius: 1.0,
             segments: 1,
-            color: white(),
         });
 
         assert_eq!(vertices.len(), 4);
@@ -767,7 +767,6 @@ mod tests {
                 vec3(0.0, 0.0, -0.6),
                 vec3(0.0, -0.5, -0.4),
             ],
-            color: white(),
         });
 
         assert_eq!(vertices.len(), 5);
@@ -778,7 +777,6 @@ mod tests {
     fn build_primitive_mesh_returns_empty_polygon_for_too_few_points() {
         let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Polygon {
             points: vec![vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0)],
-            color: white(),
         });
 
         assert!(vertices.is_empty());
