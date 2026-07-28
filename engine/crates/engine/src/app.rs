@@ -11,7 +11,7 @@ use crate::primitive::{
     create_primitive_mesh, spawn_primitive_from_mesh,
     update_primitive_mesh,
     spawn_triangle, spawn_rectangle, spawn_cube, spawn_circle,
-    spawn_polygon,
+    spawn_polygon, spawn_sphere,
 };
 
 use crate::world::{
@@ -199,6 +199,14 @@ impl App {
                         vec3(0.0,0.0,1.0),
                         vec3(0.0,-0.1,1.2),
                     ],
+                    vec3(1.0,1.0,1.0)
+                )?;
+
+                let sphere_id1=app.spawn_sphere(
+                    vec3(0.0,-1.0,0.0),
+                    0.5,
+                    16,
+                    16,
                     vec3(1.0,1.0,1.0)
                 )?;
 
@@ -628,6 +636,26 @@ impl App {
             &mut self.renderer,
             &mut self.primitive_meshes,
             points,
+            color,
+        )
+    }
+    
+    pub unsafe fn spawn_sphere(
+        &mut self,
+        center: Vec3,
+        radius: f32,
+        rings: u32,
+        segments: u32,
+        color: Vec3,
+    ) -> Result<EntityId>{
+        spawn_sphere(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            center,
+            radius,
+            rings,
+            segments,
             color,
         )
     }

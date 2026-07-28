@@ -562,6 +562,35 @@ pub unsafe fn spawn_polygon(
     )
 }
 
+pub unsafe fn spawn_sphere(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    center: Vec3,
+    radius: f32,
+    rings: u32,
+    segments: u32,
+    color: Vec3,
+) -> Result<EntityId>{
+    let primitive_mesh=create_primitive_mesh(
+        renderer,
+        PrimitiveShape::Sphere {
+            radius,
+            rings, 
+            segments, 
+            color
+        },
+    )?;
+
+    meshes.push(primitive_mesh);
+
+    spawn_primitive_from_mesh(
+        world,
+        primitive_mesh.handle,
+        Transform { position: center, ..Default::default()},
+    )
+}
+
 // update mesh ///////////////////////////////////////////////////////////
 // refered mesh in VulkanData update vertices and indices
 pub unsafe fn update_mesh(
@@ -589,6 +618,7 @@ pub unsafe fn update_primitive_mesh(
     let (vertices, indices) = build_primitive_mesh(shape);
     update_mesh(renderer, mesh.handle, vertices, indices)
 }
+
 
 
 
