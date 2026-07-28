@@ -530,7 +530,37 @@ pub unsafe fn spawn_circle(
     )
 }
 
+pub unsafe fn spawn_polygon(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    points: Vec<Vec3>,
+    color: Vec3,
+) -> Result<EntityId>{
+    let center=points.iter().copied().sum::<Vec3>()/points.len() as f32;
 
+    let local_points=points
+        .iter()
+        .map(|p| *p-center)
+        .collect::<Vec<_>>();
+
+
+    let primitive_mesh=create_primitive_mesh(
+        renderer,
+        PrimitiveShape::Polygon { 
+            points: local_points,
+            color,
+        },
+    )?;
+
+    meshes.push(primitive_mesh);
+
+    spawn_primitive_from_mesh(
+        world,
+        primitive_mesh.handle,
+        Transform { position: center, ..Default::default() }
+    )
+}
 
 // update mesh ///////////////////////////////////////////////////////////
 // refered mesh in VulkanData update vertices and indices

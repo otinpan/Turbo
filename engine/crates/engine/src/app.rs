@@ -11,6 +11,7 @@ use crate::primitive::{
     create_primitive_mesh, spawn_primitive_from_mesh,
     update_primitive_mesh,
     spawn_triangle, spawn_rectangle, spawn_cube, spawn_circle,
+    spawn_polygon,
 };
 
 use crate::world::{
@@ -189,6 +190,18 @@ impl App {
                     vec3(1.0,1.0,1.0),
                 )?;
 
+                let polygon_id1=app.spawn_polygon(
+                    vec![
+                        vec3(0.0,-0.4,-1.0),
+                        vec3(0.0,-0.2,0.0),
+                        vec3(0.0,0.5,-0.3),
+                        vec3(0.0,0.3,0.2),
+                        vec3(0.0,0.0,1.0),
+                        vec3(0.0,-0.1,1.2),
+                    ],
+                    vec3(1.0,1.0,1.0)
+                )?;
+
             }
             let triangle_count=app
                 .primitive_meshes
@@ -217,6 +230,13 @@ impl App {
                 .filter(|mesh|mesh.primitive_type==PrimitiveType::Cube)
                 .count();
             assert!(circle_count==2);
+
+            let polygon_count=app
+                .primitive_meshes
+                .iter()
+                .filter(|mesh|mesh.primitive_type==PrimitiveType::Polygon)
+                .count();
+            assert!(polygon_count==2);
         }
         app.prepare_renderer();
 
@@ -594,6 +614,20 @@ impl App {
             pos,
             radius,
             segments,
+            color,
+        )
+    }
+
+    pub unsafe fn spawn_polygon(
+        &mut self,
+        points: Vec<Vec3>,
+        color: Vec3,
+    ) -> Result<EntityId>{
+        spawn_polygon(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            points,
             color,
         )
     }
