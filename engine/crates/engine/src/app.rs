@@ -7,8 +7,14 @@ use winit::keyboard::KeyCode;
 use winit::window::Window;
 
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveShape, PrimitiveType, create_primitive_mesh, spawn_primitive,
+    PrimitiveMesh, PrimitiveShape, PrimitiveType,
+    create_primitive_mesh, spawn_primitive_from_mesh,
     update_primitive_mesh,
+    spawn_triangle,
+};
+
+use crate::world::{
+    EntityId,
 };
 
 use super::CameraComponent;
@@ -26,7 +32,7 @@ pub struct App {
     pub input: Input,
     pub time: Time,
     model_mesh: MeshHandle,
-    primitive_meshes: Vec<PrimitiveMesh>,
+    pub primitive_meshes: Vec<PrimitiveMesh>,
     positions: Vec<Vec3>,
 }
 
@@ -111,6 +117,7 @@ impl App {
             )?,
         ];
 
+
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
             vec3(0.0, 1.25, 1.0),
@@ -118,6 +125,8 @@ impl App {
             vec3(0.0, 1.25, -1.0),
         ];
 
+
+        // camera //////////////////
         world.spawn(
             Transform {
                 position: vec3(5.0, 0.0, 0.0),
@@ -148,10 +157,28 @@ impl App {
             primitive_meshes,
             positions,
         };
+
+        unsafe{
+            let id=app.spawn_triangle(
+            vec3(0.0,-0.2,-0.5),
+            vec3(0.0,0.5,0.2),
+            vec3(0.0,0.0,0.5),
+            vec3(1.0,1.0,1.0),
+            )?;
+
+        }
+        let triangle_count=app
+            .primitive_meshes
+            .iter()
+            .filter(|mesh| mesh.primitive_type==PrimitiveType::Triangle)
+            .count();
+        assert!(triangle_count==2);
+
         app.prepare_renderer();
 
         Ok(app)
     }
+
 
     pub fn handle_event(&mut self, event: &WindowEvent) {
         self.input.handle_event(event);
@@ -217,7 +244,7 @@ impl App {
         if self.input.key_pressed(KeyCode::KeyT) {
             let position = self.mouse_position_on_spawn_plane();
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Triangle) {
-                let _id = spawn_primitive(
+                let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
                     Transform {
@@ -231,7 +258,7 @@ impl App {
         if self.input.key_pressed(KeyCode::KeyR) {
             let position = self.mouse_position_on_spawn_plane();
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Rectangle) {
-                let _id = spawn_primitive(
+                let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
                     Transform {
@@ -245,7 +272,7 @@ impl App {
         if self.input.key_pressed(KeyCode::KeyC) {
             let position = self.mouse_position_on_spawn_plane();
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Cube) {
-                let _id = spawn_primitive(
+                let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
                     Transform {
@@ -259,7 +286,7 @@ impl App {
         if self.input.key_pressed(KeyCode::KeyI) {
             let position = self.mouse_position_on_spawn_plane();
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Circle) {
-                let _id = spawn_primitive(
+                let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
                     Transform {
@@ -273,7 +300,7 @@ impl App {
         if self.input.key_pressed(KeyCode::KeyP) {
             let position = self.mouse_position_on_spawn_plane();
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Polygon) {
-                let _id = spawn_primitive(
+                let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
                     Transform {
@@ -287,7 +314,7 @@ impl App {
         if self.input.key_pressed(KeyCode::KeyE){
             let position=self.mouse_position_on_spawn_plane();
             if let Some(mesh)=self.primitive_handle(PrimitiveType::Sphere){
-                let _id=spawn_primitive(
+                let _id=spawn_primitive_from_mesh(
                     &mut self.world,
                     mesh,
                     Transform {
@@ -455,13 +482,30 @@ impl App {
             }
         }
     }
+
+    pub unsafe fn spawn_triangle(
+        &mut self,
+        p0: Vec3,
+        p1: Vec3,
+        p2: Vec3,
+        color: Vec3,
+    )->Result<EntityId>{
+        spawn_triangle(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            p0,
+            p1,
+            p2,
+            color,
+        )
+    }
 }
 
 // test ///////////////////////////////////////////////////
 #[cfg(test)]
 mod tests {
     use super::*;
-
     #[test]
     fn created_world_object_count_matches_created_entity_id_count() {
         let mut world = World::default();
@@ -483,9 +527,9 @@ mod tests {
                 }),
                 vec3(0.0, 0.0, 0.0),
             ),
-            spawn_primitive(&mut world, triangle_mesh, Transform::default()).unwrap(),
-            spawn_primitive(&mut world, rectangle_mesh, Transform::default()).unwrap(),
-            spawn_primitive(&mut world, cube_mesh, Transform::default()).unwrap(),
+            spawn_primitive_from_mesh(&mut world, triangle_mesh, Transform::default()).unwrap(),
+            spawn_primitive_from_mesh(&mut world, rectangle_mesh, Transform::default()).unwrap(),
+            spawn_primitive_from_mesh(&mut world, cube_mesh, Transform::default()).unwrap(),
         ];
 
         assert_eq!(world.objects().len(), ids.len());

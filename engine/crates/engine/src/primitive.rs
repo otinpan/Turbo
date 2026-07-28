@@ -1,4 +1,3 @@
-pub type Vec3 = cgmath::Vector3<f32>;
 use anyhow::{Result, bail};
 use cgmath::{vec2, vec3};
 use renderer_vulkan::{Vertex, VulkanRenderer};
@@ -8,6 +7,9 @@ use super::EntityId;
 use super::MeshHandle;
 use super::MeshRenderer;
 use super::World;
+
+pub type Vec3 = cgmath::Vector3<f32>;
+pub type Vec2=cgmath::Vector2<f32>;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum PrimitiveType {
@@ -380,7 +382,7 @@ fn build_sphere_mesh(
 }
 
 // spawn primitice object //////////////////////////////////////////////
-pub fn spawn_primitive(
+pub fn spawn_primitive_from_mesh(
     world: &mut World,
     mesh: MeshHandle,
     transform: Transform,
@@ -392,6 +394,43 @@ pub fn spawn_primitive(
         vec3(0.0, 0.0, 0.0),
     ))
 }
+
+pub unsafe fn spawn_triangle(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    p0: Vec3,
+    p1: Vec3,
+    p2: Vec3,
+    color :Vec3,
+) -> Result<EntityId>{
+    let center=(p0+p1+p2)/3.0;
+
+    let primitive_mesh=create_primitive_mesh(
+        renderer,
+        PrimitiveShape::Triangle { 
+            points: [
+                p0-center,
+                p1-center,
+                p2-center,
+            ], 
+            color
+        },
+    )?;
+
+    meshes.push(primitive_mesh);
+
+    spawn_primitive_from_mesh(
+        world,
+        primitive_mesh.handle,
+        Transform{
+            position: center,
+            ..Default::default()
+        },
+    )
+}
+
+
 
 // update mesh ///////////////////////////////////////////////////////////
 // refered mesh in VulkanData update vertices and indices
