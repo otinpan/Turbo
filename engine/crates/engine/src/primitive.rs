@@ -431,7 +431,7 @@ pub unsafe fn spawn_triangle(
 }
 
 
-// paralell to yz
+// parallel to yz
 pub unsafe fn spawn_rectangle(
     world: &mut World,
     renderer: &mut VulkanRenderer,
@@ -464,6 +464,43 @@ pub unsafe fn spawn_rectangle(
         primitive_mesh.handle,
         Transform { position: pos, ..Default::default() },
     )
+}
+
+pub unsafe fn spawn_cube(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    pos: Vec3,
+    length: f32,
+    color: Vec3,
+) -> Result<EntityId>{
+    let h=length*0.5;
+
+    let primitive_mesh=create_primitive_mesh(
+        renderer,
+        PrimitiveShape::Cube { 
+            points: [
+                vec3( h, -h,  h),
+                vec3( h,  h,  h),
+                vec3(-h,  h,  h),
+                vec3(-h, -h,  h),
+                vec3( h, -h, -h),
+                vec3( h,  h, -h),
+                vec3(-h,  h, -h),
+                vec3(-h, -h, -h),
+            ],
+            color,
+        }
+    )?;
+
+    meshes.push(primitive_mesh);
+
+    spawn_primitive_from_mesh(
+        world,
+        primitive_mesh.handle,
+        Transform{position: pos,..Default::default()},
+    )
+    
 }
 
 // update mesh ///////////////////////////////////////////////////////////
