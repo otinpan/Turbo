@@ -431,6 +431,40 @@ pub unsafe fn spawn_triangle(
 }
 
 
+// paralell to yz
+pub unsafe fn spawn_rectangle(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    pos: Vec3,
+    width: f32,
+    height: f32,
+    color: Vec3,
+) -> Result<EntityId>{
+    let half_width=width*0.5;
+    let half_height=width*0.5;
+
+    let primitive_mesh=create_primitive_mesh(
+        renderer,
+        PrimitiveShape::Rectangle { 
+            points: [
+                vec3(0.0,-half_width,half_height),
+                vec3(0.0,-half_width,-half_height),
+                vec3(0.0,half_width,-half_height),
+                vec3(0.0,half_width,half_height),
+            ], 
+            color,
+        },
+    )?;
+
+    meshes.push(primitive_mesh);
+
+    spawn_primitive_from_mesh(
+        world,
+        primitive_mesh.handle,
+        Transform { position: pos, ..Default::default() },
+    )
+}
 
 // update mesh ///////////////////////////////////////////////////////////
 // refered mesh in VulkanData update vertices and indices
@@ -459,8 +493,6 @@ pub unsafe fn update_primitive_mesh(
     let (vertices, indices) = build_primitive_mesh(shape);
     update_mesh(renderer, mesh.handle, vertices, indices)
 }
-
-
 
 
 

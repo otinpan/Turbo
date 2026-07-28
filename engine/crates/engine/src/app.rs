@@ -10,7 +10,7 @@ use crate::primitive::{
     PrimitiveMesh, PrimitiveShape, PrimitiveType,
     create_primitive_mesh, spawn_primitive_from_mesh,
     update_primitive_mesh,
-    spawn_triangle,
+    spawn_triangle, spawn_rectangle,
 };
 
 use crate::world::{
@@ -158,21 +158,39 @@ impl App {
             positions,
         };
 
-        unsafe{
-            let id=app.spawn_triangle(
-            vec3(0.0,-0.2,-0.5),
-            vec3(0.0,0.5,0.2),
-            vec3(0.0,0.0,0.5),
-            vec3(1.0,1.0,1.0),
-            )?;
+        #[cfg(debug_assertions)]
+        {   
+            // create primitive ////////////////////////////
+            unsafe{
+                let triangle_id1=app.spawn_triangle(
+                vec3(0.0,-0.2,-0.5),
+                vec3(0.0,0.5,0.2),
+                vec3(0.0,0.0,0.5),
+                vec3(1.0,1.0,1.0),
+                )?;
 
+                let rectangle_id2=app.spawn_rectangle(
+                    vec3(0.0,0.5,0.5),
+                    0.3,
+                    0.3,
+                    vec3(1.0,1.0,1.0),
+                )?;
+
+            }
+            let triangle_count=app
+                .primitive_meshes
+                .iter()
+                .filter(|mesh| mesh.primitive_type==PrimitiveType::Triangle)
+                .count();
+            assert!(triangle_count==2);
+
+            let rectangle_count=app
+                .primitive_meshes
+                .iter()
+                .filter(|mesh| mesh.primitive_type==PrimitiveType::Rectangle)
+                .count();
+            assert!(rectangle_count==2);
         }
-        let triangle_count=app
-            .primitive_meshes
-            .iter()
-            .filter(|mesh| mesh.primitive_type==PrimitiveType::Triangle)
-            .count();
-        assert!(triangle_count==2);
 
         app.prepare_renderer();
 
@@ -483,6 +501,7 @@ impl App {
         }
     }
 
+    // spawn primitive shape ////////////////////////////
     pub unsafe fn spawn_triangle(
         &mut self,
         p0: Vec3,
@@ -497,6 +516,24 @@ impl App {
             p0,
             p1,
             p2,
+            color,
+        )
+    }
+
+    pub unsafe fn spawn_rectangle(
+        &mut self,
+        pos: Vec3,
+        width: f32,
+        height: f32,
+        color: Vec3,
+    ) -> Result<EntityId>{
+        spawn_rectangle(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            pos,
+            width,
+            height,
             color,
         )
     }
