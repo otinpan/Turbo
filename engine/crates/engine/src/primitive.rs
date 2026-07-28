@@ -500,8 +500,37 @@ pub unsafe fn spawn_cube(
         primitive_mesh.handle,
         Transform{position: pos,..Default::default()},
     )
-    
 }
+
+// parallel to yz
+pub unsafe fn spawn_circle(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    pos: Vec3,
+    radius: f32,
+    segments: u32,
+    color: Vec3,
+) -> Result<EntityId>{
+    let primitive_mesh=create_primitive_mesh(
+        renderer,
+        PrimitiveShape::Circle { 
+            radius,
+            segments,
+            color,
+        },
+    )?;
+
+    meshes.push(primitive_mesh);
+
+    spawn_primitive_from_mesh(
+        world,
+        primitive_mesh.handle,
+        Transform{position: pos,..Default::default()},
+    )
+}
+
+
 
 // update mesh ///////////////////////////////////////////////////////////
 // refered mesh in VulkanData update vertices and indices

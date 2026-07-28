@@ -10,7 +10,7 @@ use crate::primitive::{
     PrimitiveMesh, PrimitiveShape, PrimitiveType,
     create_primitive_mesh, spawn_primitive_from_mesh,
     update_primitive_mesh,
-    spawn_triangle, spawn_rectangle, spawn_cube,
+    spawn_triangle, spawn_rectangle, spawn_cube, spawn_circle,
 };
 
 use crate::world::{
@@ -182,6 +182,13 @@ impl App {
                     vec3(1.0,1.0,1.0)
                 )?;
 
+                let circle_id1=app.spawn_circle(
+                    vec3(0.0,2.0,1.0),
+                    1.0,
+                    32,
+                    vec3(1.0,1.0,1.0),
+                )?;
+
             }
             let triangle_count=app
                 .primitive_meshes
@@ -203,8 +210,14 @@ impl App {
                 .filter(|mesh|mesh.primitive_type==PrimitiveType::Cube)
                 .count();
             assert!(cube_count==2);
-        }
 
+            let circle_count=app
+                .primitive_meshes
+                .iter()
+                .filter(|mesh|mesh.primitive_type==PrimitiveType::Cube)
+                .count();
+            assert!(circle_count==2);
+        }
         app.prepare_renderer();
 
         Ok(app)
@@ -563,6 +576,24 @@ impl App {
             &mut self.primitive_meshes,
             pos,
             length,
+            color,
+        )
+    }
+
+    pub unsafe fn spawn_circle(
+        &mut self,
+        pos: Vec3,
+        radius: f32,
+        segments: u32,
+        color: Vec3,
+    )-> Result<EntityId>{
+        spawn_circle(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            pos,
+            radius,
+            segments,
             color,
         )
     }
