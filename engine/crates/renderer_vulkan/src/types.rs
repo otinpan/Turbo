@@ -84,9 +84,8 @@ pub struct RenderItem {
     pub transform: Transform,
     // material
     pub material_color: cgmath::Vector3<f32>,
+    pub use_texture: bool,
     pub is_visible: bool,
-
-    
 }
 
 // Camera

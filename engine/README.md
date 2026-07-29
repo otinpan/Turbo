@@ -12,6 +12,16 @@
   - ~~up~~
 * ~~2D図形のヘルパー関数~~
 * マテリアル
+  - ~~Material構造体作成~~
+    - ~~color~~
+  - ~~renderer_vulkanに渡す~~
+    - ~~RenderItemにmaterial_color~~
+    - ~~command_buffer更新~~
+      - ~~push constantのrangeを変える (pipeline.rs)~~
+      - ~~update_secondary_bufferの更新 (command.rs)~~
+    - ~~shader更新~~
+      
+    
 
 ## ログ表示
 ```rust

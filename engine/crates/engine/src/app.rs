@@ -301,7 +301,7 @@ impl App {
                     },
                     Some(MeshRenderer {
                         mesh: self.model_mesh,
-                        material: Material::default(),
+                        material: Material::new(vec3(1.0,1.0,1.0),true),
                     }),
                     None,
                     vec3(20.0, 0.0, 0.0),
@@ -314,7 +314,13 @@ impl App {
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Triangle) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::default_material(mesh),
+                    MeshRenderer::new(
+                        mesh,
+                        Material{
+                            color: vec3(1.0,1.0,1.0),
+                            use_texture: true,
+                        },
+                    ),
                     Transform {
                         position,
                         ..Default::default()
@@ -328,7 +334,13 @@ impl App {
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Rectangle) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::default_material(mesh),
+                    MeshRenderer::new(
+                        mesh,
+                        Material{
+                            color: vec3(1.0,1.0,1.0),
+                            use_texture: true,
+                        },
+                    ),
                     Transform {
                         position,
                         ..Default::default()
@@ -342,7 +354,13 @@ impl App {
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Cube) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::default_material(mesh),
+                    MeshRenderer::new(
+                        mesh,
+                        Material{
+                            color: vec3(1.0,1.0,1.0),
+                            use_texture: true,
+                        },
+                    ),
                     Transform {
                         position,
                         ..Default::default()
@@ -356,7 +374,13 @@ impl App {
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Circle) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::default_material(mesh),
+                    MeshRenderer::new(
+                        mesh,
+                        Material{
+                            color: vec3(1.0,1.0,1.0),
+                            use_texture: true,
+                        },
+                    ),
                     Transform {
                         position,
                         ..Default::default()
@@ -370,7 +394,13 @@ impl App {
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Polygon) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::default_material(mesh),
+                    MeshRenderer::new(
+                        mesh,
+                        Material{
+                            color: vec3(1.0,1.0,1.0),
+                            use_texture: true,
+                        },
+                    ),
                     Transform {
                         position,
                         ..Default::default()
@@ -384,7 +414,13 @@ impl App {
             if let Some(mesh)=self.primitive_handle(PrimitiveType::Sphere){
                 let _id=spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::default_material(mesh),
+                    MeshRenderer::new(
+                        mesh,
+                        Material{
+                            color: vec3(1.0,1.0,1.0),
+                            use_texture: true,
+                        },
+                    ),
                     Transform {
                         position,
                         ..Default::default()
@@ -528,6 +564,7 @@ impl App {
                     mesh_index: mesh_renderer.mesh.0,
                     transform: object.transform.clone(),
                     material_color: mesh_renderer.material.color,
+                    use_texture: mesh_renderer.material.use_texture,
                     is_visible: object.get_visible(),
                 })
             })

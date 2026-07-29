@@ -11,6 +11,7 @@ type Mat4 = cgmath::Matrix4<f32>;
 #[derive(Copy,Clone)]
 struct FragmentPushConstants{
     material_color: [f32;4],
+    material_flags: [f32;4],
 }
 
 // command pool ////////////////////////////////////////////////////////////
@@ -176,6 +177,12 @@ unsafe fn update_secondary_command_buffer(
             object.material_color.y,
             object.material_color.z,
             1.0,
+        ],
+        material_flags: [
+            if object.use_texture{1.0} else {0.0},
+            0.0,
+            0.0,
+            0.0,
         ],
     };
 
