@@ -387,18 +387,12 @@ fn build_sphere_mesh(
 // spawn primitice object //////////////////////////////////////////////
 pub fn spawn_primitive_from_mesh(
     world: &mut World,
-    mesh: MeshHandle,
-    material: Material,
+    mesh_renderer: MeshRenderer,
     transform: Transform,
 ) -> Result<EntityId> {
     Ok(world.spawn(
         transform,
-        Some(
-            MeshRenderer { 
-                mesh,
-                material
-            }
-        ),
+        Some(mesh_renderer),
         None,
         vec3(0.0, 0.0, 0.0),
     ))
@@ -430,8 +424,10 @@ pub unsafe fn spawn_triangle(
 
     spawn_primitive_from_mesh(
         world,
-        primitive_mesh.handle,
-        Material::default(),
+        MeshRenderer { 
+            mesh: primitive_mesh.handle,
+            material: Material::default()
+        },
         Transform{
             position: center,
             ..Default::default()
@@ -469,8 +465,10 @@ pub unsafe fn spawn_rectangle(
 
     spawn_primitive_from_mesh(
         world,
-        primitive_mesh.handle,
-        Material::default(),
+        MeshRenderer {
+            mesh: primitive_mesh.handle,
+            material: Material::default()
+        },
         Transform { position: pos, ..Default::default() },
     )
 }
@@ -505,8 +503,10 @@ pub unsafe fn spawn_cube(
 
     spawn_primitive_from_mesh(
         world,
-        primitive_mesh.handle,
-        Material::default(),
+        MeshRenderer {
+            mesh: primitive_mesh.handle,
+            material: Material::default()
+        },
         Transform{position: pos,..Default::default()},
     )
 }
@@ -533,8 +533,10 @@ pub unsafe fn spawn_circle(
 
     spawn_primitive_from_mesh(
         world,
-        primitive_mesh.handle,
-        Material::default(),
+        MeshRenderer {
+            mesh: primitive_mesh.handle,
+            material: Material::default()
+        },
         Transform{position: pos,..Default::default()},
     )
 }
@@ -565,8 +567,10 @@ pub unsafe fn spawn_polygon(
 
     spawn_primitive_from_mesh(
         world,
-        primitive_mesh.handle,
-        Material::default(),
+        MeshRenderer { 
+            mesh:primitive_mesh.handle,
+            material: Material::default()
+        },
         Transform { position: center, ..Default::default() }
     )
 }
@@ -594,8 +598,10 @@ pub unsafe fn spawn_sphere(
 
     spawn_primitive_from_mesh(
         world,
-        primitive_mesh.handle,
-        Material::default(),
+        MeshRenderer { 
+            mesh: primitive_mesh.handle,
+            material: Material::default()
+        },
         Transform { position: center, ..Default::default()},
     )
 }

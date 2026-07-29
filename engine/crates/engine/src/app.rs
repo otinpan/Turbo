@@ -314,8 +314,7 @@ impl App {
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Triangle) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
-                    mesh,
-                    Material::default(),
+                    MeshRenderer::default_material(mesh),
                     Transform {
                         position,
                         ..Default::default()
@@ -329,8 +328,7 @@ impl App {
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Rectangle) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
-                    mesh,
-                    Material::default(),
+                    MeshRenderer::default_material(mesh),
                     Transform {
                         position,
                         ..Default::default()
@@ -344,8 +342,7 @@ impl App {
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Cube) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
-                    mesh,
-                    Material::default(),
+                    MeshRenderer::default_material(mesh),
                     Transform {
                         position,
                         ..Default::default()
@@ -359,8 +356,7 @@ impl App {
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Circle) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
-                    mesh,
-                    Material::default(),
+                    MeshRenderer::default_material(mesh),
                     Transform {
                         position,
                         ..Default::default()
@@ -374,8 +370,7 @@ impl App {
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Polygon) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
-                    mesh,
-                    Material::default(),
+                    MeshRenderer::default_material(mesh),
                     Transform {
                         position,
                         ..Default::default()
@@ -389,8 +384,7 @@ impl App {
             if let Some(mesh)=self.primitive_handle(PrimitiveType::Sphere){
                 let _id=spawn_primitive_from_mesh(
                     &mut self.world,
-                    mesh,
-                    Material::default(),
+                    MeshRenderer::default_material(mesh),
                     Transform {
                         position,
                         ..Default::default()
@@ -533,6 +527,7 @@ impl App {
                 Some(RenderItem {
                     mesh_index: mesh_renderer.mesh.0,
                     transform: object.transform.clone(),
+                    material_color: mesh_renderer.material.color,
                     is_visible: object.get_visible(),
                 })
             })
@@ -686,9 +681,9 @@ mod tests {
                 }),
                 vec3(0.0, 0.0, 0.0),
             ),
-            spawn_primitive_from_mesh(&mut world, triangle_mesh, Material::default(),Transform::default()).unwrap(),
-            spawn_primitive_from_mesh(&mut world, rectangle_mesh, Material::default(),Transform::default()).unwrap(),
-            spawn_primitive_from_mesh(&mut world, cube_mesh, Material::default(),Transform::default()).unwrap(),
+            spawn_primitive_from_mesh(&mut world, MeshRenderer::default_material(triangle_mesh),Transform::default()).unwrap(),
+            spawn_primitive_from_mesh(&mut world, MeshRenderer::default_material(rectangle_mesh),Transform::default()).unwrap(),
+            spawn_primitive_from_mesh(&mut world, MeshRenderer::default_material(cube_mesh),Transform::default()).unwrap(),
         ];
 
         assert_eq!(world.objects().len(), ids.len());

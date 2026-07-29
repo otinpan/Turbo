@@ -7,6 +7,12 @@ use vulkanalia::prelude::v1_0::*;
 
 type Mat4 = cgmath::Matrix4<f32>;
 
+#[repr(C)]
+#[derive(Copy,Clone)]
+struct FragmentPushConstants{
+    material_color: [f32;4],
+}
+
 // command pool ////////////////////////////////////////////////////////////
 // created command buffers are pushed into graphics queue in render()
 // this command buffer is created at once
@@ -164,8 +170,19 @@ unsafe fn update_secondary_command_buffer(
     let model_bytes =
         std::slice::from_raw_parts(&model as *const Mat4 as *const u8, size_of::<Mat4>());
 
-    let opacity = (model_index + 1) as f32 * 0.25;
-    let opacity_bytes = &opacity.to_ne_bytes()[..];
+    let material=FragmentPushConstants{
+        material_color: [
+            object.material_color.x,
+            object.material_color.y,
+            object.material_color.z,
+            1.0,
+        ],
+    };
+
+    let material_bytes=std::slice::from_raw_parts(
+        &material as *const FragmentPushConstants as *const u8,
+        std::mem::size_of::<FragmentPushConstants>(),
+    );
 
     // Unique Info for Secondary Command buffeer
     let inheritance_info = vk::CommandBufferInheritanceInfo::builder()
@@ -216,7 +233,7 @@ unsafe fn update_secondary_command_buffer(
         renderer.data.pipeline_layout,
         vk::ShaderStageFlags::FRAGMENT,
         64,
-        opacity_bytes,
+        material_bytes,
     );
     renderer
         .device

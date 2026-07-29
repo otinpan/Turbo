@@ -176,6 +176,8 @@ pub unsafe fn update_uniform_buffer(
 
     // copy ubo to memory
     memcpy(&ubo, memory.cast(), 1);
+
+    // unmap gpu memory
     renderer
         .device
         .unmap_memory(renderer.data.uniform_buffers_memory[image_index]);

@@ -82,7 +82,11 @@ pub struct Mesh {
 pub struct RenderItem {
     pub mesh_index: usize,
     pub transform: Transform,
+    // material
+    pub material_color: cgmath::Vector3<f32>,
     pub is_visible: bool,
+
+    
 }
 
 // Camera
