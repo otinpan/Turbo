@@ -7,12 +7,14 @@ use vulkanalia::bytecode::Bytecode;
 use vulkanalia::prelude::v1_0::*;
 
 use super::image::get_depth_format;
-use super::types::VulkanData;
+use super::types::{VulkanData,GraphicsPipeline,PipelineKey};
 use super::vertex::Vertex;
+
+
 
 // A graphics pipeline describes how vertices and fragments
 // are processed by the GPU.
-pub unsafe fn create_pipeline(device: &Device, data: &mut VulkanData) -> Result<()> {
+pub unsafe fn create_mesh3d_pipeline(device: &Device, data: &mut VulkanData) -> Result<()> {
     // Stages
     let vert = include_bytes!("../../../shaders/compiled/vert.spv");
     let frag = include_bytes!("../../../shaders/compiled/frag.spv");
@@ -120,7 +122,7 @@ pub unsafe fn create_pipeline(device: &Device, data: &mut VulkanData) -> Result<
     let layout_info = vk::PipelineLayoutCreateInfo::builder()
         .set_layouts(set_layouts)
         .push_constant_ranges(push_constant_ranges);
-    data.pipeline_layout = device.create_pipeline_layout(&layout_info, None)?;
+    let pipeline_layout= device.create_pipeline_layout(&layout_info, None)?;
 
     // Create
     let stages = &[vert_stage, frag_stage];
@@ -133,13 +135,21 @@ pub unsafe fn create_pipeline(device: &Device, data: &mut VulkanData) -> Result<
         .multisample_state(&multisample_state)
         .depth_stencil_state(&depth_stencil_state)
         .color_blend_state(&color_blend_state)
-        .layout(data.pipeline_layout)
+        .layout(pipeline_layout)
         .render_pass(data.render_pass)
         .subpass(0);
 
-    data.pipeline = device
-        .create_graphics_pipelines(vk::PipelineCache::null(), &[info], None)?
+    let pipeline=device
+        .create_graphics_pipelines(vk::PipelineCache::null(),&[info],None)?
         .0[0];
+
+    let graphics_pipeline=GraphicsPipeline{
+        key: PipelineKey::Mesh3D,
+        pipeline,
+        layout: pipeline_layout, 
+    };
+
+    data.pipelines.push(graphics_pipeline);
 
     // Cleanup
     device.destroy_shader_module(vert_shader_module, None);

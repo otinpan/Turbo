@@ -20,6 +20,17 @@
       - ~~push constantのrangeを変える (pipeline.rs)~~
       - ~~update_secondary_bufferの更新 (command.rs)~~
     - ~~shader更新~~
+* Pipeline複数生成
+  - 一旦pipelineは１つだけ
+  - VulkanDataのpipelineを`Vec<GraphicsPipeline>`にする
+  - Material has RenderMode <-> RenderItem has pipeline_key
+  - pipeline_key -> GraphicsPipeline
+  - vulkan_renderer
+    - type.rs : vulkan_data, renderitem
+    - pipeline.rs : create_pipeline()
+    - commands.rs
+    - lib.rs : swapchain
+
       
     
 
@@ -74,6 +85,7 @@ log::debug!("camera = {:?}, camera");
   - ~~平行移動~~
   - ~~前後移動~~
   - ~~方向変更 (Mouse)~~
+* pipeline複数生成
 * シェーダーを自由に選択できるようにする
 * 2d図形のヘルパー関数
   - ~~三角形~~

@@ -25,8 +25,7 @@ pub struct VulkanData {
     // Pipeline
     pub render_pass: vk::RenderPass,
     pub descriptor_set_layout: vk::DescriptorSetLayout,
-    pub pipeline_layout: vk::PipelineLayout,
-    pub pipeline: vk::Pipeline,
+    pub pipelines: Vec<GraphicsPipeline>,
     // Descriptors
     pub descriptor_pool: vk::DescriptorPool,
     pub descriptor_sets: Vec<vk::DescriptorSet>,
@@ -78,6 +77,27 @@ pub struct Mesh {
     pub index_count: u32,
 }
 
+#[derive(Clone,Copy,Debug,PartialEq,Eq,Hash)]
+pub enum PipelineKey{
+    Mesh3D,
+}
+
+#[derive(Copy,Debug,Clone,PartialEq,Eq)]
+pub struct GraphicsPipeline{
+    pub key: PipelineKey,
+    pub layout: vk::PipelineLayout,
+    pub pipeline: vk::Pipeline,
+}
+
+impl VulkanData{
+    pub fn pipeline(&self, key: PipelineKey) -> &GraphicsPipeline{
+        self.pipelines
+            .iter()
+            .find(|pipeline| pipeline.key==key)
+            .expect("pipeline shoud exist")
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct RenderItem {
     pub mesh_index: usize,
@@ -85,6 +105,7 @@ pub struct RenderItem {
     // material
     pub material_color: cgmath::Vector3<f32>,
     pub use_texture: bool,
+    pub pipeline_key: PipelineKey,
     pub is_visible: bool,
 }
 

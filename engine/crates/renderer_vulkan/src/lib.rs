@@ -44,7 +44,7 @@ use self::image::{
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::mesh::create_mesh;
 use self::model::{MeshData, load_model};
-use self::pipeline::{create_pipeline, create_render_pass};
+use self::pipeline::{create_mesh3d_pipeline, create_render_pass};
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::{Mesh, VulkanData};
@@ -54,6 +54,7 @@ use self::uniform::{
     create_uniform_buffers, update_uniform_buffer,
 };
 pub use self::vertex::Vertex;
+pub use self::types::{PipelineKey};
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 type Mat4 = Matrix4<f32>;
@@ -80,7 +81,7 @@ impl VulkanRenderer {
         create_swapchain_image_views(&device, &mut data)?;
         create_render_pass(&instance, &device, &mut data)?;
         create_descriptor_set_layout(&device, &mut data)?;
-        create_pipeline(&device, &mut data)?;
+        create_mesh3d_pipeline(&device, &mut data)?;
         create_command_pools(&instance, &device, &mut data)?;
         create_color_objects(&instance, &device, &mut data)?;
         create_depth_objects(&instance, &device, &mut data)?;
@@ -301,7 +302,7 @@ impl VulkanRenderer {
         create_swapchain(window, &self.instance, &self.device, &mut self.data)?;
         create_swapchain_image_views(&self.device, &mut self.data)?;
         create_render_pass(&self.instance, &self.device, &mut self.data)?;
-        create_pipeline(&self.device, &mut self.data)?;
+        create_mesh3d_pipeline(&self.device, &mut self.data)?;
         create_depth_objects(&self.instance, &self.device, &mut self.data)?;
         create_framebuffers(&self.device, &mut self.data)?;
         create_uniform_buffers(&self.instance, &self.device, &mut self.data)?;
@@ -395,9 +396,13 @@ impl VulkanRenderer {
             .destroy_image_view(self.data.depth_image_view, None);
         self.device.destroy_image(self.data.depth_image, None);
         self.device.free_memory(self.data.depth_image_memory, None);
-        self.device.destroy_pipeline(self.data.pipeline, None);
-        self.device
-            .destroy_pipeline_layout(self.data.pipeline_layout, None);
+        self.data
+            .pipelines
+            .drain(..)
+            .for_each(|p| {
+                self.device.destroy_pipeline(p.pipeline, None);
+                self.device.destroy_pipeline_layout(p.layout, None);
+            });
         self.device.destroy_render_pass(self.data.render_pass, None);
         self.data
             .swapchain_image_views

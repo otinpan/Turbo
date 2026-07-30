@@ -20,7 +20,7 @@ impl MeshRenderer{
     pub fn default_material(mesh: MeshHandle) -> Self{
         Self { 
             mesh,
-            material: Material::default()
+            material: Material::default(),
         }
     }
 }

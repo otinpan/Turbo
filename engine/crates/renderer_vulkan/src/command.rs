@@ -164,6 +164,7 @@ unsafe fn update_secondary_command_buffer(
 
     //  Model
     let object = &renderer.data.render_objects[model_index];
+    let pipeline=renderer.data.pipeline(object.pipeline_key);
     let mesh = &renderer.data.meshes[object.mesh_index];
 
     let model = object.transform.matrix();
@@ -209,7 +210,7 @@ unsafe fn update_secondary_command_buffer(
     renderer.device.cmd_bind_pipeline(
         command_buffer,
         vk::PipelineBindPoint::GRAPHICS,
-        renderer.data.pipeline,
+        pipeline.pipeline,
     );
     renderer
         .device
@@ -223,21 +224,21 @@ unsafe fn update_secondary_command_buffer(
     renderer.device.cmd_bind_descriptor_sets(
         command_buffer,
         vk::PipelineBindPoint::GRAPHICS,
-        renderer.data.pipeline_layout,
+        pipeline.layout,
         0,
         &[renderer.data.descriptor_sets[image_index]],
         &[],
     );
     renderer.device.cmd_push_constants(
         command_buffer,
-        renderer.data.pipeline_layout,
+        pipeline.layout,
         vk::ShaderStageFlags::VERTEX,
         0,
         model_bytes,
     );
     renderer.device.cmd_push_constants(
         command_buffer,
-        renderer.data.pipeline_layout,
+        pipeline.layout,
         vk::ShaderStageFlags::FRAGMENT,
         64,
         material_bytes,

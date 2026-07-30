@@ -5,6 +5,7 @@ use turbo_math::Transform;
 use winit::event::{MouseButton, WindowEvent};
 use winit::keyboard::KeyCode;
 use winit::window::Window;
+use renderer_vulkan::{PipelineKey};
 
 use crate::primitive::{
     PrimitiveMesh, PrimitiveShape, PrimitiveType,
@@ -301,7 +302,11 @@ impl App {
                     },
                     Some(MeshRenderer {
                         mesh: self.model_mesh,
-                        material: Material::new(vec3(1.0,1.0,1.0),true),
+                        material: Material{
+                            color: vec3(1.0,1.0,1.0),
+                            use_texture: true,
+                            pipeline_key: PipelineKey::Mesh3D,
+                        },
                     }),
                     None,
                     vec3(20.0, 0.0, 0.0),
@@ -319,6 +324,7 @@ impl App {
                         Material{
                             color: vec3(1.0,1.0,1.0),
                             use_texture: true,
+                            ..Default::default()
                         },
                     ),
                     Transform {
@@ -339,6 +345,7 @@ impl App {
                         Material{
                             color: vec3(1.0,1.0,1.0),
                             use_texture: true,
+                            ..Default::default()
                         },
                     ),
                     Transform {
@@ -359,6 +366,7 @@ impl App {
                         Material{
                             color: vec3(1.0,1.0,1.0),
                             use_texture: true,
+                            ..Default::default()
                         },
                     ),
                     Transform {
@@ -379,6 +387,7 @@ impl App {
                         Material{
                             color: vec3(1.0,1.0,1.0),
                             use_texture: true,
+                            ..Default::default()
                         },
                     ),
                     Transform {
@@ -399,6 +408,7 @@ impl App {
                         Material{
                             color: vec3(1.0,1.0,1.0),
                             use_texture: true,
+                            ..Default::default()
                         },
                     ),
                     Transform {
@@ -419,6 +429,7 @@ impl App {
                         Material{
                             color: vec3(1.0,1.0,1.0),
                             use_texture: true,
+                            ..Default::default()
                         },
                     ),
                     Transform {
@@ -565,6 +576,7 @@ impl App {
                     transform: object.transform.clone(),
                     material_color: mesh_renderer.material.color,
                     use_texture: mesh_renderer.material.use_texture,
+                    pipeline_key: mesh_renderer.material.pipeline_key,
                     is_visible: object.get_visible(),
                 })
             })

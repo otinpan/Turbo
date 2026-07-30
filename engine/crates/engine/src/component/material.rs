@@ -1,4 +1,5 @@
 use cgmath::Vector3;
+use renderer_vulkan::PipelineKey;
 
 pub type Vec3=Vector3<f32>;
 
@@ -6,13 +7,15 @@ pub type Vec3=Vector3<f32>;
 pub struct Material{
   pub color: Vec3,
   pub use_texture: bool,
+  pub pipeline_key: PipelineKey,
 }
 
 impl Material{
-  pub const fn new(color: Vec3,use_texture: bool) -> Self{
+  pub const fn new(color: Vec3,use_texture: bool,pipeline_key: PipelineKey) -> Self{
     Self{
       color,
       use_texture,
+      pipeline_key,
     }
   }
 }
@@ -22,6 +25,7 @@ impl Default for Material{
     Self { 
       color: cgmath::vec3(1.0,1.0,1.0),
       use_texture: false,
+      pipeline_key: PipelineKey::Mesh3D,
     }
   }
 }
