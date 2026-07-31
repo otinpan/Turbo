@@ -36,9 +36,9 @@ pub struct App {
     pub world: World,
     pub input: Input,
     pub time: Time,
-    model_mesh: MeshHandle,
+    model_meshes: Vec<MeshHandle>,
     pub primitive_meshes: Vec<PrimitiveMesh>,
-    texture: TextureHandle,
+    textures: Vec<TextureHandle>,
     positions: Vec<Vec3>,
 }
 
@@ -48,8 +48,9 @@ impl App {
         let mut world = World::default();
 
         // intialize_mesh
-        let model_mesh =
-            MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?);
+        let model_meshes =vec![
+            MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?),
+        ];
 
         let primitive_meshes = vec![
             create_primitive_mesh(
@@ -148,16 +149,18 @@ impl App {
         let window_size = window.inner_size();
         input.set_window_size(vec2(window_size.width as f32, window_size.height as f32));
 
-        // texture
-        let texture = renderer.load_texture("assets/textures/viking_room.png")?;
+        let textures=vec![
+            renderer.load_texture("assets/textures/viking_room.png")?,
+            renderer.load_texture("assets/textures/texture.png")?,
+        ];
         let mut app = Self {
             renderer,
             world,
             input,
             time: Time::default(),
-            model_mesh,
+            model_meshes,
             primitive_meshes,
-            texture,
+            textures,
             positions,
         };
 
@@ -296,7 +299,9 @@ impl App {
                     object
                         .mesh_renderer
                         .as_ref()
-                        .is_some_and(|mesh_renderer| mesh_renderer.mesh == self.model_mesh)
+                        .is_some_and(|mesh_renderer|{
+                            self.model_meshes.contains(&mesh_renderer.mesh)
+                        })
                 })
                 .count();
 
@@ -307,11 +312,11 @@ impl App {
                         ..Default::default()
                     },
                     Some(MeshRenderer {
-                        mesh: self.model_mesh,
+                        mesh: self.model_meshes[0],
                         material: Material{
                             color: vec3(1.0,1.0,1.0),
                             use_texture: true,
-                            texture: self.texture,
+                            texture: self.textures[0],
                             pipeline_key: PipelineKey::Mesh3D,
                         },
                     }),
@@ -331,6 +336,7 @@ impl App {
                         Material{
                             color: vec3(1.0,1.0,1.0),
                             use_texture: true,
+                            texture: self.textures[1],
                             ..Default::default()
                         },
                     ),
