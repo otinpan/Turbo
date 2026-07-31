@@ -221,14 +221,20 @@ unsafe fn update_secondary_command_buffer(
         0,
         vk::IndexType::UINT32,
     );
+
+    let global_set=renderer.data.global_descriptor_sets[image_index];
+    let material_set=renderer.data.material_descriptor_sets[object.texture_index.0];
+
+    let sets=[global_set,material_set];
     renderer.device.cmd_bind_descriptor_sets(
         command_buffer,
         vk::PipelineBindPoint::GRAPHICS,
         pipeline.layout,
         0,
-        &[renderer.data.descriptor_sets[image_index]],
+        &sets,
         &[],
     );
+
     renderer.device.cmd_push_constants(
         command_buffer,
         pipeline.layout,

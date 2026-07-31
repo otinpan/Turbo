@@ -24,11 +24,13 @@ pub struct VulkanData {
     pub swapchain_image_views: Vec<vk::ImageView>,
     // Pipeline
     pub render_pass: vk::RenderPass,
-    pub descriptor_set_layout: vk::DescriptorSetLayout,
     pub pipelines: Vec<GraphicsPipeline>,
     // Descriptors
+    pub global_descriptor_set_layout: vk::DescriptorSetLayout,
+    pub material_descriptor_set_layout: vk::DescriptorSetLayout,
+    pub global_descriptor_sets: Vec<vk::DescriptorSet>,
+    pub material_descriptor_sets: Vec<vk::DescriptorSet>,
     pub descriptor_pool: vk::DescriptorPool,
-    pub descriptor_sets: Vec<vk::DescriptorSet>,
     // Framebuffers
     pub framebuffers: Vec<vk::Framebuffer>,
     // Command Pool
@@ -53,10 +55,7 @@ pub struct VulkanData {
     pub in_flight_fences: Vec<vk::Fence>,
     pub images_in_flight: Vec<vk::Fence>,
     // Texture Image
-    pub mip_levels: u32,
-    pub texture_image: vk::Image,
-    pub texture_image_memory: vk::DeviceMemory,
-    pub texture_image_view: vk::ImageView,
+    pub textures: Vec<Texture>,
     pub texture_sampler: vk::Sampler,
     // Depth
     pub depth_image: vk::Image,
@@ -76,6 +75,17 @@ pub struct Mesh {
     pub index_buffer_memory: vk::DeviceMemory,
     pub index_count: u32,
 }
+
+#[derive(Clone,Copy,Debug,PartialEq,Eq,Hash)]
+pub struct Texture{
+    pub image: vk::Image,
+    pub image_memory: vk::DeviceMemory,
+    pub image_view: vk::ImageView,
+    pub mip_levels: u32,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct TextureHandle(pub usize);
 
 #[derive(Clone,Copy,Debug,PartialEq,Eq,Hash)]
 pub enum PipelineKey{
@@ -105,6 +115,7 @@ pub struct RenderItem {
     // material
     pub material_color: cgmath::Vector3<f32>,
     pub use_texture: bool,
+    pub texture_index: TextureHandle, // use Texture from VulkanData::textures
     pub pipeline_key: PipelineKey,
     pub is_visible: bool,
 }

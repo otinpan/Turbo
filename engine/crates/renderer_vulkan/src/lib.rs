@@ -34,12 +34,13 @@ use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use vulkanalia::window as vk_window;
 use winit::window::Window;
 
+
 use self::buffer::{copy_buffer, create_buffer};
 use self::command::{create_command_buffers, create_command_pools, update_command_buffer};
 use self::device::{create_logical_device, pick_physical_device};
 use self::image::{
-    create_color_objects, create_depth_objects, create_texture_image, create_texture_image_view,
-    create_texture_sampler,
+    create_color_objects, create_depth_objects, create_texture, create_texture_sampler,
+    create_white_texture,
 };
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::mesh::create_mesh;
@@ -50,11 +51,12 @@ use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::{Mesh, VulkanData};
 pub use self::types::{RenderCamera, RenderItem};
 use self::uniform::{
-    create_descriptor_pool, create_descriptor_set_layout, create_descriptor_sets,
-    create_uniform_buffers, update_uniform_buffer,
+    create_descriptor_pool, create_global_descriptor_set_layout, create_global_descriptor_sets,
+    create_material_descriptor_set_layout, create_material_descriptor_sets, create_uniform_buffers,
+    update_uniform_buffer,
 };
 pub use self::vertex::Vertex;
-pub use self::types::{PipelineKey};
+pub use self::types::{PipelineKey, TextureHandle};
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 type Mat4 = Matrix4<f32>;
@@ -80,18 +82,20 @@ impl VulkanRenderer {
         create_swapchain(window, &instance, &device, &mut data)?;
         create_swapchain_image_views(&device, &mut data)?;
         create_render_pass(&instance, &device, &mut data)?;
-        create_descriptor_set_layout(&device, &mut data)?;
+        create_global_descriptor_set_layout(&device, &mut data)?;
+        create_material_descriptor_set_layout(&device, &mut data)?;
         create_mesh3d_pipeline(&device, &mut data)?;
         create_command_pools(&instance, &device, &mut data)?;
         create_color_objects(&instance, &device, &mut data)?;
         create_depth_objects(&instance, &device, &mut data)?;
         create_framebuffers(&device, &mut data)?;
-        create_texture_image(&instance, &device, &mut data)?;
-        create_texture_image_view(&device, &mut data)?;
         create_texture_sampler(&device, &mut data)?;
+        let white_texture = create_white_texture(&instance, &device, &mut data)?;
+        data.textures.push(white_texture);
         create_uniform_buffers(&instance, &device, &mut data)?;
         create_descriptor_pool(&device, &mut data)?;
-        create_descriptor_sets(&device, &mut data)?;
+        create_global_descriptor_sets(&device, &mut data)?;
+        create_material_descriptor_sets(&device, &mut data)?;
         create_command_buffers(&device, &mut data)?;
         create_sync_objects(&device, &mut data)?;
         Ok(Self {
@@ -200,6 +204,25 @@ impl VulkanRenderer {
         self.load_mesh_from_data(load_model(path)?)
     }
 
+    pub unsafe fn load_texture(&mut self, path: &str) -> Result<TextureHandle> {
+        let texture = create_texture(&self.instance, &self.device, &mut self.data, path)?;
+        let index = self.data.textures.len();
+        self.data.textures.push(texture);
+
+        if !self.data.descriptor_pool.is_null() && !self.data.uniform_buffers.is_empty() {
+            self.device.device_wait_idle()?;
+            self.device
+                .destroy_descriptor_pool(self.data.descriptor_pool, None);
+            self.data.global_descriptor_sets.clear();
+            self.data.material_descriptor_sets.clear();
+            create_descriptor_pool(&self.device, &mut self.data)?;
+            create_global_descriptor_sets(&self.device, &mut self.data)?;
+            create_material_descriptor_sets(&self.device, &mut self.data)?;
+        }
+
+        Ok(TextureHandle(index))
+    }
+
     // load mesh for simple polygon i.e. triangle, rectangle ..
     pub unsafe fn load_mesh_from_vertices(
         &mut self,
@@ -296,6 +319,7 @@ impl VulkanRenderer {
         self.data.camera = camera;
     }
 
+
     unsafe fn recreate_swapchain(&mut self, window: &Window) -> Result<()> {
         self.device.device_wait_idle()?;
         self.destroy_swapchain();
@@ -307,7 +331,8 @@ impl VulkanRenderer {
         create_framebuffers(&self.device, &mut self.data)?;
         create_uniform_buffers(&self.instance, &self.device, &mut self.data)?;
         create_descriptor_pool(&self.device, &mut self.data)?;
-        create_descriptor_sets(&self.device, &mut self.data)?;
+        create_global_descriptor_sets(&self.device, &mut self.data)?;
+        create_material_descriptor_sets(&self.device, &mut self.data)?;
         create_command_buffers(&self.device, &mut self.data)?;
         create_render_finished_semaphores(&self.device, &mut self.data)?;
         self.data.images_in_flight = vec![vk::Fence::null(); self.data.swapchain_images.len()];
@@ -331,14 +356,16 @@ impl VulkanRenderer {
 
         self.device.destroy_sampler(self.data.texture_sampler, None);
 
-        self.device
-            .destroy_image_view(self.data.texture_image_view, None);
+        self.data.textures.drain(..).for_each(|texture| {
+            self.device.destroy_image_view(texture.image_view, None);
+            self.device.destroy_image(texture.image, None);
+            self.device.free_memory(texture.image_memory, None);
+        });
 
-        self.device.destroy_image(self.data.texture_image, None);
         self.device
-            .free_memory(self.data.texture_image_memory, None);
+            .destroy_descriptor_set_layout(self.data.material_descriptor_set_layout, None);
         self.device
-            .destroy_descriptor_set_layout(self.data.descriptor_set_layout, None);
+            .destroy_descriptor_set_layout(self.data.global_descriptor_set_layout, None);
 
         self.data
             .in_flight_fences
@@ -383,7 +410,8 @@ impl VulkanRenderer {
             .uniform_buffers_memory
             .drain(..)
             .for_each(|m| self.device.free_memory(m, None));
-        self.data.descriptor_sets.clear();
+        self.data.global_descriptor_sets.clear();
+        self.data.material_descriptor_sets.clear();
         self.data
             .render_finished_semaphores
             .drain(..)

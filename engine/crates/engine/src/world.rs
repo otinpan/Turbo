@@ -4,7 +4,6 @@ pub type Vec3 = cgmath::Vector3<f32>;
 
 use super::CameraComponent;
 use super::MeshRenderer;
-use super::Material;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct EntityId(u64);

@@ -6,16 +6,16 @@ use vulkanalia::prelude::v1_0::*;
 use super::Device;
 use super::Instance;
 use super::buffer::{begin_single_time_commands, create_buffer, end_single_time_commands};
-use super::types::VulkanData;
+use super::types::{VulkanData,Texture};
 
-// texture image ///////////////////////////////////////////////
-pub unsafe fn create_texture_image(
+// texture //////////////////////////////////////////
+pub unsafe fn create_texture(
     instance: &Instance,
     device: &Device,
     data: &mut VulkanData,
-) -> Result<()> {
-    // load
-    let image = File::open("assets/textures/viking_room.png")?;
+    path: &str,
+) -> Result<Texture> {
+    let image = File::open(path)?;
 
     let decoder = png::Decoder::new(image);
     let mut reader = decoder.read_info()?;
@@ -23,7 +23,6 @@ pub unsafe fn create_texture_image(
     let mut pixels = vec![0; reader.info().raw_bytes()];
     reader.next_frame(&mut pixels)?;
 
-    // if png corresponds RGB, convert to RGBA to add 4bytes
     let pixels = match (reader.info().color_type, reader.info().bit_depth) {
         (png::ColorType::Rgb, png::BitDepth::Eight) => pixels
             .chunks_exact(3)
@@ -39,15 +38,48 @@ pub unsafe fn create_texture_image(
         }
     };
 
-    let size = pixels.len() as u64;
     let (width, height) = reader.info().size();
-    data.mip_levels = (width.max(height) as f32).log2().floor() as u32 + 1;
 
-    if width != 1024 || height != 1024 || reader.info().color_type != png::ColorType::Rgba {
-        panic!("Invalid texture image.")
-    }
+    create_texture_from_pixels(
+        instance,
+        device,
+        data,
+        &pixels,
+        width,
+        height,
+    )
+}
 
-    // create (staging)
+
+pub unsafe fn create_white_texture(
+    instance: &Instance,
+    device: &Device,
+    data: &mut VulkanData,
+) -> Result<Texture> {
+    let pixels = [255, 255, 255, 255];
+
+    create_texture_from_pixels(
+        instance,
+        device,
+        data,
+        &pixels,
+        1,
+        1,
+    )
+}
+
+// texture image ///////////////////////////////////////////////
+pub unsafe fn create_texture_from_pixels(
+    instance: &Instance,
+    device: &Device,
+    data: &mut VulkanData,
+    pixels: &[u8],
+    width: u32,
+    height: u32,
+) -> Result<Texture> {
+    let mip_levels = (width.max(height) as f32).log2().floor() as u32 + 1;
+    let size = pixels.len() as u64;
+
     let (staging_buffer, staging_buffer_memory) = create_buffer(
         instance,
         device,
@@ -57,73 +89,68 @@ pub unsafe fn create_texture_image(
         vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
     )?;
 
-    // copy (staging)
     let memory = device.map_memory(staging_buffer_memory, 0, size, vk::MemoryMapFlags::empty())?;
     memcpy(pixels.as_ptr(), memory.cast(), pixels.len());
     device.unmap_memory(staging_buffer_memory);
 
-    // create image
-    // allocate level 0..1 in vk::Image
-    let (texture_image, texture_image_memory) = create_image(
+    let (image, image_memory) = create_image(
         instance,
         device,
         data,
         width,
         height,
-        data.mip_levels,
+        mip_levels,
         vk::SampleCountFlags::_1,
         vk::Format::R8G8B8A8_SRGB,
         vk::ImageTiling::OPTIMAL,
         vk::ImageUsageFlags::SAMPLED
             | vk::ImageUsageFlags::TRANSFER_DST
-            | vk::ImageUsageFlags::TRANSFER_SRC, // this image is used as a src
+            | vk::ImageUsageFlags::TRANSFER_SRC,
         vk::MemoryPropertyFlags::DEVICE_LOCAL,
     )?;
 
-    data.texture_image = texture_image;
-    data.texture_image_memory = texture_image_memory;
-
-    // transition + copy
-    // change layout to TRANSFER_DST_OPTIMAL to write staging buffer to texture image
     transition_image_layout(
         device,
         data,
-        data.texture_image,
+        image,
         vk::Format::R8G8B8A8_SRGB,
         vk::ImageLayout::UNDEFINED,
         vk::ImageLayout::TRANSFER_DST_OPTIMAL,
-        data.mip_levels,
+        mip_levels,
     )?;
 
-    // copy pixel data from staging buffer to texture image
-    // copy only mipmap_level = 0
-    copy_buffer_to_image(
-        device,
-        data,
-        staging_buffer,
-        data.texture_image,
-        width,
-        height,
-    )?;
+    copy_buffer_to_image(device, data, staging_buffer, image, width, height)?;
 
-    // clean up
     device.destroy_buffer(staging_buffer, None);
     device.free_memory(staging_buffer_memory, None);
 
-    // Mipmaps
-    // write mipmap_level 1...mipmap_level-1 from level0
     generate_mipmaps(
         instance,
         device,
         data,
-        data.texture_image,
+        image,
         vk::Format::R8G8B8A8_SRGB,
         width,
         height,
-        data.mip_levels,
+        mip_levels,
     )?;
-    Ok(())
+
+    let image_view = create_image_view(
+        device,
+        image,
+        vk::Format::R8G8B8A8_SRGB,
+        vk::ImageAspectFlags::COLOR,
+        mip_levels,
+    )?;
+
+    Ok(Texture {
+        image,
+        image_memory,
+        image_view,
+        mip_levels,
+    })
 }
+
 
 unsafe fn create_image(
     instance: &Instance,
@@ -301,18 +328,6 @@ unsafe fn copy_buffer_to_image(
     Ok(())
 }
 
-// texture image view //////////////////////////////////////
-pub unsafe fn create_texture_image_view(device: &Device, data: &mut VulkanData) -> Result<()> {
-    data.texture_image_view = create_image_view(
-        device,
-        data.texture_image,
-        vk::Format::R8G8B8A8_SRGB,
-        vk::ImageAspectFlags::COLOR,
-        data.mip_levels,
-    )?;
-
-    Ok(())
-}
 
 // tell vulkan how to use this image
 // i.e. this image is 2D, this image is shown in this range
@@ -356,7 +371,7 @@ pub unsafe fn create_texture_sampler(device: &Device, data: &mut VulkanData) -> 
         .mipmap_mode(vk::SamplerMipmapMode::LINEAR)
         .mip_lod_bias(0.0)
         .min_lod(0.0)
-        .max_lod(data.mip_levels as f32)
+        .max_lod(32.0)
         .mip_lod_bias(0.0);
 
     data.texture_sampler = device.create_sampler(&info, None)?;

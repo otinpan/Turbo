@@ -30,8 +30,16 @@
     - pipeline.rs : create_pipeline()
     - commands.rs
     - lib.rs : swapchain
-
-      
+* Image複数作成
+  - Texture struct と textures: Vec<Texture> を作る
+  - create_texture_image(path) -> Texture に変える
+  - shader の set/binding を分ける
+  - create_descriptor_set_layout を global/material に分割
+  - pipeline layout に両方渡す
+  - create_global_descriptor_sets を作る
+  - create_material_descriptor_sets を作る
+  - RenderItem に material_index または texture_index を持たせる
+  - command buffer で global set と material set を bind 
     
 
 ## ログ表示

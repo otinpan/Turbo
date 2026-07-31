@@ -14,6 +14,7 @@ use super::vertex::Vertex;
 
 // A graphics pipeline describes how vertices and fragments
 // are processed by the GPU.
+// create "pipeline" between shader and engine
 pub unsafe fn create_mesh3d_pipeline(device: &Device, data: &mut VulkanData) -> Result<()> {
     // Stages
     let vert = include_bytes!("../../../shaders/compiled/vert.spv");
@@ -117,7 +118,10 @@ pub unsafe fn create_mesh3d_pipeline(device: &Device, data: &mut VulkanData) -> 
         .size(32);
 
     // Layout
-    let set_layouts = &[data.descriptor_set_layout];
+    let set_layouts = &[
+        data.global_descriptor_set_layout,
+        data.material_descriptor_set_layout,
+    ];
     let push_constant_ranges = &[vert_push_constant_range, frag_push_constant_range];
     let layout_info = vk::PipelineLayoutCreateInfo::builder()
         .set_layouts(set_layouts)

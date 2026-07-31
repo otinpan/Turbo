@@ -5,7 +5,9 @@ use turbo_math::Transform;
 use winit::event::{MouseButton, WindowEvent};
 use winit::keyboard::KeyCode;
 use winit::window::Window;
-use renderer_vulkan::{PipelineKey};
+use renderer_vulkan::{PipelineKey, TextureHandle};
+
+pub const DEFAULT_TEXTURE: TextureHandle=TextureHandle(0);
 
 use crate::primitive::{
     PrimitiveMesh, PrimitiveShape, PrimitiveType,
@@ -36,6 +38,7 @@ pub struct App {
     pub time: Time,
     model_mesh: MeshHandle,
     pub primitive_meshes: Vec<PrimitiveMesh>,
+    texture: TextureHandle,
     positions: Vec<Vec3>,
 }
 
@@ -145,6 +148,8 @@ impl App {
         let window_size = window.inner_size();
         input.set_window_size(vec2(window_size.width as f32, window_size.height as f32));
 
+        // texture
+        let texture = renderer.load_texture("assets/textures/viking_room.png")?;
         let mut app = Self {
             renderer,
             world,
@@ -152,6 +157,7 @@ impl App {
             time: Time::default(),
             model_mesh,
             primitive_meshes,
+            texture,
             positions,
         };
 
@@ -305,6 +311,7 @@ impl App {
                         material: Material{
                             color: vec3(1.0,1.0,1.0),
                             use_texture: true,
+                            texture: self.texture,
                             pipeline_key: PipelineKey::Mesh3D,
                         },
                     }),
@@ -576,6 +583,7 @@ impl App {
                     transform: object.transform.clone(),
                     material_color: mesh_renderer.material.color,
                     use_texture: mesh_renderer.material.use_texture,
+                    texture_index: mesh_renderer.material.texture,
                     pipeline_key: mesh_renderer.material.pipeline_key,
                     is_visible: object.get_visible(),
                 })
