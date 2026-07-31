@@ -7,9 +7,9 @@
 )]
 
 mod camera;
-mod mesh_renderer;
 mod material;
+mod mesh_renderer;
 
 pub use camera::CameraComponent;
+pub use material::Material;
 pub use mesh_renderer::{MeshHandle, MeshRenderer};
-pub use material::{Material};

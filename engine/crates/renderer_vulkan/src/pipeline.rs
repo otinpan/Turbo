@@ -7,10 +7,8 @@ use vulkanalia::bytecode::Bytecode;
 use vulkanalia::prelude::v1_0::*;
 
 use super::image::get_depth_format;
-use super::types::{VulkanData,GraphicsPipeline,PipelineKey};
+use super::types::{GraphicsPipeline, PipelineKey, VulkanData};
 use super::vertex::Vertex;
-
-
 
 // A graphics pipeline describes how vertices and fragments
 // are processed by the GPU.
@@ -126,7 +124,7 @@ pub unsafe fn create_mesh3d_pipeline(device: &Device, data: &mut VulkanData) -> 
     let layout_info = vk::PipelineLayoutCreateInfo::builder()
         .set_layouts(set_layouts)
         .push_constant_ranges(push_constant_ranges);
-    let pipeline_layout= device.create_pipeline_layout(&layout_info, None)?;
+    let pipeline_layout = device.create_pipeline_layout(&layout_info, None)?;
 
     // Create
     let stages = &[vert_stage, frag_stage];
@@ -143,14 +141,14 @@ pub unsafe fn create_mesh3d_pipeline(device: &Device, data: &mut VulkanData) -> 
         .render_pass(data.render_pass)
         .subpass(0);
 
-    let pipeline=device
-        .create_graphics_pipelines(vk::PipelineCache::null(),&[info],None)?
+    let pipeline = device
+        .create_graphics_pipelines(vk::PipelineCache::null(), &[info], None)?
         .0[0];
 
-    let graphics_pipeline=GraphicsPipeline{
+    let graphics_pipeline = GraphicsPipeline {
         key: PipelineKey::Mesh3D,
         pipeline,
-        layout: pipeline_layout, 
+        layout: pipeline_layout,
     };
 
     data.pipelines.push(graphics_pipeline);

@@ -8,10 +8,10 @@ use vulkanalia::prelude::v1_0::*;
 type Mat4 = cgmath::Matrix4<f32>;
 
 #[repr(C)]
-#[derive(Copy,Clone)]
-struct FragmentPushConstants{
-    material_color: [f32;4],
-    material_flags: [f32;4],
+#[derive(Copy, Clone)]
+struct FragmentPushConstants {
+    material_color: [f32; 4],
+    material_flags: [f32; 4],
 }
 
 // command pool ////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ unsafe fn update_secondary_command_buffer(
 
     //  Model
     let object = &renderer.data.render_objects[model_index];
-    let pipeline=renderer.data.pipeline(object.pipeline_key);
+    let pipeline = renderer.data.pipeline(object.pipeline_key);
     let mesh = &renderer.data.meshes[object.mesh_index];
 
     let model = object.transform.matrix();
@@ -172,22 +172,17 @@ unsafe fn update_secondary_command_buffer(
     let model_bytes =
         std::slice::from_raw_parts(&model as *const Mat4 as *const u8, size_of::<Mat4>());
 
-    let material=FragmentPushConstants{
+    let material = FragmentPushConstants {
         material_color: [
             object.material_color.x,
             object.material_color.y,
             object.material_color.z,
             1.0,
         ],
-        material_flags: [
-            if object.use_texture{1.0} else {0.0},
-            0.0,
-            0.0,
-            0.0,
-        ],
+        material_flags: [if object.use_texture { 1.0 } else { 0.0 }, 0.0, 0.0, 0.0],
     };
 
-    let material_bytes=std::slice::from_raw_parts(
+    let material_bytes = std::slice::from_raw_parts(
         &material as *const FragmentPushConstants as *const u8,
         std::mem::size_of::<FragmentPushConstants>(),
     );
@@ -222,10 +217,10 @@ unsafe fn update_secondary_command_buffer(
         vk::IndexType::UINT32,
     );
 
-    let global_set=renderer.data.global_descriptor_sets[image_index];
-    let material_set=renderer.data.material_descriptor_sets[object.texture_index.0];
+    let global_set = renderer.data.global_descriptor_sets[image_index];
+    let material_set = renderer.data.material_descriptor_sets[object.texture_index.0];
 
-    let sets=[global_set,material_set];
+    let sets = [global_set, material_set];
     renderer.device.cmd_bind_descriptor_sets(
         command_buffer,
         vk::PipelineBindPoint::GRAPHICS,

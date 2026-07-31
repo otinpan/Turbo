@@ -9,16 +9,13 @@ pub struct MeshRenderer {
     pub material: Material,
 }
 
-impl MeshRenderer{
-    pub fn new(mesh: MeshHandle, material: Material) -> Self{
-        Self{
-            mesh,
-            material,
-        }
+impl MeshRenderer {
+    pub fn new(mesh: MeshHandle, material: Material) -> Self {
+        Self { mesh, material }
     }
 
-    pub fn default_material(mesh: MeshHandle) -> Self{
-        Self { 
+    pub fn default_material(mesh: MeshHandle) -> Self {
+        Self {
             mesh,
             material: Material::default(),
         }

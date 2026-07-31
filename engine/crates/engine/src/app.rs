@@ -1,33 +1,30 @@
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use cgmath::{InnerSpace, vec2, vec3};
+use renderer_vulkan::{PipelineKey, TextureHandle};
 use renderer_vulkan::{RenderCamera, RenderItem, VulkanRenderer};
+use std::collections::HashMap;
 use turbo_math::Transform;
 use winit::event::{MouseButton, WindowEvent};
 use winit::keyboard::KeyCode;
 use winit::window::Window;
-use renderer_vulkan::{PipelineKey, TextureHandle};
 
-pub const DEFAULT_TEXTURE: TextureHandle=TextureHandle(0);
+pub const DEFAULT_TEXTURE: TextureHandle = TextureHandle(0);
 
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveShape, PrimitiveType,
-    create_primitive_mesh, spawn_primitive_from_mesh,
+    PrimitiveMesh, PrimitiveShape, PrimitiveType, create_primitive_mesh, spawn_circle, spawn_cube,
+    spawn_polygon, spawn_primitive_from_mesh, spawn_rectangle, spawn_sphere, spawn_triangle,
     update_primitive_mesh,
-    spawn_triangle, spawn_rectangle, spawn_cube, spawn_circle,
-    spawn_polygon, spawn_sphere,
 };
 
-use crate::world::{
-    EntityId,
-};
+use crate::world::EntityId;
 
 use super::CameraComponent;
 use super::Input;
+use super::Material;
 use super::MeshHandle;
 use super::MeshRenderer;
 use super::Time;
 use super::World;
-use super::Material;
 
 pub type Vec3 = cgmath::Vector3<f32>;
 
@@ -36,9 +33,9 @@ pub struct App {
     pub world: World,
     pub input: Input,
     pub time: Time,
-    model_meshes: Vec<MeshHandle>,
+    models: HashMap<String, MeshHandle>,
     pub primitive_meshes: Vec<PrimitiveMesh>,
-    textures: Vec<TextureHandle>,
+    textures: HashMap<String, TextureHandle>,
     positions: Vec<Vec3>,
 }
 
@@ -47,77 +44,10 @@ impl App {
         let mut renderer = VulkanRenderer::create(window)?;
         let mut world = World::default();
 
-        // intialize_mesh
-        let model_meshes =vec![
-            MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?),
-        ];
-
-        let primitive_meshes = vec![
-            create_primitive_mesh(
-                &mut renderer,
-                PrimitiveShape::Triangle {
-                    points: [
-                        vec3(0.0, 0.0, 0.5),
-                        vec3(0.0, -0.5, -0.5),
-                        vec3(0.0, 0.5, -0.5),
-                    ],
-                },
-            )?,
-            create_primitive_mesh(
-                &mut renderer,
-                PrimitiveShape::Rectangle {
-                    points: [
-                        vec3(0.0, -0.5, 0.5),
-                        vec3(0.0, -0.5, -0.5),
-                        vec3(0.0, 0.5, -0.5),
-                        vec3(0.0, 0.5, 0.5),
-                    ],
-                },
-            )?,
-            create_primitive_mesh(
-                &mut renderer,
-                PrimitiveShape::Cube {
-                    points: [
-                        vec3(0.5, -0.5, 0.5),
-                        vec3(0.5, 0.5, 0.5),
-                        vec3(-0.5, 0.5, 0.5),
-                        vec3(-0.5, -0.5, 0.5),
-                        vec3(0.5, -0.5, -0.5),
-                        vec3(0.5, 0.5, -0.5),
-                        vec3(-0.5, 0.5, -0.5),
-                        vec3(-0.5, -0.5, -0.5),
-                    ],
-                },
-            )?,
-            create_primitive_mesh(
-                &mut renderer,
-                PrimitiveShape::Circle {
-                    radius: 1.0,
-                    segments: 32,
-                },
-            )?,
-            create_primitive_mesh(
-                &mut renderer,
-                PrimitiveShape::Polygon {
-                    points: vec![
-                        vec3(0.0, -0.7, 0.7),
-                        vec3(0.0, -0.4, 0.5),
-                        vec3(0.0, 0.7, 0.5),
-                        vec3(0.0, 0.0, -0.6),
-                        vec3(0.0, -0.5, -0.4),
-                    ],
-                },
-            )?,
-            create_primitive_mesh(
-                &mut renderer,
-                PrimitiveShape::Sphere { 
-                    radius: 1.0, 
-                    rings: 32, 
-                    segments: 32, 
-                }
-            )?,
-        ];
-
+        // load data
+        let models = load_models(&mut renderer)?;
+        let primitive_meshes = create_primitive_meshes(&mut renderer)?;
+        let textures = load_textures(&mut renderer)?;
 
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
@@ -125,7 +55,6 @@ impl App {
             vec3(0.0, -1.25, -1.0),
             vec3(0.0, 1.25, -1.0),
         ];
-
 
         // camera //////////////////
         world.spawn(
@@ -149,113 +78,90 @@ impl App {
         let window_size = window.inner_size();
         input.set_window_size(vec2(window_size.width as f32, window_size.height as f32));
 
-        let textures=vec![
-            renderer.load_texture("assets/textures/viking_room.png")?,
-            renderer.load_texture("assets/textures/texture.png")?,
-        ];
         let mut app = Self {
             renderer,
             world,
             input,
             time: Time::default(),
-            model_meshes,
+            models,
             primitive_meshes,
             textures,
             positions,
         };
 
         #[cfg(debug_assertions)]
-        {   
+        {
             // create primitive ////////////////////////////
-            unsafe{
-                let triangle_id1=app.spawn_triangle(
-                vec3(0.0,-0.2,-0.5),
-                vec3(0.0,0.5,0.2),
-                vec3(0.0,0.0,0.5),
-                vec3(1.0,1.0,1.0),
+            unsafe {
+                let triangle_id1 = app.spawn_triangle(
+                    vec3(0.0, -0.2, -0.5),
+                    vec3(0.0, 0.5, 0.2),
+                    vec3(0.0, 0.0, 0.5),
+                    vec3(1.0, 1.0, 1.0),
                 )?;
 
-                let rectangle_id1=app.spawn_rectangle(
-                    vec3(0.0,0.5,0.5),
-                    0.3,
-                    0.3,
-                    vec3(1.0,1.0,1.0),
-                )?;
+                let rectangle_id1 =
+                    app.spawn_rectangle(vec3(0.0, 0.5, 0.5), 0.3, 0.3, vec3(1.0, 1.0, 1.0))?;
 
-                let cube_id1=app.spawn_cube(
-                    vec3(0.0,1.0,1.0),
-                    1.0,
-                    vec3(1.0,1.0,1.0)
-                )?;
+                let cube_id1 = app.spawn_cube(vec3(0.0, 1.0, 1.0), 1.0, vec3(1.0, 1.0, 1.0))?;
 
-                let circle_id1=app.spawn_circle(
-                    vec3(0.0,2.0,1.0),
-                    1.0,
-                    32,
-                    vec3(1.0,1.0,1.0),
-                )?;
+                let circle_id1 =
+                    app.spawn_circle(vec3(0.0, 2.0, 1.0), 1.0, 32, vec3(1.0, 1.0, 1.0))?;
 
-                let polygon_id1=app.spawn_polygon(
+                let polygon_id1 = app.spawn_polygon(
                     vec![
-                        vec3(0.0,-0.4,-1.0),
-                        vec3(0.0,-0.2,0.0),
-                        vec3(0.0,0.5,-0.3),
-                        vec3(0.0,0.3,0.2),
-                        vec3(0.0,0.0,1.0),
-                        vec3(0.0,-0.1,1.2),
+                        vec3(0.0, -0.4, -1.0),
+                        vec3(0.0, -0.2, 0.0),
+                        vec3(0.0, 0.5, -0.3),
+                        vec3(0.0, 0.3, 0.2),
+                        vec3(0.0, 0.0, 1.0),
+                        vec3(0.0, -0.1, 1.2),
                     ],
-                    vec3(1.0,1.0,1.0)
+                    vec3(1.0, 1.0, 1.0),
                 )?;
 
-                let sphere_id1=app.spawn_sphere(
-                    vec3(0.0,-1.0,0.0),
-                    0.5,
-                    16,
-                    16,
-                    vec3(1.0,1.0,1.0)
-                )?;
-
+                let sphere_id1 =
+                    app.spawn_sphere(vec3(0.0, -1.0, 0.0), 0.5, 16, 16, vec3(1.0, 1.0, 1.0))?;
             }
-            let triangle_count=app
+            let triangle_count = app
                 .primitive_meshes
                 .iter()
-                .filter(|mesh| mesh.primitive_type==PrimitiveType::Triangle)
+                .filter(|mesh| mesh.primitive_type == PrimitiveType::Triangle)
                 .count();
-            assert!(triangle_count==2);
+            assert!(triangle_count == 2);
 
-            let rectangle_count=app
+            let rectangle_count = app
                 .primitive_meshes
                 .iter()
-                .filter(|mesh| mesh.primitive_type==PrimitiveType::Rectangle)
+                .filter(|mesh| mesh.primitive_type == PrimitiveType::Rectangle)
                 .count();
-            assert!(rectangle_count==2);
+            assert!(rectangle_count == 2);
 
-            let cube_count=app
+            let cube_count = app
                 .primitive_meshes
                 .iter()
-                .filter(|mesh|mesh.primitive_type==PrimitiveType::Cube)
+                .filter(|mesh| mesh.primitive_type == PrimitiveType::Cube)
                 .count();
-            assert!(cube_count==2);
+            assert!(cube_count == 2);
 
-            let circle_count=app
+            let circle_count = app
                 .primitive_meshes
                 .iter()
-                .filter(|mesh|mesh.primitive_type==PrimitiveType::Cube)
+                .filter(|mesh| mesh.primitive_type == PrimitiveType::Circle)
                 .count();
-            assert!(circle_count==2);
+            assert!(circle_count == 2);
 
-            let polygon_count=app
+            let polygon_count = app
                 .primitive_meshes
                 .iter()
-                .filter(|mesh|mesh.primitive_type==PrimitiveType::Polygon)
+                .filter(|mesh| mesh.primitive_type == PrimitiveType::Polygon)
                 .count();
-            assert!(polygon_count==2);
+            assert!(polygon_count == 2);
         }
         app.prepare_renderer();
 
         Ok(app)
     }
-
 
     pub fn handle_event(&mut self, event: &WindowEvent) {
         self.input.handle_event(event);
@@ -291,6 +197,8 @@ impl App {
             }
         }
         if self.input.key_pressed(KeyCode::ArrowRight) {
+            let viking_room = self.use_model("viking_room")?;
+            let viking_texture = self.use_texture("viking_room");
             let index = self
                 .world
                 .objects()
@@ -299,9 +207,7 @@ impl App {
                     object
                         .mesh_renderer
                         .as_ref()
-                        .is_some_and(|mesh_renderer|{
-                            self.model_meshes.contains(&mesh_renderer.mesh)
-                        })
+                        .is_some_and(|mesh_renderer| mesh_renderer.mesh == viking_room)
                 })
                 .count();
 
@@ -312,11 +218,11 @@ impl App {
                         ..Default::default()
                     },
                     Some(MeshRenderer {
-                        mesh: self.model_meshes[0],
-                        material: Material{
-                            color: vec3(1.0,1.0,1.0),
+                        mesh: viking_room,
+                        material: Material {
+                            color: vec3(1.0, 1.0, 1.0),
                             use_texture: true,
-                            texture: self.textures[0],
+                            texture: viking_texture,
                             pipeline_key: PipelineKey::Mesh3D,
                         },
                     }),
@@ -328,15 +234,16 @@ impl App {
 
         if self.input.key_pressed(KeyCode::KeyT) {
             let position = self.mouse_position_on_spawn_plane();
+            let face_texture = self.use_texture("face");
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Triangle) {
                 let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     MeshRenderer::new(
                         mesh,
-                        Material{
-                            color: vec3(1.0,1.0,1.0),
+                        Material {
+                            color: vec3(1.0, 1.0, 1.0),
                             use_texture: true,
-                            texture: self.textures[1],
+                            texture: face_texture,
                             ..Default::default()
                         },
                     ),
@@ -355,8 +262,8 @@ impl App {
                     &mut self.world,
                     MeshRenderer::new(
                         mesh,
-                        Material{
-                            color: vec3(1.0,1.0,1.0),
+                        Material {
+                            color: vec3(1.0, 1.0, 1.0),
                             use_texture: true,
                             ..Default::default()
                         },
@@ -376,8 +283,8 @@ impl App {
                     &mut self.world,
                     MeshRenderer::new(
                         mesh,
-                        Material{
-                            color: vec3(1.0,1.0,1.0),
+                        Material {
+                            color: vec3(1.0, 1.0, 1.0),
                             use_texture: true,
                             ..Default::default()
                         },
@@ -397,8 +304,8 @@ impl App {
                     &mut self.world,
                     MeshRenderer::new(
                         mesh,
-                        Material{
-                            color: vec3(1.0,1.0,1.0),
+                        Material {
+                            color: vec3(1.0, 1.0, 1.0),
                             use_texture: true,
                             ..Default::default()
                         },
@@ -418,8 +325,8 @@ impl App {
                     &mut self.world,
                     MeshRenderer::new(
                         mesh,
-                        Material{
-                            color: vec3(1.0,1.0,1.0),
+                        Material {
+                            color: vec3(1.0, 1.0, 1.0),
                             use_texture: true,
                             ..Default::default()
                         },
@@ -432,15 +339,15 @@ impl App {
             }
         }
 
-        if self.input.key_pressed(KeyCode::KeyE){
-            let position=self.mouse_position_on_spawn_plane();
-            if let Some(mesh)=self.primitive_handle(PrimitiveType::Sphere){
-                let _id=spawn_primitive_from_mesh(
+        if self.input.key_pressed(KeyCode::KeyE) {
+            let position = self.mouse_position_on_spawn_plane();
+            if let Some(mesh) = self.primitive_handle(PrimitiveType::Sphere) {
+                let _id = spawn_primitive_from_mesh(
                     &mut self.world,
                     MeshRenderer::new(
                         mesh,
-                        Material{
-                            color: vec3(1.0,1.0,1.0),
+                        Material {
+                            color: vec3(1.0, 1.0, 1.0),
                             use_texture: true,
                             ..Default::default()
                         },
@@ -448,7 +355,7 @@ impl App {
                     Transform {
                         position,
                         ..Default::default()
-                    }
+                    },
                 );
             }
         }
@@ -472,15 +379,15 @@ impl App {
                     )?;
                 }
             }
-            if let Some(mesh)=self.primitive_mesh(PrimitiveType::Sphere){
-                unsafe{
+            if let Some(mesh) = self.primitive_mesh(PrimitiveType::Sphere) {
+                unsafe {
                     update_primitive_mesh(
                         &mut self.renderer,
                         mesh,
-                        PrimitiveShape::Sphere { 
-                            radius: 2.0, 
-                            rings: 20, 
-                            segments: 20, 
+                        PrimitiveShape::Sphere {
+                            radius: 2.0,
+                            rings: 20,
+                            segments: 20,
                         },
                     )?;
                 }
@@ -513,6 +420,17 @@ impl App {
         let y = 0.5 - mouse.y / height;
 
         vec3(0.0, x * world_height * aspect, y * world_height)
+    }
+
+    fn use_texture(&self, name: &str) -> TextureHandle {
+        self.textures.get(name).copied().unwrap_or(DEFAULT_TEXTURE)
+    }
+
+    fn use_model(&self, name: &str) -> Result<MeshHandle> {
+        self.models
+            .get(name)
+            .copied()
+            .ok_or_else(|| anyhow!("Model not found: {name}"))
     }
 
     // TODO: later move to systems/camera.rs
@@ -620,7 +538,7 @@ impl App {
         p1: Vec3,
         p2: Vec3,
         color: Vec3,
-    )->Result<EntityId>{
+    ) -> Result<EntityId> {
         spawn_triangle(
             &mut self.world,
             &mut self.renderer,
@@ -638,7 +556,7 @@ impl App {
         width: f32,
         height: f32,
         color: Vec3,
-    ) -> Result<EntityId>{
+    ) -> Result<EntityId> {
         spawn_rectangle(
             &mut self.world,
             &mut self.renderer,
@@ -650,12 +568,7 @@ impl App {
         )
     }
 
-    pub unsafe fn spawn_cube(
-        &mut self,
-        pos: Vec3,
-        length: f32,
-        color: Vec3,
-    ) -> Result<EntityId>{
+    pub unsafe fn spawn_cube(&mut self, pos: Vec3, length: f32, color: Vec3) -> Result<EntityId> {
         spawn_cube(
             &mut self.world,
             &mut self.renderer,
@@ -672,7 +585,7 @@ impl App {
         radius: f32,
         segments: u32,
         color: Vec3,
-    )-> Result<EntityId>{
+    ) -> Result<EntityId> {
         spawn_circle(
             &mut self.world,
             &mut self.renderer,
@@ -684,11 +597,7 @@ impl App {
         )
     }
 
-    pub unsafe fn spawn_polygon(
-        &mut self,
-        points: Vec<Vec3>,
-        color: Vec3,
-    ) -> Result<EntityId>{
+    pub unsafe fn spawn_polygon(&mut self, points: Vec<Vec3>, color: Vec3) -> Result<EntityId> {
         spawn_polygon(
             &mut self.world,
             &mut self.renderer,
@@ -697,7 +606,7 @@ impl App {
             color,
         )
     }
-    
+
     pub unsafe fn spawn_sphere(
         &mut self,
         center: Vec3,
@@ -705,7 +614,7 @@ impl App {
         rings: u32,
         segments: u32,
         color: Vec3,
-    ) -> Result<EntityId>{
+    ) -> Result<EntityId> {
         spawn_sphere(
             &mut self.world,
             &mut self.renderer,
@@ -717,6 +626,100 @@ impl App {
             color,
         )
     }
+}
+
+unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, MeshHandle>> {
+    let mut models = HashMap::new();
+    models.insert(
+        "viking_room".to_string(),
+        MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?),
+    );
+
+    Ok(models)
+}
+
+unsafe fn load_textures(renderer: &mut VulkanRenderer) -> Result<HashMap<String, TextureHandle>> {
+    let mut textures = HashMap::new();
+    textures.insert(
+        "viking_room".to_string(),
+        renderer.load_texture("assets/textures/viking_room.png")?,
+    );
+    textures.insert(
+        "face".to_string(),
+        renderer.load_texture("assets/textures/texture.png")?,
+    );
+
+    Ok(textures)
+}
+
+unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<PrimitiveMesh>> {
+    let primitive_meshes = vec![
+        create_primitive_mesh(
+            renderer,
+            PrimitiveShape::Triangle {
+                points: [
+                    vec3(0.0, 0.0, 0.5),
+                    vec3(0.0, -0.5, -0.5),
+                    vec3(0.0, 0.5, -0.5),
+                ],
+            },
+        )?,
+        create_primitive_mesh(
+            renderer,
+            PrimitiveShape::Rectangle {
+                points: [
+                    vec3(0.0, -0.5, 0.5),
+                    vec3(0.0, -0.5, -0.5),
+                    vec3(0.0, 0.5, -0.5),
+                    vec3(0.0, 0.5, 0.5),
+                ],
+            },
+        )?,
+        create_primitive_mesh(
+            renderer,
+            PrimitiveShape::Cube {
+                points: [
+                    vec3(0.5, -0.5, 0.5),
+                    vec3(0.5, 0.5, 0.5),
+                    vec3(-0.5, 0.5, 0.5),
+                    vec3(-0.5, -0.5, 0.5),
+                    vec3(0.5, -0.5, -0.5),
+                    vec3(0.5, 0.5, -0.5),
+                    vec3(-0.5, 0.5, -0.5),
+                    vec3(-0.5, -0.5, -0.5),
+                ],
+            },
+        )?,
+        create_primitive_mesh(
+            renderer,
+            PrimitiveShape::Circle {
+                radius: 1.0,
+                segments: 32,
+            },
+        )?,
+        create_primitive_mesh(
+            renderer,
+            PrimitiveShape::Polygon {
+                points: vec![
+                    vec3(0.0, -0.7, 0.7),
+                    vec3(0.0, -0.4, 0.5),
+                    vec3(0.0, 0.7, 0.5),
+                    vec3(0.0, 0.0, -0.6),
+                    vec3(0.0, -0.5, -0.4),
+                ],
+            },
+        )?,
+        create_primitive_mesh(
+            renderer,
+            PrimitiveShape::Sphere {
+                radius: 1.0,
+                rings: 32,
+                segments: 32,
+            },
+        )?,
+    ];
+
+    Ok(primitive_meshes)
 }
 
 // test ///////////////////////////////////////////////////
@@ -744,9 +747,24 @@ mod tests {
                 }),
                 vec3(0.0, 0.0, 0.0),
             ),
-            spawn_primitive_from_mesh(&mut world, MeshRenderer::default_material(triangle_mesh),Transform::default()).unwrap(),
-            spawn_primitive_from_mesh(&mut world, MeshRenderer::default_material(rectangle_mesh),Transform::default()).unwrap(),
-            spawn_primitive_from_mesh(&mut world, MeshRenderer::default_material(cube_mesh),Transform::default()).unwrap(),
+            spawn_primitive_from_mesh(
+                &mut world,
+                MeshRenderer::default_material(triangle_mesh),
+                Transform::default(),
+            )
+            .unwrap(),
+            spawn_primitive_from_mesh(
+                &mut world,
+                MeshRenderer::default_material(rectangle_mesh),
+                Transform::default(),
+            )
+            .unwrap(),
+            spawn_primitive_from_mesh(
+                &mut world,
+                MeshRenderer::default_material(cube_mesh),
+                Transform::default(),
+            )
+            .unwrap(),
         ];
 
         assert_eq!(world.objects().len(), ids.len());

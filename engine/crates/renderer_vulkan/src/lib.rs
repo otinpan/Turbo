@@ -34,7 +34,6 @@ use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use vulkanalia::window as vk_window;
 use winit::window::Window;
 
-
 use self::buffer::{copy_buffer, create_buffer};
 use self::command::{create_command_buffers, create_command_pools, update_command_buffer};
 use self::device::{create_logical_device, pick_physical_device};
@@ -49,6 +48,7 @@ use self::pipeline::{create_mesh3d_pipeline, create_render_pass};
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::{Mesh, VulkanData};
+pub use self::types::{PipelineKey, TextureHandle};
 pub use self::types::{RenderCamera, RenderItem};
 use self::uniform::{
     create_descriptor_pool, create_global_descriptor_set_layout, create_global_descriptor_sets,
@@ -56,7 +56,6 @@ use self::uniform::{
     update_uniform_buffer,
 };
 pub use self::vertex::Vertex;
-pub use self::types::{PipelineKey, TextureHandle};
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 type Mat4 = Matrix4<f32>;
@@ -319,7 +318,6 @@ impl VulkanRenderer {
         self.data.camera = camera;
     }
 
-
     unsafe fn recreate_swapchain(&mut self, window: &Window) -> Result<()> {
         self.device.device_wait_idle()?;
         self.destroy_swapchain();
@@ -424,13 +422,10 @@ impl VulkanRenderer {
             .destroy_image_view(self.data.depth_image_view, None);
         self.device.destroy_image(self.data.depth_image, None);
         self.device.free_memory(self.data.depth_image_memory, None);
-        self.data
-            .pipelines
-            .drain(..)
-            .for_each(|p| {
-                self.device.destroy_pipeline(p.pipeline, None);
-                self.device.destroy_pipeline_layout(p.layout, None);
-            });
+        self.data.pipelines.drain(..).for_each(|p| {
+            self.device.destroy_pipeline(p.pipeline, None);
+            self.device.destroy_pipeline_layout(p.layout, None);
+        });
         self.device.destroy_render_pass(self.data.render_pass, None);
         self.data
             .swapchain_image_views

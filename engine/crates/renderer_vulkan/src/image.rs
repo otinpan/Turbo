@@ -6,7 +6,7 @@ use vulkanalia::prelude::v1_0::*;
 use super::Device;
 use super::Instance;
 use super::buffer::{begin_single_time_commands, create_buffer, end_single_time_commands};
-use super::types::{VulkanData,Texture};
+use super::types::{Texture, VulkanData};
 
 // texture //////////////////////////////////////////
 pub unsafe fn create_texture(
@@ -40,16 +40,8 @@ pub unsafe fn create_texture(
 
     let (width, height) = reader.info().size();
 
-    create_texture_from_pixels(
-        instance,
-        device,
-        data,
-        &pixels,
-        width,
-        height,
-    )
+    create_texture_from_pixels(instance, device, data, &pixels, width, height)
 }
-
 
 pub unsafe fn create_white_texture(
     instance: &Instance,
@@ -58,14 +50,7 @@ pub unsafe fn create_white_texture(
 ) -> Result<Texture> {
     let pixels = [255, 255, 255, 255];
 
-    create_texture_from_pixels(
-        instance,
-        device,
-        data,
-        &pixels,
-        1,
-        1,
-    )
+    create_texture_from_pixels(instance, device, data, &pixels, 1, 1)
 }
 
 // texture image ///////////////////////////////////////////////
@@ -150,7 +135,6 @@ pub unsafe fn create_texture_from_pixels(
         mip_levels,
     })
 }
-
 
 unsafe fn create_image(
     instance: &Instance,
@@ -327,7 +311,6 @@ unsafe fn copy_buffer_to_image(
     end_single_time_commands(device, data, command_buffer)?;
     Ok(())
 }
-
 
 // tell vulkan how to use this image
 // i.e. this image is 2D, this image is shown in this range

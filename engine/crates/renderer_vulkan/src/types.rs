@@ -76,8 +76,8 @@ pub struct Mesh {
     pub index_count: u32,
 }
 
-#[derive(Clone,Copy,Debug,PartialEq,Eq,Hash)]
-pub struct Texture{
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Texture {
     pub image: vk::Image,
     pub image_memory: vk::DeviceMemory,
     pub image_view: vk::ImageView,
@@ -87,23 +87,23 @@ pub struct Texture{
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct TextureHandle(pub usize);
 
-#[derive(Clone,Copy,Debug,PartialEq,Eq,Hash)]
-pub enum PipelineKey{
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum PipelineKey {
     Mesh3D,
 }
 
-#[derive(Copy,Debug,Clone,PartialEq,Eq)]
-pub struct GraphicsPipeline{
+#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+pub struct GraphicsPipeline {
     pub key: PipelineKey,
     pub layout: vk::PipelineLayout,
     pub pipeline: vk::Pipeline,
 }
 
-impl VulkanData{
-    pub fn pipeline(&self, key: PipelineKey) -> &GraphicsPipeline{
+impl VulkanData {
+    pub fn pipeline(&self, key: PipelineKey) -> &GraphicsPipeline {
         self.pipelines
             .iter()
-            .find(|pipeline| pipeline.key==key)
+            .find(|pipeline| pipeline.key == key)
             .expect("pipeline shoud exist")
     }
 }

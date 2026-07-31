@@ -113,18 +113,17 @@ impl Default for World {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::MeshHandle;
     use crate::Material;
+    use crate::MeshHandle;
     use cgmath::vec3;
 
     fn spawn_renderable(world: &mut World, mesh: MeshHandle, transform: Transform) -> EntityId {
         world.spawn(
             transform,
-            Some(
-                MeshRenderer {
-                    mesh,
-                    material: Material::default(),
-             }),
+            Some(MeshRenderer {
+                mesh,
+                material: Material::default(),
+            }),
             None,
             vec3(20.0, 0.0, 0.0),
         )
@@ -219,12 +218,10 @@ mod tests {
         let mut world = World::default();
         let id = world.spawn(
             Transform::default(),
-            Some(
-                MeshRenderer {
-                    mesh: MeshHandle(0),
-                    material: Material::default(),
-            }
-        ),
+            Some(MeshRenderer {
+                mesh: MeshHandle(0),
+                material: Material::default(),
+            }),
             None,
             vec3(40.0, 0.0, 0.0),
         );

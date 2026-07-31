@@ -4,13 +4,13 @@ use renderer_vulkan::{Vertex, VulkanRenderer};
 use turbo_math::Transform;
 
 use super::EntityId;
+use super::Material;
 use super::MeshHandle;
 use super::MeshRenderer;
 use super::World;
-use super::Material;
 
 pub type Vec3 = cgmath::Vector3<f32>;
-pub type Vec2=cgmath::Vector2<f32>;
+pub type Vec2 = cgmath::Vector2<f32>;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum PrimitiveType {
@@ -28,8 +28,8 @@ pub struct PrimitiveMesh {
     pub primitive_type: PrimitiveType,
 }
 
-fn default_color()->Vec3{
-    vec3(1.0,1.0,1.0)
+fn default_color() -> Vec3 {
+    vec3(1.0, 1.0, 1.0)
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -50,11 +50,11 @@ pub enum PrimitiveShape {
     Polygon {
         points: Vec<Vec3>,
     },
-    Sphere{
+    Sphere {
         radius: f32,
-        rings: u32, // the number of rings (parallel to the latitude)
+        rings: u32,    // the number of rings (parallel to the latitude)
         segments: u32, // the number of segments (parallel to the latitude)
-    }
+    },
 }
 
 impl PrimitiveShape {
@@ -88,19 +88,20 @@ pub unsafe fn create_primitive_mesh(
 pub fn build_primitive_mesh(shape: PrimitiveShape) -> (Vec<Vertex>, Vec<u32>) {
     match shape {
         PrimitiveShape::Triangle { points } => build_triangle_mesh(points),
-        PrimitiveShape::Rectangle { points} => build_rectangle_mesh(points),
+        PrimitiveShape::Rectangle { points } => build_rectangle_mesh(points),
         PrimitiveShape::Cube { points } => build_cube_mesh(points),
-        PrimitiveShape::Circle {
+        PrimitiveShape::Circle { radius, segments } => build_circle_mesh(radius, segments),
+        PrimitiveShape::Polygon { points } => build_polygon_mesh(points),
+        PrimitiveShape::Sphere {
             radius,
+            rings,
             segments,
-        } => build_circle_mesh(radius, segments),
-        PrimitiveShape::Polygon { points} => build_polygon_mesh(points),
-        PrimitiveShape::Sphere {radius, rings,segments} => build_sphere_mesh(radius,rings,segments),
+        } => build_sphere_mesh(radius, rings, segments),
     }
 }
 
 fn build_triangle_mesh(points: [Vec3; 3]) -> (Vec<Vertex>, Vec<u32>) {
-    let color=default_color();
+    let color = default_color();
     let vertices = vec![
         Vertex::new(points[0], color, vec2(0.0, 0.0)),
         Vertex::new(points[1], color, vec2(1.0, 0.0)),
@@ -113,7 +114,7 @@ fn build_triangle_mesh(points: [Vec3; 3]) -> (Vec<Vertex>, Vec<u32>) {
 }
 
 fn build_rectangle_mesh(points: [Vec3; 4]) -> (Vec<Vertex>, Vec<u32>) {
-    let color=default_color();
+    let color = default_color();
     let vertices = vec![
         Vertex::new(points[0], color, vec2(0.0, 0.0)),
         Vertex::new(points[1], color, vec2(1.0, 0.0)),
@@ -127,7 +128,7 @@ fn build_rectangle_mesh(points: [Vec3; 4]) -> (Vec<Vertex>, Vec<u32>) {
 }
 
 pub fn build_cube_mesh(points: [Vec3; 8]) -> (Vec<Vertex>, Vec<u32>) {
-    let color=default_color();
+    let color = default_color();
     let faces = [
         [0, 1, 2, 3],
         [4, 7, 6, 5],
@@ -155,7 +156,7 @@ pub fn build_cube_mesh(points: [Vec3; 8]) -> (Vec<Vertex>, Vec<u32>) {
 }
 
 pub fn build_circle_mesh(radius: f32, segments: u32) -> (Vec<Vertex>, Vec<u32>) {
-    let color=default_color();
+    let color = default_color();
     let segments = segments.max(3);
     let mut vertices = Vec::with_capacity(segments as usize + 1);
     let mut indices = Vec::with_capacity(segments as usize * 3);
@@ -183,7 +184,7 @@ pub fn build_circle_mesh(radius: f32, segments: u32) -> (Vec<Vertex>, Vec<u32>) 
 }
 
 fn build_polygon_mesh(points: Vec<Vec3>) -> (Vec<Vertex>, Vec<u32>) {
-    let color=default_color();
+    let color = default_color();
     let size = points.len();
 
     if size < 3 {
@@ -331,57 +332,46 @@ fn fan_triangulate(size: usize) -> Vec<u32> {
     indices
 }
 
-fn build_sphere_mesh(
-    radius: f32,
-    rings: u32,
-    segments: u32,
-) -> (Vec<Vertex>, Vec<u32>) {
-    let color=default_color();
-    let rings=rings.max(2);
-    let segments=segments.max(3);
+fn build_sphere_mesh(radius: f32, rings: u32, segments: u32) -> (Vec<Vertex>, Vec<u32>) {
+    let color = default_color();
+    let rings = rings.max(2);
+    let segments = segments.max(3);
 
-    let vertex_count=(rings+1)*(segments+1);
-    let index_count=rings*segments*6;
-    
-    let mut vertices=Vec::with_capacity(vertex_count as usize);
-    let mut indices=Vec::with_capacity(index_count as usize);
+    let vertex_count = (rings + 1) * (segments + 1);
+    let index_count = rings * segments * 6;
 
-    for ring in 0..rings{
-        let v=ring as f32/rings as f32;
-        let theta=std::f32::consts::PI*v;
+    let mut vertices = Vec::with_capacity(vertex_count as usize);
+    let mut indices = Vec::with_capacity(index_count as usize);
 
-        for segment in 0..segments{
-            let u=segment as f32/segments as f32;
-            let phi=std::f32::consts::TAU*u;
+    for ring in 0..rings {
+        let v = ring as f32 / rings as f32;
+        let theta = std::f32::consts::PI * v;
 
-            let x=radius*theta.sin()*phi.cos();
-            let y=radius*theta.sin()*phi.sin();
-            let z=radius*theta.cos();
+        for segment in 0..segments {
+            let u = segment as f32 / segments as f32;
+            let phi = std::f32::consts::TAU * u;
 
-            vertices.push(Vertex::new(
-                vec3(x,y,z),
-                color,
-                vec2(u,v),
-            ));
+            let x = radius * theta.sin() * phi.cos();
+            let y = radius * theta.sin() * phi.sin();
+            let z = radius * theta.cos();
+
+            vertices.push(Vertex::new(vec3(x, y, z), color, vec2(u, v)));
         }
     }
 
-    let columns=segments+1;
+    let columns = segments + 1;
 
-    for ring in 0..rings{
-        for segment in 0..segments{
-            let a=ring*columns+segment;
-            let b=a+columns;
-            let c=b+1;
-            let d=a+1;
-            indices.extend_from_slice(&[
-                a,b,d,
-                d,b,c,
-            ]);
+    for ring in 0..rings {
+        for segment in 0..segments {
+            let a = ring * columns + segment;
+            let b = a + columns;
+            let c = b + 1;
+            let d = a + 1;
+            indices.extend_from_slice(&[a, b, d, d, b, c]);
         }
     }
 
-    (vertices,indices)
+    (vertices, indices)
 }
 
 // spawn primitice object //////////////////////////////////////////////
@@ -390,12 +380,7 @@ pub fn spawn_primitive_from_mesh(
     mesh_renderer: MeshRenderer,
     transform: Transform,
 ) -> Result<EntityId> {
-    Ok(world.spawn(
-        transform,
-        Some(mesh_renderer),
-        None,
-        vec3(0.0, 0.0, 0.0),
-    ))
+    Ok(world.spawn(transform, Some(mesh_renderer), None, vec3(0.0, 0.0, 0.0)))
 }
 
 pub unsafe fn spawn_triangle(
@@ -405,18 +390,14 @@ pub unsafe fn spawn_triangle(
     p0: Vec3,
     p1: Vec3,
     p2: Vec3,
-    color :Vec3,
-) -> Result<EntityId>{
-    let center=(p0+p1+p2)/3.0;
+    color: Vec3,
+) -> Result<EntityId> {
+    let center = (p0 + p1 + p2) / 3.0;
 
-    let primitive_mesh=create_primitive_mesh(
+    let primitive_mesh = create_primitive_mesh(
         renderer,
-        PrimitiveShape::Triangle { 
-            points: [
-                p0-center,
-                p1-center,
-                p2-center,
-            ], 
+        PrimitiveShape::Triangle {
+            points: [p0 - center, p1 - center, p2 - center],
         },
     )?;
 
@@ -424,17 +405,16 @@ pub unsafe fn spawn_triangle(
 
     spawn_primitive_from_mesh(
         world,
-        MeshRenderer { 
+        MeshRenderer {
             mesh: primitive_mesh.handle,
-            material: Material::default()
+            material: Material::default(),
         },
-        Transform{
+        Transform {
             position: center,
             ..Default::default()
         },
     )
 }
-
 
 // parallel to yz
 pub unsafe fn spawn_rectangle(
@@ -445,19 +425,19 @@ pub unsafe fn spawn_rectangle(
     width: f32,
     height: f32,
     color: Vec3,
-) -> Result<EntityId>{
-    let half_width=width*0.5;
-    let half_height=width*0.5;
+) -> Result<EntityId> {
+    let half_width = width * 0.5;
+    let half_height = width * 0.5;
 
-    let primitive_mesh=create_primitive_mesh(
+    let primitive_mesh = create_primitive_mesh(
         renderer,
-        PrimitiveShape::Rectangle { 
+        PrimitiveShape::Rectangle {
             points: [
-                vec3(0.0,-half_width,half_height),
-                vec3(0.0,-half_width,-half_height),
-                vec3(0.0,half_width,-half_height),
-                vec3(0.0,half_width,half_height),
-            ], 
+                vec3(0.0, -half_width, half_height),
+                vec3(0.0, -half_width, -half_height),
+                vec3(0.0, half_width, -half_height),
+                vec3(0.0, half_width, half_height),
+            ],
         },
     )?;
 
@@ -467,9 +447,12 @@ pub unsafe fn spawn_rectangle(
         world,
         MeshRenderer {
             mesh: primitive_mesh.handle,
-            material: Material::default()
+            material: Material::default(),
         },
-        Transform { position: pos, ..Default::default() },
+        Transform {
+            position: pos,
+            ..Default::default()
+        },
     )
 }
 
@@ -480,23 +463,23 @@ pub unsafe fn spawn_cube(
     pos: Vec3,
     length: f32,
     color: Vec3,
-) -> Result<EntityId>{
-    let h=length*0.5;
+) -> Result<EntityId> {
+    let h = length * 0.5;
 
-    let primitive_mesh=create_primitive_mesh(
+    let primitive_mesh = create_primitive_mesh(
         renderer,
-        PrimitiveShape::Cube { 
+        PrimitiveShape::Cube {
             points: [
-                vec3( h, -h,  h),
-                vec3( h,  h,  h),
-                vec3(-h,  h,  h),
-                vec3(-h, -h,  h),
-                vec3( h, -h, -h),
-                vec3( h,  h, -h),
-                vec3(-h,  h, -h),
+                vec3(h, -h, h),
+                vec3(h, h, h),
+                vec3(-h, h, h),
+                vec3(-h, -h, h),
+                vec3(h, -h, -h),
+                vec3(h, h, -h),
+                vec3(-h, h, -h),
                 vec3(-h, -h, -h),
             ],
-        }
+        },
     )?;
 
     meshes.push(primitive_mesh);
@@ -505,9 +488,12 @@ pub unsafe fn spawn_cube(
         world,
         MeshRenderer {
             mesh: primitive_mesh.handle,
-            material: Material::default()
+            material: Material::default(),
         },
-        Transform{position: pos,..Default::default()},
+        Transform {
+            position: pos,
+            ..Default::default()
+        },
     )
 }
 
@@ -520,14 +506,9 @@ pub unsafe fn spawn_circle(
     radius: f32,
     segments: u32,
     color: Vec3,
-) -> Result<EntityId>{
-    let primitive_mesh=create_primitive_mesh(
-        renderer,
-        PrimitiveShape::Circle { 
-            radius,
-            segments,
-        },
-    )?;
+) -> Result<EntityId> {
+    let primitive_mesh =
+        create_primitive_mesh(renderer, PrimitiveShape::Circle { radius, segments })?;
 
     meshes.push(primitive_mesh);
 
@@ -535,9 +516,12 @@ pub unsafe fn spawn_circle(
         world,
         MeshRenderer {
             mesh: primitive_mesh.handle,
-            material: Material::default()
+            material: Material::default(),
         },
-        Transform{position: pos,..Default::default()},
+        Transform {
+            position: pos,
+            ..Default::default()
+        },
     )
 }
 
@@ -547,18 +531,14 @@ pub unsafe fn spawn_polygon(
     meshes: &mut Vec<PrimitiveMesh>,
     points: Vec<Vec3>,
     color: Vec3,
-) -> Result<EntityId>{
-    let center=points.iter().copied().sum::<Vec3>()/points.len() as f32;
+) -> Result<EntityId> {
+    let center = points.iter().copied().sum::<Vec3>() / points.len() as f32;
 
-    let local_points=points
-        .iter()
-        .map(|p| *p-center)
-        .collect::<Vec<_>>();
+    let local_points = points.iter().map(|p| *p - center).collect::<Vec<_>>();
 
-
-    let primitive_mesh=create_primitive_mesh(
+    let primitive_mesh = create_primitive_mesh(
         renderer,
-        PrimitiveShape::Polygon { 
+        PrimitiveShape::Polygon {
             points: local_points,
         },
     )?;
@@ -567,11 +547,14 @@ pub unsafe fn spawn_polygon(
 
     spawn_primitive_from_mesh(
         world,
-        MeshRenderer { 
-            mesh:primitive_mesh.handle,
-            material: Material::default()
+        MeshRenderer {
+            mesh: primitive_mesh.handle,
+            material: Material::default(),
         },
-        Transform { position: center, ..Default::default() }
+        Transform {
+            position: center,
+            ..Default::default()
+        },
     )
 }
 
@@ -584,13 +567,13 @@ pub unsafe fn spawn_sphere(
     rings: u32,
     segments: u32,
     color: Vec3,
-) -> Result<EntityId>{
-    let primitive_mesh=create_primitive_mesh(
+) -> Result<EntityId> {
+    let primitive_mesh = create_primitive_mesh(
         renderer,
         PrimitiveShape::Sphere {
             radius,
-            rings, 
-            segments, 
+            rings,
+            segments,
         },
     )?;
 
@@ -598,11 +581,14 @@ pub unsafe fn spawn_sphere(
 
     spawn_primitive_from_mesh(
         world,
-        MeshRenderer { 
+        MeshRenderer {
             mesh: primitive_mesh.handle,
-            material: Material::default()
+            material: Material::default(),
         },
-        Transform { position: center, ..Default::default()},
+        Transform {
+            position: center,
+            ..Default::default()
+        },
     )
 }
 
@@ -633,9 +619,6 @@ pub unsafe fn update_primitive_mesh(
     let (vertices, indices) = build_primitive_mesh(shape);
     update_mesh(renderer, mesh.handle, vertices, indices)
 }
-
-
-
 
 // test ///////////////////////////////////////////////////////////////////////
 #[cfg(test)]
@@ -679,10 +662,10 @@ mod tests {
                 PrimitiveType::Circle,
             ),
             (
-                PrimitiveShape::Sphere { 
-                    radius: 1.0, 
-                    rings: 32, 
-                    segments: 22, 
+                PrimitiveShape::Sphere {
+                    radius: 1.0,
+                    rings: 32,
+                    segments: 22,
                 },
                 PrimitiveType::Sphere,
             ),
