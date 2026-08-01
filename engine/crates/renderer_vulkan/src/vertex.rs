@@ -19,6 +19,44 @@ pub struct Vertex {
     pub tex_coord: Vec2, // points of a texture
 }
 
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DebugLineVertex {
+    pub pos: Vec3,
+    pub color: Vec3,
+}
+
+impl DebugLineVertex {
+    pub const fn new(pos: Vec3, color: Vec3) -> Self {
+        Self { pos, color }
+    }
+
+    pub fn binding_description() -> vk::VertexInputBindingDescription {
+        vk::VertexInputBindingDescription::builder()
+            .binding(0)
+            .stride(size_of::<DebugLineVertex>() as u32)
+            .input_rate(vk::VertexInputRate::VERTEX)
+            .build()
+    }
+
+    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 2] {
+        let pos = vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(0)
+            .format(vk::Format::R32G32B32_SFLOAT)
+            .offset(0)
+            .build();
+        let color = vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(1)
+            .format(vk::Format::R32G32B32_SFLOAT)
+            .offset(size_of::<Vec3>() as u32)
+            .build();
+
+        [pos, color]
+    }
+}
+
 impl Vertex {
     pub const fn new(pos: Vec3, color: Vec3, tex_coord: Vec2) -> Self {
         Self {

@@ -1,11 +1,10 @@
 use anyhow::{Result, bail};
 use cgmath::{vec2, vec3};
-use renderer_vulkan::{Vertex, VulkanRenderer};
+use renderer_vulkan::{Vertex, VulkanRenderer,MeshHandle};
 use turbo_math::Transform;
 
 use super::EntityId;
 use super::Material;
-use super::MeshHandle;
 use super::MeshRenderer;
 use super::World;
 

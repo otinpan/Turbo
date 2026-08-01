@@ -76,6 +76,9 @@ pub struct Mesh {
     pub index_count: u32,
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct MeshHandle(pub usize);
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Texture {
     pub image: vk::Image,
@@ -90,6 +93,7 @@ pub struct TextureHandle(pub usize);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum PipelineKey {
     Mesh3D,
+    DebugLine3D,
 }
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq)]
@@ -110,7 +114,7 @@ impl VulkanData {
 
 #[derive(Clone, Debug)]
 pub struct RenderItem {
-    pub mesh_index: usize,
+    pub mesh_index: MeshHandle,
     pub transform: Transform,
     // material
     pub material_color: cgmath::Vector3<f32>,

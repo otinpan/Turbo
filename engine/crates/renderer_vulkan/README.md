@@ -150,6 +150,7 @@ It contains settings such as:
 - vertex shader
 - fragment shader
 - vertex input layout
+- how to push_constants
 - input assembly
 - viewport and scissor
 - rasterizer
@@ -167,42 +168,6 @@ The pipeline is created for a specific render pass and subpass:
 
 That means if the render pass changes, the pipeline usually needs to be recreated too.
 
-### When To Recreate
-
-Change only the pipeline when the render target structure stays the same but the drawing style changes.
-
-Examples:
-
-```text
-change shader
-change culling
-change blend mode
-change depth test behavior
-change vertex format
-```
-
-Change the render pass, and usually the pipeline too, when the attachment structure changes.
-
-Examples:
-
-```text
-enable or disable depth attachment
-enable or disable MSAA
-change MSAA sample count
-change color/depth format
-change resolve attachment
-```
-
-For MSAA changes, the dependent resources are usually recreated together:
-
-```text
-render_pass
-pipeline
-color_image / color_image_view
-depth_image / depth_image_view
-framebuffers
-command_buffers
-```
 
 ## Framebuffer
 
@@ -257,16 +222,12 @@ A descriptor set is the resource table used by shaders.
 
 The descriptor set layout says:
 
-```text
-binding 0 -> uniform buffer
-binding 1 -> combined image sampler
-```
 
 The descriptor set stores the actual resources:
 
 ```text
-binding 0 -> uniform_buffers[i]
-binding 1 -> texture_image_view + texture_sampler
+set 0, binding 0 -> uniform_buffer
+set 1, binding 0 -> material_buffer (texture, sampler, ...)
 ```
 
 The command buffer binds the descriptor set before drawing. Then the shaders can read the uniform buffer and sample the texture.
@@ -392,3 +353,15 @@ written by GPU during rendering:
   MSAA color image
   swapchain image
 ```
+
+## Shader
+### vertex shader
+* (set=0, binding=0) view/proj <-> global_descriptor_set
+* (push_constant) model <-> pipeline_layout
+* (layout=0,1,2) position/color/tex_coord <-> vertex_input_layout
+
+### fragment shader
+* (set=1, binding=0) texture <-> material_descriptor_set
+* (push_constant) material_color/
+
+

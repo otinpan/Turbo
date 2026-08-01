@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 use cgmath::{InnerSpace, vec2, vec3};
-use renderer_vulkan::{PipelineKey, TextureHandle};
+use renderer_vulkan::{PipelineKey, TextureHandle,MeshHandle};
 use renderer_vulkan::{RenderCamera, RenderItem, VulkanRenderer};
 use std::collections::HashMap;
 use turbo_math::Transform;
@@ -21,7 +21,6 @@ use crate::world::EntityId;
 use super::CameraComponent;
 use super::Input;
 use super::Material;
-use super::MeshHandle;
 use super::MeshRenderer;
 use super::Time;
 use super::World;
@@ -503,7 +502,7 @@ impl App {
                 let mesh_renderer = object.mesh_renderer.as_ref()?;
 
                 Some(RenderItem {
-                    mesh_index: mesh_renderer.mesh.0,
+                    mesh_index: mesh_renderer.mesh,
                     transform: object.transform.clone(),
                     material_color: mesh_renderer.material.color,
                     use_texture: mesh_renderer.material.use_texture,

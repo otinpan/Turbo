@@ -44,18 +44,18 @@ use self::image::{
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::mesh::create_mesh;
 use self::model::{MeshData, load_model};
-use self::pipeline::{create_mesh3d_pipeline, create_render_pass};
+use self::pipeline::{create_debug_line_pipeline, create_mesh3d_pipeline, create_render_pass};
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::{Mesh, VulkanData};
-pub use self::types::{PipelineKey, TextureHandle};
+pub use self::types::{PipelineKey, TextureHandle,MeshHandle};
 pub use self::types::{RenderCamera, RenderItem};
 use self::uniform::{
     create_descriptor_pool, create_global_descriptor_set_layout, create_global_descriptor_sets,
     create_material_descriptor_set_layout, create_material_descriptor_sets, create_uniform_buffers,
     update_uniform_buffer,
 };
-pub use self::vertex::Vertex;
+pub use self::vertex::{DebugLineVertex, Vertex};
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 type Mat4 = Matrix4<f32>;
@@ -84,6 +84,7 @@ impl VulkanRenderer {
         create_global_descriptor_set_layout(&device, &mut data)?;
         create_material_descriptor_set_layout(&device, &mut data)?;
         create_mesh3d_pipeline(&device, &mut data)?;
+        create_debug_line_pipeline(&device, &mut data)?;
         create_command_pools(&instance, &device, &mut data)?;
         create_color_objects(&instance, &device, &mut data)?;
         create_depth_objects(&instance, &device, &mut data)?;
@@ -325,6 +326,7 @@ impl VulkanRenderer {
         create_swapchain_image_views(&self.device, &mut self.data)?;
         create_render_pass(&self.instance, &self.device, &mut self.data)?;
         create_mesh3d_pipeline(&self.device, &mut self.data)?;
+        create_debug_line_pipeline(&self.device, &mut self.data)?;
         create_depth_objects(&self.instance, &self.device, &mut self.data)?;
         create_framebuffers(&self.device, &mut self.data)?;
         create_uniform_buffers(&self.instance, &self.device, &mut self.data)?;

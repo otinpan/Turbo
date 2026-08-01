@@ -14,4 +14,12 @@ glslc `
     (Join-Path $ShaderDir "shader.frag") `
     -o (Join-Path $OutDir "frag.spv")
 
+glslc `
+    (Join-Path $ShaderDir "debug_line.vert") `
+    -o (Join-Path $OutDir "debug_line_vert.spv")
+
+glslc `
+    (Join-Path $ShaderDir "debug_line.frag") `
+    -o (Join-Path $OutDir "debug_line_frag.spv")
+
 Write-Host "Shaders compiled to $OutDir"

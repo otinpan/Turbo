@@ -20,7 +20,7 @@
       - ~~push constantのrangeを変える (pipeline.rs)~~
       - ~~update_secondary_bufferの更新 (command.rs)~~
     - ~~shader更新~~
-* Pipeline複数生成
+* ~~Pipeline選択~~
   - 一旦pipelineは１つだけ
   - VulkanDataのpipelineを`Vec<GraphicsPipeline>`にする
   - Material has RenderMode <-> RenderItem has pipeline_key
@@ -40,6 +40,13 @@
   - ~~create_material_descriptor_sets を作る~~
   - ~~RenderItem に material_index または texture_index を持たせる~~
   - ~~command buffer で global set と material set を bind~~
+* Pipeline複数作成
+  - DebugLine3D: 線を描画
+  - Transparent3D: 透明オブジェクトの生成
+  - Lit3D: ライティング付きの3Dオブジェクトを描画
+  - Ui2D: 2DのUIや画像を画面に貼り付ける
+  - Skybox: 空や背景描画
+  - ShadowMap: 色を出さずに、depthだけを描画
 
     
 
