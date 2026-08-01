@@ -4,13 +4,14 @@ use vulkanalia::prelude::v1_0::*;
 use super::index::create_index_buffer;
 use super::model::MeshData;
 use super::types::{Mesh, VulkanData};
+use super::vertex::Vertex;
 use super::vertex::create_vertex_buffer;
 
 pub unsafe fn create_mesh(
     instance: &Instance,
     device: &Device,
     data: &VulkanData,
-    mesh_data: MeshData,
+    mesh_data: MeshData<Vertex>,
 ) -> Result<Mesh> {
     let index_count = mesh_data.indices.len() as u32;
 

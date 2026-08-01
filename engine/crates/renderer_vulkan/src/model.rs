@@ -7,12 +7,12 @@ use std::io::BufReader;
 use super::vertex::Vertex;
 
 #[derive(Clone, Debug)]
-pub struct MeshData {
-    pub vertices: Vec<Vertex>,
+pub struct MeshData<V> {
+    pub vertices: Vec<V>,
     pub indices: Vec<u32>,
 }
 
-pub fn load_model(file_path: &str) -> Result<MeshData> {
+pub fn load_model(file_path: &str) -> Result<MeshData<Vertex>> {
     let mut reader = BufReader::new(File::open(file_path)?);
 
     let (models, _) = tobj::load_obj_buf(

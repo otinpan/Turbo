@@ -48,7 +48,7 @@ use self::pipeline::{create_debug_line_pipeline, create_mesh3d_pipeline, create_
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::{Mesh, VulkanData};
-pub use self::types::{PipelineKey, TextureHandle,MeshHandle};
+pub use self::types::{MeshHandle, PipelineKey, TextureHandle};
 pub use self::types::{RenderCamera, RenderItem};
 use self::uniform::{
     create_descriptor_pool, create_global_descriptor_set_layout, create_global_descriptor_sets,
@@ -200,7 +200,7 @@ impl VulkanRenderer {
     }
 
     // load mesh from model from designated path
-    pub unsafe fn load_mesh_from_model(&mut self, path: &str) -> Result<usize> {
+    pub unsafe fn load_mesh_from_model(&mut self, path: &str) -> Result<MeshHandle> {
         self.load_mesh_from_data(load_model(path)?)
     }
 
@@ -228,7 +228,7 @@ impl VulkanRenderer {
         &mut self,
         vertices: Vec<Vertex>,
         indices: Vec<u32>,
-    ) -> Result<usize> {
+    ) -> Result<MeshHandle> {
         self.load_mesh_from_data(MeshData { vertices, indices })
     }
 
@@ -300,11 +300,11 @@ impl VulkanRenderer {
         Ok(())
     }
 
-    unsafe fn load_mesh_from_data(&mut self, mesh_data: MeshData) -> Result<usize> {
+    unsafe fn load_mesh_from_data(&mut self, mesh_data: MeshData<Vertex>) -> Result<MeshHandle> {
         let mesh = create_mesh(&self.instance, &self.device, &self.data, mesh_data)?;
         self.data.meshes.push(mesh);
 
-        Ok(self.data.meshes.len() - 1)
+        Ok(MeshHandle(self.data.meshes.len() - 1))
     }
 
     pub fn set_render_items(&mut self, render_items: Vec<RenderItem>) {

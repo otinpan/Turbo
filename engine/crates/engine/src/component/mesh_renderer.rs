@@ -1,7 +1,6 @@
 use super::Material;
 use renderer_vulkan::MeshHandle;
 
-
 #[derive(Clone, Debug)]
 pub struct MeshRenderer {
     pub mesh: MeshHandle,

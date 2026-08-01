@@ -114,8 +114,8 @@ impl Default for World {
 mod tests {
     use super::*;
     use crate::Material;
-    use renderer_vulkan::MeshHandle;
     use cgmath::vec3;
+    use renderer_vulkan::MeshHandle;
 
     fn spawn_renderable(world: &mut World, mesh: MeshHandle, transform: Transform) -> EntityId {
         world.spawn(

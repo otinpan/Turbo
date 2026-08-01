@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 use cgmath::{InnerSpace, vec2, vec3};
-use renderer_vulkan::{PipelineKey, TextureHandle,MeshHandle};
+use renderer_vulkan::{MeshHandle, PipelineKey, TextureHandle};
 use renderer_vulkan::{RenderCamera, RenderItem, VulkanRenderer};
 use std::collections::HashMap;
 use turbo_math::Transform;
@@ -631,7 +631,7 @@ unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, M
     let mut models = HashMap::new();
     models.insert(
         "viking_room".to_string(),
-        MeshHandle(renderer.load_mesh_from_model("assets/models/viking_room.obj")?),
+        renderer.load_mesh_from_model("assets/models/viking_room.obj")?,
     );
 
     Ok(models)

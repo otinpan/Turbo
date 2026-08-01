@@ -1,6 +1,6 @@
 use anyhow::{Result, bail};
 use cgmath::{vec2, vec3};
-use renderer_vulkan::{Vertex, VulkanRenderer,MeshHandle};
+use renderer_vulkan::{MeshHandle, Vertex, VulkanRenderer};
 use turbo_math::Transform;
 
 use super::EntityId;
@@ -78,7 +78,7 @@ pub unsafe fn create_primitive_mesh(
     let (vertices, indices) = build_primitive_mesh(shape);
 
     Ok(PrimitiveMesh {
-        handle: MeshHandle(renderer.load_mesh_from_vertices(vertices, indices)?),
+        handle: renderer.load_mesh_from_vertices(vertices, indices)?,
         primitive_type,
     })
 }
