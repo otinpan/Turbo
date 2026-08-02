@@ -28,6 +28,7 @@ pub enum PrimitiveType {
 pub struct PrimitiveMesh {
     pub handle: MeshHandle,
     pub primitive_type: PrimitiveType,
+    pub vertex_layout: VertexLayout,
 }
 
 fn default_color() -> Vec3 {
@@ -38,24 +39,30 @@ fn default_color() -> Vec3 {
 pub enum PrimitiveShape {
     Triangle {
         points: [Vec3; 3],
+        color: Vec3,
     },
     Rectangle {
         points: [Vec3; 4],
+        color: Vec3,
     },
     Cube {
         points: [Vec3; 8],
+        color: Vec3,
     },
     Circle {
         radius: f32,
         segments: u32,
+        color: Vec3,
     },
     Polygon {
         points: Vec<Vec3>,
+        color: Vec3,
     },
     Sphere {
         radius: f32,
         rings: u32,    // the number of rings (parallel to the latitude)
         segments: u32, // the number of segments (parallel to the latitude)
+        color: Vec3,
     },
     Line {
         pos0: Vec3,
@@ -92,6 +99,7 @@ pub unsafe fn create_primitive_mesh3d(
     Ok(PrimitiveMesh {
         handle,
         primitive_type,
+        vertex_layout: VertexLayout::Mesh3D,
     })
 }
 
@@ -108,6 +116,7 @@ pub unsafe fn create_primitive_debug_line(
     Ok(PrimitiveMesh {
         handle,
         primitive_type,
+        vertex_layout: VertexLayout::DebugLine3D,
     })
 }
 
@@ -125,22 +134,22 @@ pub unsafe fn create_primitive_with_layout(
 // build mesh. create vertices and indices from points //////////////////////////////////////////////////
 pub fn build_primitive_source(shape: PrimitiveShape) -> SourceMesh {
     match shape {
-        PrimitiveShape::Triangle { points } => build_triangle_source(points),
-        PrimitiveShape::Rectangle { points } => build_rectangle_source(points),
-        PrimitiveShape::Cube { points } => build_cube_source(points),
-        PrimitiveShape::Circle { radius, segments } => build_circle_source(radius, segments),
-        PrimitiveShape::Polygon { points } => build_polygon_source(points),
+        PrimitiveShape::Triangle { points ,color} => build_triangle_source(points,color),
+        PrimitiveShape::Rectangle { points ,color} => build_rectangle_source(points,color),
+        PrimitiveShape::Cube { points ,color} => build_cube_source(points,color),
+        PrimitiveShape::Circle { radius, segments,color } => build_circle_source(radius, segments,color),
+        PrimitiveShape::Polygon { points ,color} => build_polygon_source(points,color),
         PrimitiveShape::Sphere {
             radius,
             rings,
             segments,
-        } => build_sphere_source(radius, rings, segments),
+            color,
+        } => build_sphere_source(radius, rings, segments,color),
         PrimitiveShape::Line { pos0, pos1 ,color} => build_line_source(pos0, pos1,color),
     }
 }
 
-fn build_triangle_source(points: [Vec3; 3]) -> SourceMesh {
-    let color = default_color();
+fn build_triangle_source(points: [Vec3; 3],color: Vec3) -> SourceMesh {
 
     let vertices = vec![
         SourceVertex::new(points[0], color, vec2(0.0, 0.0)),
@@ -157,8 +166,7 @@ fn build_triangle_source(points: [Vec3; 3]) -> SourceMesh {
     }
 }
 
-fn build_rectangle_source(points: [Vec3; 4]) -> SourceMesh {
-    let color = default_color();
+fn build_rectangle_source(points: [Vec3; 4],color: Vec3) -> SourceMesh {
     let vertices = vec![
         SourceVertex::new(points[0], color, vec2(0.0, 0.0)),
         SourceVertex::new(points[1], color, vec2(1.0, 0.0)),
@@ -174,8 +182,7 @@ fn build_rectangle_source(points: [Vec3; 4]) -> SourceMesh {
     }
 }
 
-pub fn build_cube_source(points: [Vec3; 8]) -> SourceMesh {
-    let color = default_color();
+pub fn build_cube_source(points: [Vec3; 8],color: Vec3) -> SourceMesh {
     let faces = [
         [0, 1, 2, 3],
         [4, 7, 6, 5],
@@ -205,8 +212,7 @@ pub fn build_cube_source(points: [Vec3; 8]) -> SourceMesh {
     }
 }
 
-pub fn build_circle_source(radius: f32, segments: u32) -> SourceMesh {
-    let color = default_color();
+pub fn build_circle_source(radius: f32, segments: u32,color: Vec3) -> SourceMesh {
     let segments = segments.max(3);
     let mut vertices = Vec::with_capacity(segments as usize + 1);
     let mut indices = Vec::with_capacity(segments as usize * 3);
@@ -240,7 +246,7 @@ pub fn build_circle_source(radius: f32, segments: u32) -> SourceMesh {
     }
 }
 
-fn build_polygon_source(points: Vec<Vec3>) -> SourceMesh {
+fn build_polygon_source(points: Vec<Vec3>, color: Vec3) -> SourceMesh {
     let color = default_color();
     let size = points.len();
 
@@ -396,8 +402,7 @@ fn fan_triangulate(size: usize) -> Vec<u32> {
     indices
 }
 
-fn build_sphere_source(radius: f32, rings: u32, segments: u32) -> SourceMesh {
-    let color = default_color();
+fn build_sphere_source(radius: f32, rings: u32, segments: u32,color: Vec3) -> SourceMesh {
     let rings = rings.max(2);
     let segments = segments.max(3);
 
@@ -557,6 +562,7 @@ pub unsafe fn spawn_triangle_with_layout(
     let center = (p0 + p1 + p2) / 3.0;
     let shape = PrimitiveShape::Triangle {
         points: [p0 - center, p1 - center, p2 - center],
+        color,
     };
 
     spawn_shape_with_layout(world, renderer, meshes, shape, center, color, vertex_layout)
@@ -624,6 +630,7 @@ pub unsafe fn spawn_rectangle_with_layout(
             vec3(0.0, half_width, -half_height),
             vec3(0.0, half_width, half_height),
         ],
+        color,
     };
 
     spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, vertex_layout)
@@ -688,6 +695,7 @@ pub unsafe fn spawn_cube_with_layout(
             vec3(-h, h, -h),
             vec3(-h, -h, -h),
         ],
+        color,
     };
 
     spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, vertex_layout)
@@ -746,7 +754,7 @@ pub unsafe fn spawn_circle_with_layout(
     color: Vec3,
     vertex_layout: VertexLayout,
 ) -> Result<EntityId> {
-    let shape = PrimitiveShape::Circle { radius, segments };
+    let shape = PrimitiveShape::Circle { radius, segments, color};
 
     spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, vertex_layout)
 }
@@ -791,6 +799,7 @@ pub unsafe fn spawn_polygon_with_layout(
     let local_points = points.iter().map(|p| *p - center).collect::<Vec<_>>();
     let shape = PrimitiveShape::Polygon {
         points: local_points,
+        color,
     };
 
     spawn_shape_with_layout(world, renderer, meshes, shape, center, color, vertex_layout)
@@ -857,6 +866,7 @@ pub unsafe fn spawn_sphere_with_layout(
         radius,
         rings,
         segments,
+        color,
     };
 
     spawn_shape_with_layout(world, renderer, meshes, shape, center, color, vertex_layout)
@@ -890,7 +900,6 @@ pub unsafe fn spawn_line(
 
 // update mesh ///////////////////////////////////////////////////////////
 // refered mesh in VulkanData update vertices and indices
-
 pub unsafe fn update_primitive_mesh(
     renderer: &mut VulkanRenderer,
     mesh: PrimitiveMesh,
@@ -905,15 +914,30 @@ pub unsafe fn update_primitive_mesh(
     }
 
     let source = build_primitive_source(shape);
-    let mesh_data = source.to_mesh3d_data();
 
-    renderer.update_mesh_from_data(mesh.handle, mesh_data, VertexLayout::Mesh3D)
+    match mesh.vertex_layout {
+        VertexLayout::Mesh3D => {
+            renderer.update_mesh_from_data(
+                mesh.handle,
+                source.to_mesh3d_data(),
+                VertexLayout::Mesh3D,
+            )
+        }
+        VertexLayout::DebugLine3D => {
+            renderer.update_mesh_from_data(
+                mesh.handle,
+                source.to_debugline_data(),
+                VertexLayout::DebugLine3D,
+            )
+        }
+    }
 }
-
 // test ///////////////////////////////////////////////////////////////////////
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::app::DEFAULT_TEXTURE;
+
+use super::*;
     use cgmath::vec3;
 
     fn white() -> Vec3 {
@@ -930,6 +954,7 @@ mod tests {
                         vec3(0.0, 1.0, 0.0),
                         vec3(0.0, 0.0, 1.0),
                     ],
+                    color: default_color(),
                 },
                 PrimitiveType::Triangle,
             ),
@@ -941,6 +966,7 @@ mod tests {
                         vec3(0.0, 1.0, -1.0),
                         vec3(0.0, 1.0, 1.0),
                     ],
+                    color: default_color(),
                 },
                 PrimitiveType::Rectangle,
             ),
@@ -948,6 +974,7 @@ mod tests {
                 PrimitiveShape::Circle {
                     radius: 1.0,
                     segments: 8,
+                    color: default_color(),
                 },
                 PrimitiveType::Circle,
             ),
@@ -956,6 +983,7 @@ mod tests {
                     radius: 1.0,
                     rings: 32,
                     segments: 22,
+                    color: default_color(),
                 },
                 PrimitiveType::Sphere,
             ),
@@ -974,6 +1002,7 @@ mod tests {
                 vec3(0.0, 1.0, 0.0),
                 vec3(0.0, 0.0, 1.0),
             ],
+            color: default_color(),
         });
 
         assert_eq!(source.vertices.len(), 3);
@@ -989,6 +1018,7 @@ mod tests {
                 vec3(0.0, 1.0, -1.0),
                 vec3(0.0, 1.0, 1.0),
             ],
+            color: default_color(),
         });
 
         assert_eq!(source.vertices.len(), 4);
@@ -1008,6 +1038,7 @@ mod tests {
                 vec3(-0.5, 0.5, -0.5),
                 vec3(-0.5, -0.5, -0.5),
             ],
+            color: default_color(),
         });
 
         assert_eq!(source.vertices.len(), 24);
@@ -1019,6 +1050,7 @@ mod tests {
         let source = build_primitive_source(PrimitiveShape::Circle {
             radius: 1.0,
             segments: 8,
+            color: default_color(),
         });
 
         assert_eq!(source.vertices.len(), 9);
@@ -1030,6 +1062,7 @@ mod tests {
         let source = build_primitive_source(PrimitiveShape::Circle {
             radius: 1.0,
             segments: 1,
+            color: default_color(),
         });
 
         assert_eq!(source.vertices.len(), 4);
@@ -1046,6 +1079,7 @@ mod tests {
                 vec3(0.0, 0.0, -0.6),
                 vec3(0.0, -0.5, -0.4),
             ],
+            color: default_color(),
         });
 
         assert_eq!(source.vertices.len(), 5);
@@ -1056,6 +1090,7 @@ mod tests {
     fn build_primitive_source_returns_empty_polygon_for_too_few_points() {
         let source = build_primitive_source(PrimitiveShape::Polygon {
             points: vec![vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0)],
+            color: default_color(),
         });
 
         assert!(source.vertices.is_empty());

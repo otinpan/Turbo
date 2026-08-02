@@ -12,10 +12,7 @@ use winit::window::Window;
 pub const DEFAULT_TEXTURE: TextureHandle = TextureHandle(0);
 
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveShape, PrimitiveType, create_primitive_mesh3d,
-    spawn_circle_with_layout, spawn_cube_with_layout, spawn_line, spawn_polygon_with_layout,
-    spawn_primitive_from_mesh, spawn_rectangle_with_layout, spawn_sphere_with_layout,
-    spawn_triangle_with_layout, update_primitive_mesh,
+    PrimitiveMesh, PrimitiveShape, PrimitiveType, create_primitive_debug_line, create_primitive_mesh3d, spawn_circle_with_layout, spawn_cube_with_layout, spawn_line, spawn_polygon_with_layout, spawn_primitive_from_mesh, spawn_rectangle_with_layout, spawn_sphere_with_layout, spawn_triangle_with_layout, update_primitive_mesh,
 };
 
 use crate::world::EntityId;
@@ -98,7 +95,7 @@ impl App {
                     vec3(0.0, -0.2, -0.5),
                     vec3(0.0, 0.5, 0.2),
                     vec3(0.0, 0.0, 0.5),
-                    vec3(1.0, 1.0, 1.0),
+                    vec3(0.0, 1.0, 1.0),
                     VertexLayout::DebugLine3D,
                 )?;
 
@@ -106,14 +103,14 @@ impl App {
                     vec3(0.0, 0.5, 0.5),
                     0.3,
                     0.3,
-                    vec3(1.0, 1.0, 1.0),
+                    vec3(1.0, 0.0, 1.0),
                     VertexLayout::DebugLine3D,
                 )?;
 
                 let cube_id1 = app.spawn_cube(
                     vec3(0.0, 1.0, 1.0),
                     1.0,
-                    vec3(1.0, 1.0, 1.0),
+                    vec3(1.0, 1.0, 0.0),
                     VertexLayout::DebugLine3D,
                 )?;
 
@@ -121,7 +118,7 @@ impl App {
                     vec3(0.0, 2.0, 1.0),
                     1.0,
                     32,
-                    vec3(1.0, 1.0, 1.0),
+                    vec3(0.0, 0.0, 1.0),
                     VertexLayout::DebugLine3D,
                 )?;
 
@@ -134,7 +131,7 @@ impl App {
                         vec3(0.0, 0.0, 1.0),
                         vec3(0.0, -0.1, 1.2),
                     ],
-                    vec3(1.0, 1.0, 1.0),
+                    vec3(0.0, 1.0, 0.0),
                     VertexLayout::DebugLine3D,
                 )?;
 
@@ -143,7 +140,7 @@ impl App {
                     0.5,
                     16,
                     16,
-                    vec3(1.0, 1.0, 1.0),
+                    vec3(1.0, 0.0, 0.0),
                     VertexLayout::DebugLine3D,
                 )?;
 
@@ -381,6 +378,7 @@ impl App {
                                 vec3(0.0, 0.2, -0.2),
                                 vec3(0.0, -0.5, -0.45),
                             ],
+                            color: vec3(1.0,0.0,0.0),
                         },
                     )?;
                 }
@@ -394,6 +392,7 @@ impl App {
                             radius: 2.0,
                             rings: 20,
                             segments: 20,
+                            color: vec3(0.0,1.0,1.0),
                         },
                     )?;
                 }
@@ -705,7 +704,9 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                     vec3(0.0, -0.5, -0.5),
                     vec3(0.0, 0.5, -0.5),
                 ],
+                color: vec3(1.0,1.0,1.0),
             },
+
         )?,
         create_primitive_mesh3d(
             renderer,
@@ -716,6 +717,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                     vec3(0.0, 0.5, -0.5),
                     vec3(0.0, 0.5, 0.5),
                 ],
+                color: vec3(1.0,1.0,0.0),
             },
         )?,
         create_primitive_mesh3d(
@@ -731,6 +733,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                     vec3(-0.5, 0.5, -0.5),
                     vec3(-0.5, -0.5, -0.5),
                 ],
+                color: vec3(1.0,0.0,0.0),
             },
         )?,
         create_primitive_mesh3d(
@@ -738,6 +741,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
             PrimitiveShape::Circle {
                 radius: 1.0,
                 segments: 32,
+                color: vec3(0.0,1.0,1.0),
             },
         )?,
         create_primitive_mesh3d(
@@ -750,6 +754,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                     vec3(0.0, 0.0, -0.6),
                     vec3(0.0, -0.5, -0.4),
                 ],
+                color: vec3(0.0,1.0,0.0),
             },
         )?,
         create_primitive_mesh3d(
@@ -758,6 +763,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                 radius: 1.0,
                 rings: 32,
                 segments: 32,
+                color: vec3(0.0,0.0,1.0),
             },
         )?,
     ];

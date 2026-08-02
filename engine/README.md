@@ -48,6 +48,8 @@
   - Skybox: 空や背景描画
   - ShadowMap: 色を出さずに、depthだけを描画
 
+create_primitivesでcreate_primitive_debug_lineでprimitiveを作った後に、spawnでmesh3dのことをするとクラッシュする
+
     
 
 ## ログ表示
