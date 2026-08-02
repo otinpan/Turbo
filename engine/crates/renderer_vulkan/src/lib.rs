@@ -43,19 +43,19 @@ use self::image::{
 };
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::mesh::create_mesh;
-use self::model::{MeshData, load_model};
+pub use self::model::SourceMesh;
+use self::model::{MeshData, load_model_source};
 use self::pipeline::{create_debug_line_pipeline, create_mesh3d_pipeline, create_render_pass};
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::{Mesh, VulkanData};
-pub use self::types::{MeshHandle, PipelineKey, TextureHandle};
-pub use self::types::{RenderCamera, RenderItem};
+pub use self::types::{MeshHandle, PipelineKey, RenderCamera, RenderItem, TextureHandle};
 use self::uniform::{
     create_descriptor_pool, create_global_descriptor_set_layout, create_global_descriptor_sets,
     create_material_descriptor_set_layout, create_material_descriptor_sets, create_uniform_buffers,
     update_uniform_buffer,
 };
-pub use self::vertex::{DebugLineVertex, Vertex};
+pub use self::vertex::{DebugLineVertex, Mesh3DVertex, SourceVertex, VertexLayout};
 
 pub const MAX_FRAMES_IN_FLIGHT: usize = 2;
 type Mat4 = Matrix4<f32>;
@@ -199,9 +199,19 @@ impl VulkanRenderer {
         Ok(())
     }
 
-    // load mesh from model from designated path
-    pub unsafe fn load_mesh_from_model(&mut self, path: &str) -> Result<MeshHandle> {
-        self.load_mesh_from_data(load_model(path)?)
+    // load 3d mesh from model from designated path
+    pub unsafe fn load_mesh3d_from_model(&mut self, path: &str) -> Result<MeshHandle> {
+        let source = load_model_source(path)?;
+        let mesh_data = source.to_mesh3d_data();
+
+        self.load_mesh_from_data(mesh_data, VertexLayout::Mesh3D)
+    }
+
+    pub unsafe fn load_debug_line_from_model(&mut self, path: &str) -> Result<MeshHandle>{
+        let source=load_model_source(path)?;
+        let mesh_data=source.to_debugline_data();
+
+        self.load_mesh_from_data(mesh_data,VertexLayout::DebugLine3D)
     }
 
     pub unsafe fn load_texture(&mut self, path: &str) -> Result<TextureHandle> {
@@ -224,43 +234,53 @@ impl VulkanRenderer {
     }
 
     // load mesh for simple polygon i.e. triangle, rectangle ..
-    pub unsafe fn load_mesh_from_vertices(
+    pub unsafe fn load_mesh_from_vertices<V>(
         &mut self,
-        vertices: Vec<Vertex>,
+        vertices: Vec<V>,
         indices: Vec<u32>,
+        vertex_layout: VertexLayout,
     ) -> Result<MeshHandle> {
-        self.load_mesh_from_data(MeshData { vertices, indices })
+        self.load_mesh_from_data(MeshData { vertices, indices }, vertex_layout)
     }
 
-    pub unsafe fn update_mesh_from_vertices(
+    pub unsafe fn update_mesh_from_data<V>(
         &mut self,
-        mesh_index: usize,
-        vertices: Vec<Vertex>,
-        indices: Vec<u32>,
+        mesh_handle: MeshHandle,
+        mesh_data: MeshData<V>,
+        vertex_layout: VertexLayout,
     ) -> Result<()> {
-        if vertices.is_empty() || indices.is_empty() {
+        if mesh_data.vertices.is_empty() || mesh_data.indices.is_empty() {
             return Err(anyhow!("Mesh vertices and indices must not be empty."));
         }
 
+        let mesh_index = mesh_handle.0;
         let mesh = self
             .data
             .meshes
             .get(mesh_index)
             .ok_or_else(|| anyhow!("Mesh index out of range: {mesh_index}"))?;
 
-        // if the number of new vertex match that of old vertex, then update old to new
-        // else destroy old buffer and recreate new buffer
-        if mesh.vertices.len() == vertices.len() && mesh.indices.len() == indices.len() {
-            self.upload_to_buffer(mesh.vertex_buffer, &vertices)?;
-            self.upload_to_buffer(mesh.index_buffer, &indices)?;
+        let vertex_buffer_size = (size_of::<V>() * mesh_data.vertices.len()) as vk::DeviceSize;
+        let index_buffer_size = (size_of::<u32>() * mesh_data.indices.len()) as vk::DeviceSize;
+
+        let can_reuse_buffers = mesh.vertex_layout == vertex_layout
+            && mesh.vertex_buffer_size == vertex_buffer_size
+            && mesh.index_buffer_size == index_buffer_size;
+
+        if can_reuse_buffers {
+            self.upload_to_buffer(mesh.vertex_buffer, &mesh_data.vertices)?;
+            self.upload_to_buffer(mesh.index_buffer, &mesh_data.indices)?;
 
             let mesh = &mut self.data.meshes[mesh_index];
-            mesh.vertices = vertices;
-            mesh.indices = indices;
-            mesh.index_count = mesh.indices.len() as u32;
+            mesh.index_count = mesh_data.indices.len() as u32;
         } else {
-            let mesh_data = MeshData { vertices, indices };
-            let new_mesh = create_mesh(&self.instance, &self.device, &self.data, mesh_data)?;
+            let new_mesh = create_mesh(
+                &self.instance,
+                &self.device,
+                &self.data,
+                mesh_data,
+                vertex_layout,
+            )?;
 
             self.device.device_wait_idle()?;
 
@@ -300,8 +320,18 @@ impl VulkanRenderer {
         Ok(())
     }
 
-    unsafe fn load_mesh_from_data(&mut self, mesh_data: MeshData<Vertex>) -> Result<MeshHandle> {
-        let mesh = create_mesh(&self.instance, &self.device, &self.data, mesh_data)?;
+    pub unsafe fn load_mesh_from_data<V>(
+        &mut self,
+        mesh_data: MeshData<V>,
+        vertex_layout: VertexLayout,
+    ) -> Result<MeshHandle> {
+        let mesh = create_mesh(
+            &self.instance,
+            &self.device,
+            &self.data,
+            mesh_data,
+            vertex_layout,
+        )?;
         self.data.meshes.push(mesh);
 
         Ok(MeshHandle(self.data.meshes.len() - 1))

@@ -13,10 +13,44 @@ type Vec3 = cgmath::Vector3<f32>;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
-pub struct Vertex {
+pub struct SourceVertex {
     pub pos: Vec3,
     pub color: Vec3,
     pub tex_coord: Vec2, // points of a texture
+}
+
+impl SourceVertex {
+    pub fn new(pos: Vec3, color: Vec3, tex_coord: Vec2) -> Self {
+        Self {
+            pos,
+            color,
+            tex_coord,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum VertexLayout {
+    Mesh3D,
+    DebugLine3D,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct Mesh3DVertex {
+    pub pos: Vec3,
+    pub color: Vec3,
+    pub tex_coord: Vec2,
+}
+
+impl From<&SourceVertex> for Mesh3DVertex {
+    fn from(v: &SourceVertex) -> Self {
+        Self {
+            pos: v.pos,
+            color: v.color,
+            tex_coord: v.tex_coord,
+        }
+    }
 }
 
 #[repr(C)]
@@ -24,6 +58,15 @@ pub struct Vertex {
 pub struct DebugLineVertex {
     pub pos: Vec3,
     pub color: Vec3,
+}
+
+impl From<&SourceVertex> for DebugLineVertex {
+    fn from(v: &SourceVertex) -> Self {
+        Self {
+            pos: v.pos,
+            color: v.color,
+        }
+    }
 }
 
 impl DebugLineVertex {
@@ -57,7 +100,7 @@ impl DebugLineVertex {
     }
 }
 
-impl Vertex {
+impl Mesh3DVertex {
     pub const fn new(pos: Vec3, color: Vec3, tex_coord: Vec2) -> Self {
         Self {
             pos,
@@ -68,7 +111,7 @@ impl Vertex {
     pub fn binding_description() -> vk::VertexInputBindingDescription {
         vk::VertexInputBindingDescription::builder()
             .binding(0)
-            .stride(size_of::<Vertex>() as u32)
+            .stride(size_of::<Mesh3DVertex>() as u32)
             .input_rate(vk::VertexInputRate::VERTEX)
             .build()
     }
@@ -97,15 +140,15 @@ impl Vertex {
     }
 }
 
-impl PartialEq for Vertex {
+impl PartialEq for SourceVertex {
     fn eq(&self, other: &Self) -> bool {
         self.pos == other.pos && self.color == other.color && self.tex_coord == other.tex_coord
     }
 }
 
-impl Eq for Vertex {}
+impl Eq for SourceVertex {}
 
-impl Hash for Vertex {
+impl Hash for SourceVertex {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.pos[0].to_bits().hash(state);
         self.pos[1].to_bits().hash(state);
@@ -120,13 +163,13 @@ impl Hash for Vertex {
 
 // 1. record staging buffer
 // 2. copy vertices from staging buffer to vertex buffer
-pub unsafe fn create_vertex_buffer(
+pub unsafe fn create_vertex_buffer<V>(
     instance: &Instance,
     device: &Device,
     data: &VulkanData,
-    vertices: &[Vertex],
+    vertices: &[V],
 ) -> Result<(vk::Buffer, vk::DeviceMemory)> {
-    let size = (size_of::<Vertex>() * vertices.len()) as u64;
+    let size = std::mem::size_of_val(vertices) as u64;
 
     let (staging_buffer, staging_buffer_memory) = create_buffer(
         instance,

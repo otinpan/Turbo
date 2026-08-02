@@ -1,6 +1,6 @@
 use anyhow::{Result, bail};
 use cgmath::{vec2, vec3};
-use renderer_vulkan::{MeshHandle, Vertex, VulkanRenderer};
+use renderer_vulkan::{MeshHandle, SourceMesh, SourceVertex, VertexLayout, VulkanRenderer};
 use turbo_math::Transform;
 
 use super::EntityId;
@@ -70,63 +70,94 @@ impl PrimitiveShape {
 }
 
 // create mesh ////////////////////////////////////////////
-pub unsafe fn create_primitive_mesh(
+pub unsafe fn create_primitive_mesh3d(
     renderer: &mut VulkanRenderer,
     shape: PrimitiveShape,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
-    let (vertices, indices) = build_primitive_mesh(shape);
+    let source = build_primitive_source(shape);
+    let mesh_data = source.to_mesh3d_data();
+
+    let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Mesh3D)?;
 
     Ok(PrimitiveMesh {
-        handle: renderer.load_mesh_from_vertices(vertices, indices)?,
+        handle,
         primitive_type,
     })
 }
 
+pub unsafe fn create_primitive_debug_line(
+    renderer: &mut VulkanRenderer,
+    shape: PrimitiveShape,
+) -> Result<PrimitiveMesh> {
+    let primitive_type = shape.primitive_type();
+    let source = build_primitive_source(shape);
+    let mesh_data = source.to_debugline_data();
+
+    let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::DebugLine3D)?;
+
+    Ok(PrimitiveMesh {
+        handle,
+        primitive_type,
+    })
+}
+
+pub unsafe fn create_primitive_with_layout(
+    renderer: &mut VulkanRenderer,
+    shape: PrimitiveShape,
+    vertex_layout: VertexLayout,
+) -> Result<PrimitiveMesh> {
+    match vertex_layout {
+        VertexLayout::Mesh3D => create_primitive_mesh3d(renderer, shape),
+        VertexLayout::DebugLine3D => create_primitive_debug_line(renderer, shape),
+    }
+}
+
 // build mesh. create vertices and indices from points //////////////////////////////////////////////////
-pub fn build_primitive_mesh(shape: PrimitiveShape) -> (Vec<Vertex>, Vec<u32>) {
+pub fn build_primitive_source(shape: PrimitiveShape) -> SourceMesh {
     match shape {
-        PrimitiveShape::Triangle { points } => build_triangle_mesh(points),
-        PrimitiveShape::Rectangle { points } => build_rectangle_mesh(points),
-        PrimitiveShape::Cube { points } => build_cube_mesh(points),
-        PrimitiveShape::Circle { radius, segments } => build_circle_mesh(radius, segments),
-        PrimitiveShape::Polygon { points } => build_polygon_mesh(points),
+        PrimitiveShape::Triangle { points } => build_triangle_source(points),
+        PrimitiveShape::Rectangle { points } => build_rectangle_source(points),
+        PrimitiveShape::Cube { points } => build_cube_source(points),
+        PrimitiveShape::Circle { radius, segments } => build_circle_source(radius, segments),
+        PrimitiveShape::Polygon { points } => build_polygon_source(points),
         PrimitiveShape::Sphere {
             radius,
             rings,
             segments,
-        } => build_sphere_mesh(radius, rings, segments),
+        } => build_sphere_source(radius, rings, segments),
     }
 }
 
-fn build_triangle_mesh(points: [Vec3; 3]) -> (Vec<Vertex>, Vec<u32>) {
+fn build_triangle_source(points: [Vec3; 3]) -> SourceMesh {
     let color = default_color();
+
     let vertices = vec![
-        Vertex::new(points[0], color, vec2(0.0, 0.0)),
-        Vertex::new(points[1], color, vec2(1.0, 0.0)),
-        Vertex::new(points[2], color, vec2(0.5, 1.0)),
+        SourceVertex::new(points[0], color, vec2(0.0, 0.0)),
+        SourceVertex::new(points[1], color, vec2(1.0, 0.0)),
+        SourceVertex::new(points[2], color, vec2(0.5, 1.0)),
     ];
 
     let indices = vec![0, 1, 2];
 
-    (vertices, indices)
+    SourceMesh { vertices, indices }
 }
 
-fn build_rectangle_mesh(points: [Vec3; 4]) -> (Vec<Vertex>, Vec<u32>) {
+fn build_rectangle_source(points: [Vec3; 4]) -> SourceMesh {
     let color = default_color();
     let vertices = vec![
-        Vertex::new(points[0], color, vec2(0.0, 0.0)),
-        Vertex::new(points[1], color, vec2(1.0, 0.0)),
-        Vertex::new(points[2], color, vec2(1.0, 1.0)),
-        Vertex::new(points[3], color, vec2(0.0, 1.0)),
+        SourceVertex::new(points[0], color, vec2(0.0, 0.0)),
+        SourceVertex::new(points[1], color, vec2(1.0, 0.0)),
+        SourceVertex::new(points[2], color, vec2(1.0, 1.0)),
+        SourceVertex::new(points[3], color, vec2(0.0, 1.0)),
     ];
 
     let indices = vec![0, 1, 2, 2, 3, 0];
 
-    (vertices, indices)
+    SourceMesh { vertices, indices }
 }
 
-pub fn build_cube_mesh(points: [Vec3; 8]) -> (Vec<Vertex>, Vec<u32>) {
+pub fn build_cube_source(points: [Vec3; 8]) -> SourceMesh {
     let color = default_color();
     let faces = [
         [0, 1, 2, 3],
@@ -143,24 +174,28 @@ pub fn build_cube_mesh(points: [Vec3; 8]) -> (Vec<Vertex>, Vec<u32>) {
     for face in faces {
         let base = vertices.len() as u32;
 
-        vertices.push(Vertex::new(points[face[0]], color, vec2(0.0, 0.0)));
-        vertices.push(Vertex::new(points[face[1]], color, vec2(1.0, 0.0)));
-        vertices.push(Vertex::new(points[face[2]], color, vec2(1.0, 1.0)));
-        vertices.push(Vertex::new(points[face[3]], color, vec2(0.0, 1.0)));
+        vertices.push(SourceVertex::new(points[face[0]], color, vec2(0.0, 0.0)));
+        vertices.push(SourceVertex::new(points[face[1]], color, vec2(1.0, 0.0)));
+        vertices.push(SourceVertex::new(points[face[2]], color, vec2(1.0, 1.0)));
+        vertices.push(SourceVertex::new(points[face[3]], color, vec2(0.0, 1.0)));
 
         indices.extend_from_slice(&[base, base + 1, base + 2, base + 2, base + 3, base]);
     }
 
-    (vertices, indices)
+    SourceMesh { vertices, indices }
 }
 
-pub fn build_circle_mesh(radius: f32, segments: u32) -> (Vec<Vertex>, Vec<u32>) {
+pub fn build_circle_source(radius: f32, segments: u32) -> SourceMesh {
     let color = default_color();
     let segments = segments.max(3);
     let mut vertices = Vec::with_capacity(segments as usize + 1);
     let mut indices = Vec::with_capacity(segments as usize * 3);
 
-    vertices.push(Vertex::new(vec3(0.0, 0.0, 0.0), color, vec2(0.5, 0.5)));
+    vertices.push(SourceVertex::new(
+        vec3(0.0, 0.0, 0.0),
+        color,
+        vec2(0.5, 0.5),
+    ));
 
     for i in 0..segments {
         let angle = std::f32::consts::TAU * i as f32 / segments as f32;
@@ -169,7 +204,7 @@ pub fn build_circle_mesh(radius: f32, segments: u32) -> (Vec<Vertex>, Vec<u32>) 
         let u = angle.cos() * 0.5 + 0.5;
         let v = angle.sin() * 0.5 + 0.5;
 
-        vertices.push(Vertex::new(vec3(0.0, y, z), color, vec2(u, v)));
+        vertices.push(SourceVertex::new(vec3(0.0, y, z), color, vec2(u, v)));
     }
 
     for i in 0..segments {
@@ -179,15 +214,18 @@ pub fn build_circle_mesh(radius: f32, segments: u32) -> (Vec<Vertex>, Vec<u32>) 
         indices.extend_from_slice(&[0, current, next]);
     }
 
-    (vertices, indices)
+    SourceMesh { vertices, indices }
 }
 
-fn build_polygon_mesh(points: Vec<Vec3>) -> (Vec<Vertex>, Vec<u32>) {
+fn build_polygon_source(points: Vec<Vec3>) -> SourceMesh {
     let color = default_color();
     let size = points.len();
 
     if size < 3 {
-        return (Vec::new(), Vec::new());
+        return SourceMesh {
+            vertices: Vec::new(),
+            indices: Vec::new(),
+        };
     }
 
     let mut vertices = Vec::with_capacity(size);
@@ -220,12 +258,12 @@ fn build_polygon_mesh(points: Vec<Vec3>) -> (Vec<Vertex>, Vec<u32>) {
             0.0
         };
 
-        vertices.push(Vertex::new(*p, color, vec2(u, v)));
+        vertices.push(SourceVertex::new(*p, color, vec2(u, v)));
     }
 
     indices.extend(triangulate_polygon_yz(&points));
 
-    (vertices, indices)
+    SourceMesh { vertices, indices }
 }
 
 // create triangle from polygon using era clipping
@@ -331,7 +369,7 @@ fn fan_triangulate(size: usize) -> Vec<u32> {
     indices
 }
 
-fn build_sphere_mesh(radius: f32, rings: u32, segments: u32) -> (Vec<Vertex>, Vec<u32>) {
+fn build_sphere_source(radius: f32, rings: u32, segments: u32) -> SourceMesh {
     let color = default_color();
     let rings = rings.max(2);
     let segments = segments.max(3);
@@ -354,7 +392,7 @@ fn build_sphere_mesh(radius: f32, rings: u32, segments: u32) -> (Vec<Vertex>, Ve
             let y = radius * theta.sin() * phi.sin();
             let z = radius * theta.cos();
 
-            vertices.push(Vertex::new(vec3(x, y, z), color, vec2(u, v)));
+            vertices.push(SourceVertex::new(vec3(x, y, z), color, vec2(u, v)));
         }
     }
 
@@ -370,10 +408,10 @@ fn build_sphere_mesh(radius: f32, rings: u32, segments: u32) -> (Vec<Vertex>, Ve
         }
     }
 
-    (vertices, indices)
+    SourceMesh { vertices, indices }
 }
 
-// spawn primitice object //////////////////////////////////////////////
+// spawn primitive object //////////////////////////////////////////////
 pub fn spawn_primitive_from_mesh(
     world: &mut World,
     mesh_renderer: MeshRenderer,
@@ -382,7 +420,44 @@ pub fn spawn_primitive_from_mesh(
     Ok(world.spawn(transform, Some(mesh_renderer), None, vec3(0.0, 0.0, 0.0)))
 }
 
-pub unsafe fn spawn_triangle(
+fn pipeline_key_for_layout(vertex_layout: VertexLayout) -> renderer_vulkan::PipelineKey {
+    match vertex_layout {
+        VertexLayout::Mesh3D => renderer_vulkan::PipelineKey::Mesh3D,
+        VertexLayout::DebugLine3D => renderer_vulkan::PipelineKey::DebugLine,
+    }
+}
+
+unsafe fn spawn_shape_with_layout(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    shape: PrimitiveShape,
+    position: Vec3,
+    color: Vec3,
+    vertex_layout: VertexLayout,
+) -> Result<EntityId> {
+    let primitive_mesh = create_primitive_with_layout(renderer, shape, vertex_layout)?;
+    meshes.push(primitive_mesh);
+
+    spawn_primitive_from_mesh(
+        world,
+        MeshRenderer {
+            mesh: primitive_mesh.handle,
+            material: Material {
+                color,
+                pipeline_key: pipeline_key_for_layout(vertex_layout),
+                ..Material::default()
+            },
+        },
+        Transform {
+            position,
+            ..Default::default()
+        },
+    )
+}
+
+// create new object ////////////////////////////////////////
+pub unsafe fn spawn_triangle_mesh3d(
     world: &mut World,
     renderer: &mut VulkanRenderer,
     meshes: &mut Vec<PrimitiveMesh>,
@@ -391,32 +466,59 @@ pub unsafe fn spawn_triangle(
     p2: Vec3,
     color: Vec3,
 ) -> Result<EntityId> {
-    let center = (p0 + p1 + p2) / 3.0;
-
-    let primitive_mesh = create_primitive_mesh(
-        renderer,
-        PrimitiveShape::Triangle {
-            points: [p0 - center, p1 - center, p2 - center],
-        },
-    )?;
-
-    meshes.push(primitive_mesh);
-
-    spawn_primitive_from_mesh(
+    spawn_triangle_with_layout(
         world,
-        MeshRenderer {
-            mesh: primitive_mesh.handle,
-            material: Material::default(),
-        },
-        Transform {
-            position: center,
-            ..Default::default()
-        },
+        renderer,
+        meshes,
+        p0,
+        p1,
+        p2,
+        color,
+        VertexLayout::Mesh3D,
     )
 }
 
+pub unsafe fn spawn_triangle_debug_line(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    p0: Vec3,
+    p1: Vec3,
+    p2: Vec3,
+    color: Vec3,
+) -> Result<EntityId> {
+    spawn_triangle_with_layout(
+        world,
+        renderer,
+        meshes,
+        p0,
+        p1,
+        p2,
+        color,
+        VertexLayout::DebugLine3D,
+    )
+}
+
+pub unsafe fn spawn_triangle_with_layout(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    p0: Vec3,
+    p1: Vec3,
+    p2: Vec3,
+    color: Vec3,
+    vertex_layout: VertexLayout,
+) -> Result<EntityId> {
+    let center = (p0 + p1 + p2) / 3.0;
+    let shape = PrimitiveShape::Triangle {
+        points: [p0 - center, p1 - center, p2 - center],
+    };
+
+    spawn_shape_with_layout(world, renderer, meshes, shape, center, color, vertex_layout)
+}
+
 // parallel to yz
-pub unsafe fn spawn_rectangle(
+pub unsafe fn spawn_rectangle_mesh3d(
     world: &mut World,
     renderer: &mut VulkanRenderer,
     meshes: &mut Vec<PrimitiveMesh>,
@@ -425,37 +527,64 @@ pub unsafe fn spawn_rectangle(
     height: f32,
     color: Vec3,
 ) -> Result<EntityId> {
-    let half_width = width * 0.5;
-    let half_height = width * 0.5;
-
-    let primitive_mesh = create_primitive_mesh(
-        renderer,
-        PrimitiveShape::Rectangle {
-            points: [
-                vec3(0.0, -half_width, half_height),
-                vec3(0.0, -half_width, -half_height),
-                vec3(0.0, half_width, -half_height),
-                vec3(0.0, half_width, half_height),
-            ],
-        },
-    )?;
-
-    meshes.push(primitive_mesh);
-
-    spawn_primitive_from_mesh(
+    spawn_rectangle_with_layout(
         world,
-        MeshRenderer {
-            mesh: primitive_mesh.handle,
-            material: Material::default(),
-        },
-        Transform {
-            position: pos,
-            ..Default::default()
-        },
+        renderer,
+        meshes,
+        pos,
+        width,
+        height,
+        color,
+        VertexLayout::Mesh3D,
     )
 }
 
-pub unsafe fn spawn_cube(
+pub unsafe fn spawn_rectangle_debug_line(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    pos: Vec3,
+    width: f32,
+    height: f32,
+    color: Vec3,
+) -> Result<EntityId> {
+    spawn_rectangle_with_layout(
+        world,
+        renderer,
+        meshes,
+        pos,
+        width,
+        height,
+        color,
+        VertexLayout::DebugLine3D,
+    )
+}
+
+pub unsafe fn spawn_rectangle_with_layout(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    pos: Vec3,
+    width: f32,
+    height: f32,
+    color: Vec3,
+    vertex_layout: VertexLayout,
+) -> Result<EntityId> {
+    let half_width = width * 0.5;
+    let half_height = height * 0.5;
+    let shape = PrimitiveShape::Rectangle {
+        points: [
+            vec3(0.0, -half_width, half_height),
+            vec3(0.0, -half_width, -half_height),
+            vec3(0.0, half_width, -half_height),
+            vec3(0.0, half_width, half_height),
+        ],
+    };
+
+    spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, vertex_layout)
+}
+
+pub unsafe fn spawn_cube_mesh3d(
     world: &mut World,
     renderer: &mut VulkanRenderer,
     meshes: &mut Vec<PrimitiveMesh>,
@@ -463,41 +592,64 @@ pub unsafe fn spawn_cube(
     length: f32,
     color: Vec3,
 ) -> Result<EntityId> {
-    let h = length * 0.5;
-
-    let primitive_mesh = create_primitive_mesh(
-        renderer,
-        PrimitiveShape::Cube {
-            points: [
-                vec3(h, -h, h),
-                vec3(h, h, h),
-                vec3(-h, h, h),
-                vec3(-h, -h, h),
-                vec3(h, -h, -h),
-                vec3(h, h, -h),
-                vec3(-h, h, -h),
-                vec3(-h, -h, -h),
-            ],
-        },
-    )?;
-
-    meshes.push(primitive_mesh);
-
-    spawn_primitive_from_mesh(
+    spawn_cube_with_layout(
         world,
-        MeshRenderer {
-            mesh: primitive_mesh.handle,
-            material: Material::default(),
-        },
-        Transform {
-            position: pos,
-            ..Default::default()
-        },
+        renderer,
+        meshes,
+        pos,
+        length,
+        color,
+        VertexLayout::Mesh3D,
     )
 }
 
+pub unsafe fn spawn_cube_debug_line(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    pos: Vec3,
+    length: f32,
+    color: Vec3,
+) -> Result<EntityId> {
+    spawn_cube_with_layout(
+        world,
+        renderer,
+        meshes,
+        pos,
+        length,
+        color,
+        VertexLayout::DebugLine3D,
+    )
+}
+
+pub unsafe fn spawn_cube_with_layout(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    pos: Vec3,
+    length: f32,
+    color: Vec3,
+    vertex_layout: VertexLayout,
+) -> Result<EntityId> {
+    let h = length * 0.5;
+    let shape = PrimitiveShape::Cube {
+        points: [
+            vec3(h, -h, h),
+            vec3(h, h, h),
+            vec3(-h, h, h),
+            vec3(-h, -h, h),
+            vec3(h, -h, -h),
+            vec3(h, h, -h),
+            vec3(-h, h, -h),
+            vec3(-h, -h, -h),
+        ],
+    };
+
+    spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, vertex_layout)
+}
+
 // parallel to yz
-pub unsafe fn spawn_circle(
+pub unsafe fn spawn_circle_mesh3d(
     world: &mut World,
     renderer: &mut VulkanRenderer,
     meshes: &mut Vec<PrimitiveMesh>,
@@ -506,58 +658,100 @@ pub unsafe fn spawn_circle(
     segments: u32,
     color: Vec3,
 ) -> Result<EntityId> {
-    let primitive_mesh =
-        create_primitive_mesh(renderer, PrimitiveShape::Circle { radius, segments })?;
-
-    meshes.push(primitive_mesh);
-
-    spawn_primitive_from_mesh(
+    spawn_circle_with_layout(
         world,
-        MeshRenderer {
-            mesh: primitive_mesh.handle,
-            material: Material::default(),
-        },
-        Transform {
-            position: pos,
-            ..Default::default()
-        },
+        renderer,
+        meshes,
+        pos,
+        radius,
+        segments,
+        color,
+        VertexLayout::Mesh3D,
     )
 }
 
-pub unsafe fn spawn_polygon(
+pub unsafe fn spawn_circle_debug_line(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    pos: Vec3,
+    radius: f32,
+    segments: u32,
+    color: Vec3,
+) -> Result<EntityId> {
+    spawn_circle_with_layout(
+        world,
+        renderer,
+        meshes,
+        pos,
+        radius,
+        segments,
+        color,
+        VertexLayout::DebugLine3D,
+    )
+}
+
+pub unsafe fn spawn_circle_with_layout(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    pos: Vec3,
+    radius: f32,
+    segments: u32,
+    color: Vec3,
+    vertex_layout: VertexLayout,
+) -> Result<EntityId> {
+    let shape = PrimitiveShape::Circle { radius, segments };
+
+    spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, vertex_layout)
+}
+
+pub unsafe fn spawn_polygon_mesh3d(
     world: &mut World,
     renderer: &mut VulkanRenderer,
     meshes: &mut Vec<PrimitiveMesh>,
     points: Vec<Vec3>,
     color: Vec3,
 ) -> Result<EntityId> {
-    let center = points.iter().copied().sum::<Vec3>() / points.len() as f32;
+    spawn_polygon_with_layout(world, renderer, meshes, points, color, VertexLayout::Mesh3D)
+}
 
-    let local_points = points.iter().map(|p| *p - center).collect::<Vec<_>>();
-
-    let primitive_mesh = create_primitive_mesh(
-        renderer,
-        PrimitiveShape::Polygon {
-            points: local_points,
-        },
-    )?;
-
-    meshes.push(primitive_mesh);
-
-    spawn_primitive_from_mesh(
+pub unsafe fn spawn_polygon_debug_line(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    points: Vec<Vec3>,
+    color: Vec3,
+) -> Result<EntityId> {
+    spawn_polygon_with_layout(
         world,
-        MeshRenderer {
-            mesh: primitive_mesh.handle,
-            material: Material::default(),
-        },
-        Transform {
-            position: center,
-            ..Default::default()
-        },
+        renderer,
+        meshes,
+        points,
+        color,
+        VertexLayout::DebugLine3D,
     )
 }
 
-pub unsafe fn spawn_sphere(
+pub unsafe fn spawn_polygon_with_layout(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    points: Vec<Vec3>,
+    color: Vec3,
+    vertex_layout: VertexLayout,
+) -> Result<EntityId> {
+    let center = points.iter().copied().sum::<Vec3>() / points.len() as f32;
+
+    let local_points = points.iter().map(|p| *p - center).collect::<Vec<_>>();
+    let shape = PrimitiveShape::Polygon {
+        points: local_points,
+    };
+
+    spawn_shape_with_layout(world, renderer, meshes, shape, center, color, vertex_layout)
+}
+
+pub unsafe fn spawn_sphere_mesh3d(
     world: &mut World,
     renderer: &mut VulkanRenderer,
     meshes: &mut Vec<PrimitiveMesh>,
@@ -567,40 +761,64 @@ pub unsafe fn spawn_sphere(
     segments: u32,
     color: Vec3,
 ) -> Result<EntityId> {
-    let primitive_mesh = create_primitive_mesh(
-        renderer,
-        PrimitiveShape::Sphere {
-            radius,
-            rings,
-            segments,
-        },
-    )?;
-
-    meshes.push(primitive_mesh);
-
-    spawn_primitive_from_mesh(
+    spawn_sphere_with_layout(
         world,
-        MeshRenderer {
-            mesh: primitive_mesh.handle,
-            material: Material::default(),
-        },
-        Transform {
-            position: center,
-            ..Default::default()
-        },
+        renderer,
+        meshes,
+        center,
+        radius,
+        rings,
+        segments,
+        color,
+        VertexLayout::Mesh3D,
     )
+}
+
+pub unsafe fn spawn_sphere_debug_line(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    center: Vec3,
+    radius: f32,
+    rings: u32,
+    segments: u32,
+    color: Vec3,
+) -> Result<EntityId> {
+    spawn_sphere_with_layout(
+        world,
+        renderer,
+        meshes,
+        center,
+        radius,
+        rings,
+        segments,
+        color,
+        VertexLayout::DebugLine3D,
+    )
+}
+
+pub unsafe fn spawn_sphere_with_layout(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    center: Vec3,
+    radius: f32,
+    rings: u32,
+    segments: u32,
+    color: Vec3,
+    vertex_layout: VertexLayout,
+) -> Result<EntityId> {
+    let shape = PrimitiveShape::Sphere {
+        radius,
+        rings,
+        segments,
+    };
+
+    spawn_shape_with_layout(world, renderer, meshes, shape, center, color, vertex_layout)
 }
 
 // update mesh ///////////////////////////////////////////////////////////
 // refered mesh in VulkanData update vertices and indices
-pub unsafe fn update_mesh(
-    renderer: &mut VulkanRenderer,
-    mesh: MeshHandle,
-    vertices: Vec<Vertex>,
-    indices: Vec<u32>,
-) -> Result<()> {
-    renderer.update_mesh_from_vertices(mesh.0, vertices, indices)
-}
 
 pub unsafe fn update_primitive_mesh(
     renderer: &mut VulkanRenderer,
@@ -615,8 +833,10 @@ pub unsafe fn update_primitive_mesh(
         );
     }
 
-    let (vertices, indices) = build_primitive_mesh(shape);
-    update_mesh(renderer, mesh.handle, vertices, indices)
+    let source = build_primitive_source(shape);
+    let mesh_data = source.to_mesh3d_data();
+
+    renderer.update_mesh_from_data(mesh.handle, mesh_data, VertexLayout::Mesh3D)
 }
 
 // test ///////////////////////////////////////////////////////////////////////
@@ -676,8 +896,8 @@ mod tests {
     }
 
     #[test]
-    fn build_primitive_mesh_creates_expected_triangle_counts() {
-        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Triangle {
+    fn build_primitive_source_creates_expected_triangle_counts() {
+        let source = build_primitive_source(PrimitiveShape::Triangle {
             points: [
                 vec3(0.0, 0.0, 0.0),
                 vec3(0.0, 1.0, 0.0),
@@ -685,13 +905,13 @@ mod tests {
             ],
         });
 
-        assert_eq!(vertices.len(), 3);
-        assert_eq!(indices, vec![0, 1, 2]);
+        assert_eq!(source.vertices.len(), 3);
+        assert_eq!(source.indices, vec![0, 1, 2]);
     }
 
     #[test]
-    fn build_primitive_mesh_creates_expected_rectangle_counts() {
-        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Rectangle {
+    fn build_primitive_source_creates_expected_rectangle_counts() {
+        let source = build_primitive_source(PrimitiveShape::Rectangle {
             points: [
                 vec3(0.0, -1.0, 1.0),
                 vec3(0.0, -1.0, -1.0),
@@ -700,13 +920,13 @@ mod tests {
             ],
         });
 
-        assert_eq!(vertices.len(), 4);
-        assert_eq!(indices, vec![0, 1, 2, 2, 3, 0]);
+        assert_eq!(source.vertices.len(), 4);
+        assert_eq!(source.indices, vec![0, 1, 2, 2, 3, 0]);
     }
 
     #[test]
-    fn build_primitive_mesh_creates_expected_cube_counts() {
-        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Cube {
+    fn build_primitive_source_creates_expected_cube_counts() {
+        let source = build_primitive_source(PrimitiveShape::Cube {
             points: [
                 vec3(0.5, -0.5, 0.5),
                 vec3(0.5, 0.5, 0.5),
@@ -719,35 +939,35 @@ mod tests {
             ],
         });
 
-        assert_eq!(vertices.len(), 24);
-        assert_eq!(indices.len(), 36);
+        assert_eq!(source.vertices.len(), 24);
+        assert_eq!(source.indices.len(), 36);
     }
 
     #[test]
-    fn build_primitive_mesh_creates_expected_circle_counts() {
-        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Circle {
+    fn build_primitive_source_creates_expected_circle_counts() {
+        let source = build_primitive_source(PrimitiveShape::Circle {
             radius: 1.0,
             segments: 8,
         });
 
-        assert_eq!(vertices.len(), 9);
-        assert_eq!(indices.len(), 24);
+        assert_eq!(source.vertices.len(), 9);
+        assert_eq!(source.indices.len(), 24);
     }
 
     #[test]
-    fn build_primitive_mesh_clamps_circle_segments_to_three() {
-        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Circle {
+    fn build_primitive_source_clamps_circle_segments_to_three() {
+        let source = build_primitive_source(PrimitiveShape::Circle {
             radius: 1.0,
             segments: 1,
         });
 
-        assert_eq!(vertices.len(), 4);
-        assert_eq!(indices.len(), 9);
+        assert_eq!(source.vertices.len(), 4);
+        assert_eq!(source.indices.len(), 9);
     }
 
     #[test]
-    fn build_primitive_mesh_creates_expected_polygon_counts() {
-        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Polygon {
+    fn build_primitive_source_creates_expected_polygon_counts() {
+        let source = build_primitive_source(PrimitiveShape::Polygon {
             points: vec![
                 vec3(0.0, -0.7, 0.7),
                 vec3(0.0, -0.4, 0.5),
@@ -757,17 +977,17 @@ mod tests {
             ],
         });
 
-        assert_eq!(vertices.len(), 5);
-        assert_eq!(indices.len(), 9);
+        assert_eq!(source.vertices.len(), 5);
+        assert_eq!(source.indices.len(), 9);
     }
 
     #[test]
-    fn build_primitive_mesh_returns_empty_polygon_for_too_few_points() {
-        let (vertices, indices) = build_primitive_mesh(PrimitiveShape::Polygon {
+    fn build_primitive_source_returns_empty_polygon_for_too_few_points() {
+        let source = build_primitive_source(PrimitiveShape::Polygon {
             points: vec![vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0)],
         });
 
-        assert!(vertices.is_empty());
-        assert!(indices.is_empty());
+        assert!(source.vertices.is_empty());
+        assert!(source.indices.is_empty());
     }
 }

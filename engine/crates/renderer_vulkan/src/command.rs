@@ -202,6 +202,13 @@ unsafe fn update_secondary_command_buffer(
         .device
         .begin_command_buffer(command_buffer, &info)?;
 
+    debug_assert_eq!(mesh.vertex_layout, pipeline.vertex_layout);
+
+    if mesh.vertex_layout != pipeline.vertex_layout {
+        renderer.device.end_command_buffer(command_buffer)?;
+        return Ok(command_buffer);
+    }
+
     renderer.device.cmd_bind_pipeline(
         command_buffer,
         vk::PipelineBindPoint::GRAPHICS,

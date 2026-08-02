@@ -1,7 +1,8 @@
 use cgmath::{Matrix4, vec3};
 use vulkanalia::prelude::v1_0::*;
 
-use super::vertex::Vertex;
+use super::model::MeshData;
+use super::vertex::{DebugLineVertex, Mesh3DVertex, SourceVertex, VertexLayout};
 use turbo_math::Transform;
 
 #[derive(Clone, Debug, Default)]
@@ -67,13 +68,16 @@ pub struct VulkanData {
 
 #[derive(Clone, Debug)]
 pub struct Mesh {
-    pub vertices: Vec<Vertex>,
-    pub indices: Vec<u32>,
     pub vertex_buffer: vk::Buffer,
     pub vertex_buffer_memory: vk::DeviceMemory,
+    pub vertex_buffer_size: vk::DeviceSize,
+
     pub index_buffer: vk::Buffer,
     pub index_buffer_memory: vk::DeviceMemory,
+    pub index_buffer_size: vk::DeviceSize,
+
     pub index_count: u32,
+    pub vertex_layout: VertexLayout,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -93,7 +97,7 @@ pub struct TextureHandle(pub usize);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum PipelineKey {
     Mesh3D,
-    DebugLine3D,
+    DebugLine,
 }
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq)]
@@ -101,6 +105,9 @@ pub struct GraphicsPipeline {
     pub key: PipelineKey,
     pub layout: vk::PipelineLayout,
     pub pipeline: vk::Pipeline,
+
+    // vertex layout to use this pipeline
+    pub vertex_layout: VertexLayout,
 }
 
 impl VulkanData {

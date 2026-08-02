@@ -8,7 +8,7 @@ use vulkanalia::prelude::v1_0::*;
 
 use super::image::get_depth_format;
 use super::types::{GraphicsPipeline, PipelineKey, VulkanData};
-use super::vertex::{DebugLineVertex, Vertex};
+use super::vertex::{DebugLineVertex, Mesh3DVertex, VertexLayout};
 
 // A graphics pipeline describes how vertices and fragments
 // are processed by the GPU.
@@ -32,8 +32,8 @@ pub unsafe fn create_mesh3d_pipeline(device: &Device, data: &mut VulkanData) -> 
         .name(b"main\0");
 
     // Vertex Input
-    let binding_descriptions = &[Vertex::binding_description()];
-    let attribute_descriptions = Vertex::attribute_descriptions();
+    let binding_descriptions = &[Mesh3DVertex::binding_description()];
+    let attribute_descriptions = Mesh3DVertex::attribute_descriptions();
     let vertex_input_state = vk::PipelineVertexInputStateCreateInfo::builder()
         .vertex_binding_descriptions(binding_descriptions)
         .vertex_attribute_descriptions(&attribute_descriptions);
@@ -149,6 +149,7 @@ pub unsafe fn create_mesh3d_pipeline(device: &Device, data: &mut VulkanData) -> 
         key: PipelineKey::Mesh3D,
         pipeline,
         layout: pipeline_layout,
+        vertex_layout: VertexLayout::Mesh3D,
     };
 
     data.pipelines.push(graphics_pipeline);
@@ -268,9 +269,10 @@ pub unsafe fn create_debug_line_pipeline(device: &Device, data: &mut VulkanData)
         .0[0];
 
     data.pipelines.push(GraphicsPipeline {
-        key: PipelineKey::DebugLine3D,
+        key: PipelineKey::DebugLine,
         layout: pipeline_layout,
         pipeline,
+        vertex_layout: VertexLayout::DebugLine3D,
     });
 
     device.destroy_shader_module(vert_shader_module, None);

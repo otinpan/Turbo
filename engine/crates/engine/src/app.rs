@@ -1,7 +1,10 @@
 use anyhow::{Result, anyhow};
 use cgmath::{InnerSpace, vec2, vec3};
-use renderer_vulkan::{MeshHandle, PipelineKey, TextureHandle};
-use renderer_vulkan::{RenderCamera, RenderItem, VulkanRenderer};
+use renderer_vulkan::{
+    MeshHandle, PipelineKey, TextureHandle,
+    RenderCamera, RenderItem, VulkanRenderer,
+    VertexLayout,
+};
 use std::collections::HashMap;
 use turbo_math::Transform;
 use winit::event::{MouseButton, WindowEvent};
@@ -11,9 +14,14 @@ use winit::window::Window;
 pub const DEFAULT_TEXTURE: TextureHandle = TextureHandle(0);
 
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveShape, PrimitiveType, create_primitive_mesh, spawn_circle, spawn_cube,
-    spawn_polygon, spawn_primitive_from_mesh, spawn_rectangle, spawn_sphere, spawn_triangle,
-    update_primitive_mesh,
+    PrimitiveMesh, PrimitiveShape, PrimitiveType, create_primitive_mesh3d, 
+    spawn_circle_mesh3d, spawn_circle_debug_line, spawn_circle_with_layout,
+    spawn_cube_mesh3d, spawn_cube_debug_line, spawn_cube_with_layout,
+    spawn_polygon_mesh3d, spawn_polygon_debug_line, spawn_polygon_with_layout,
+    spawn_triangle_mesh3d, spawn_triangle_debug_line, spawn_triangle_with_layout,
+    spawn_rectangle_mesh3d, spawn_rectangle_debug_line, spawn_rectangle_with_layout,
+    spawn_sphere_mesh3d, spawn_sphere_debug_line, spawn_sphere_with_layout,
+    spawn_primitive_from_mesh, update_primitive_mesh,
 };
 
 use crate::world::EntityId;
@@ -97,15 +105,32 @@ impl App {
                     vec3(0.0, 0.5, 0.2),
                     vec3(0.0, 0.0, 0.5),
                     vec3(1.0, 1.0, 1.0),
+                    VertexLayout::DebugLine3D,
                 )?;
 
-                let rectangle_id1 =
-                    app.spawn_rectangle(vec3(0.0, 0.5, 0.5), 0.3, 0.3, vec3(1.0, 1.0, 1.0))?;
+                let rectangle_id1 = app.spawn_rectangle(
+                        vec3(0.0, 0.5, 0.5),
+                        0.3,
+                        0.3,
+                        vec3(1.0, 1.0, 1.0),
+                        VertexLayout::DebugLine3D,
+                    )?;
 
-                let cube_id1 = app.spawn_cube(vec3(0.0, 1.0, 1.0), 1.0, vec3(1.0, 1.0, 1.0))?;
+                let cube_id1 = app.spawn_cube(
+                    vec3(0.0, 1.0, 1.0),
+                    1.0,
+                    vec3(1.0, 1.0, 1.0),
+                    VertexLayout::DebugLine3D,
+                )?;
 
                 let circle_id1 =
-                    app.spawn_circle(vec3(0.0, 2.0, 1.0), 1.0, 32, vec3(1.0, 1.0, 1.0))?;
+                    app.spawn_circle(
+                        vec3(0.0, 2.0, 1.0),
+                        1.0,
+                        32,
+                        vec3(1.0, 1.0, 1.0),
+                        VertexLayout::DebugLine3D,
+                    )?;
 
                 let polygon_id1 = app.spawn_polygon(
                     vec![
@@ -117,10 +142,16 @@ impl App {
                         vec3(0.0, -0.1, 1.2),
                     ],
                     vec3(1.0, 1.0, 1.0),
+                    VertexLayout::DebugLine3D,
                 )?;
 
                 let sphere_id1 =
-                    app.spawn_sphere(vec3(0.0, -1.0, 0.0), 0.5, 16, 16, vec3(1.0, 1.0, 1.0))?;
+                    app.spawn_sphere(
+                        vec3(0.0, -1.0, 0.0),
+                        0.5, 16, 16,
+                        vec3(1.0, 1.0, 1.0),
+                        VertexLayout::DebugLine3D,
+                    )?;
             }
             let triangle_count = app
                 .primitive_meshes
@@ -196,7 +227,7 @@ impl App {
             }
         }
         if self.input.key_pressed(KeyCode::ArrowRight) {
-            let viking_room = self.use_model("viking_room")?;
+            let viking_room = self.use_model("viking_room_debug_line")?;
             let viking_texture = self.use_texture("viking_room");
             let index = self
                 .world
@@ -222,7 +253,7 @@ impl App {
                             color: vec3(1.0, 1.0, 1.0),
                             use_texture: true,
                             texture: viking_texture,
-                            pipeline_key: PipelineKey::Mesh3D,
+                            pipeline_key: PipelineKey::DebugLine,
                         },
                     }),
                     None,
@@ -537,8 +568,9 @@ impl App {
         p1: Vec3,
         p2: Vec3,
         color: Vec3,
+        vertex_layout: VertexLayout,
     ) -> Result<EntityId> {
-        spawn_triangle(
+        spawn_triangle_with_layout(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
@@ -546,6 +578,7 @@ impl App {
             p1,
             p2,
             color,
+            vertex_layout,
         )
     }
 
@@ -555,8 +588,9 @@ impl App {
         width: f32,
         height: f32,
         color: Vec3,
+        vertex_layout: VertexLayout,
     ) -> Result<EntityId> {
-        spawn_rectangle(
+        spawn_rectangle_with_layout(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
@@ -564,17 +598,25 @@ impl App {
             width,
             height,
             color,
+            vertex_layout
         )
     }
 
-    pub unsafe fn spawn_cube(&mut self, pos: Vec3, length: f32, color: Vec3) -> Result<EntityId> {
-        spawn_cube(
+    pub unsafe fn spawn_cube(
+        &mut self,
+        pos: Vec3, 
+        length: f32, 
+        color: Vec3,
+        vertex_layout: VertexLayout
+    ) -> Result<EntityId> {
+        spawn_cube_with_layout(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
             pos,
             length,
             color,
+            vertex_layout,
         )
     }
 
@@ -584,8 +626,9 @@ impl App {
         radius: f32,
         segments: u32,
         color: Vec3,
+        vertex_layout: VertexLayout,
     ) -> Result<EntityId> {
-        spawn_circle(
+        spawn_circle_with_layout(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
@@ -593,16 +636,23 @@ impl App {
             radius,
             segments,
             color,
+            vertex_layout,
         )
     }
 
-    pub unsafe fn spawn_polygon(&mut self, points: Vec<Vec3>, color: Vec3) -> Result<EntityId> {
-        spawn_polygon(
+    pub unsafe fn spawn_polygon(
+        &mut self,
+        points: Vec<Vec3>,
+        color: Vec3,
+        vertex_layout: VertexLayout,
+    ) -> Result<EntityId> {
+        spawn_polygon_with_layout(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
             points,
             color,
+            vertex_layout,
         )
     }
 
@@ -613,8 +663,9 @@ impl App {
         rings: u32,
         segments: u32,
         color: Vec3,
+        vertex_layout: VertexLayout,
     ) -> Result<EntityId> {
-        spawn_sphere(
+        spawn_sphere_with_layout(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
@@ -623,15 +674,23 @@ impl App {
             rings,
             segments,
             color,
+            vertex_layout,
         )
     }
 }
 
-unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, MeshHandle>> {
+unsafe fn load_models(
+    renderer: &mut VulkanRenderer,
+) -> Result<HashMap<String, MeshHandle>> {
     let mut models = HashMap::new();
+
     models.insert(
         "viking_room".to_string(),
-        renderer.load_mesh_from_model("assets/models/viking_room.obj")?,
+        renderer.load_mesh3d_from_model("assets/models/viking_room.obj")?,
+    );
+    models.insert(
+        "viking_room_debug_line".to_string(),
+        renderer.load_debug_line_from_model("assets/models/viking_room.obj")?,
     );
 
     Ok(models)
@@ -653,7 +712,7 @@ unsafe fn load_textures(renderer: &mut VulkanRenderer) -> Result<HashMap<String,
 
 unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<PrimitiveMesh>> {
     let primitive_meshes = vec![
-        create_primitive_mesh(
+        create_primitive_mesh3d(
             renderer,
             PrimitiveShape::Triangle {
                 points: [
@@ -663,7 +722,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                 ],
             },
         )?,
-        create_primitive_mesh(
+        create_primitive_mesh3d(
             renderer,
             PrimitiveShape::Rectangle {
                 points: [
@@ -674,7 +733,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                 ],
             },
         )?,
-        create_primitive_mesh(
+        create_primitive_mesh3d(
             renderer,
             PrimitiveShape::Cube {
                 points: [
@@ -689,14 +748,14 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                 ],
             },
         )?,
-        create_primitive_mesh(
+        create_primitive_mesh3d(
             renderer,
             PrimitiveShape::Circle {
                 radius: 1.0,
                 segments: 32,
             },
         )?,
-        create_primitive_mesh(
+        create_primitive_mesh3d(
             renderer,
             PrimitiveShape::Polygon {
                 points: vec![
@@ -708,7 +767,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                 ],
             },
         )?,
-        create_primitive_mesh(
+        create_primitive_mesh3d(
             renderer,
             PrimitiveShape::Sphere {
                 radius: 1.0,

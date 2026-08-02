@@ -72,6 +72,15 @@ pub struct Texture {
 }
 ```
 
+SourceMesh has all vertex data.
+```rust
+pub struct SourceMesh{
+    pub vertices: Vec<SourceVertex>,
+    pub indices: Vec<u32>,
+}
+```
+
+MeshData is created from SourceMesh
 ```rust
 pub struct MeshData<V> {
     pub vertices: Vec<V>,
@@ -79,12 +88,33 @@ pub struct MeshData<V> {
 }
 ```
 
+```rust
+pub struct Mesh {
+    pub vertex_buffer: vk::Buffer,
+    pub vertex_buffer_memory: vk::DeviceMemory,
+    pub vertex_buffer_size: vk::DeviceSize,
+
+    pub index_buffer: vk::Buffer,
+    pub index_buffer_memory: vk::DeviceMemory,
+    pub index_buffer_size: vk::DeviceSize,
+
+    pub index_count: u32,
+    pub vertex_layout: VertexLayout,
+}
+```
+
 ### Create Mesh
 Models and primitives are loaded by `load_mesh_from_model` and `load_mesh_from_primitive`.
 ```rust
-load_mesh_from_model(<path>) -> MeshHandle
-  load_model(<path>) -> MeshData
-    load_mesh_from_data(MeshData)
+load_mesh_from_model(<path>)
+  load_model_source(<path>) -> SourceMesh
+    convert -> MeshData<T>
+      load_model_from_data(SourceMesh,VertexLayout) -> MeshHandle 
+```
+
+```rust
+load_mesh_from_vertices<V>(vertices<V>, indices,VertexLayout)
+  load_mesh_from_data(MeshData{vertices,indices},layout) -> MeshHandle
 ```
 
 ### Create Pipeline
