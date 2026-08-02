@@ -1,9 +1,7 @@
 use anyhow::{Result, anyhow};
 use cgmath::{InnerSpace, vec2, vec3};
 use renderer_vulkan::{
-    MeshHandle, PipelineKey, TextureHandle,
-    RenderCamera, RenderItem, VulkanRenderer,
-    VertexLayout,
+    MeshHandle, PipelineKey, RenderCamera, RenderItem, TextureHandle, VertexLayout, VulkanRenderer,
 };
 use std::collections::HashMap;
 use turbo_math::Transform;
@@ -14,14 +12,10 @@ use winit::window::Window;
 pub const DEFAULT_TEXTURE: TextureHandle = TextureHandle(0);
 
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveShape, PrimitiveType, create_primitive_mesh3d, 
-    spawn_circle_mesh3d, spawn_circle_debug_line, spawn_circle_with_layout,
-    spawn_cube_mesh3d, spawn_cube_debug_line, spawn_cube_with_layout,
-    spawn_polygon_mesh3d, spawn_polygon_debug_line, spawn_polygon_with_layout,
-    spawn_triangle_mesh3d, spawn_triangle_debug_line, spawn_triangle_with_layout,
-    spawn_rectangle_mesh3d, spawn_rectangle_debug_line, spawn_rectangle_with_layout,
-    spawn_sphere_mesh3d, spawn_sphere_debug_line, spawn_sphere_with_layout,
-    spawn_primitive_from_mesh, update_primitive_mesh,
+    PrimitiveMesh, PrimitiveShape, PrimitiveType, create_primitive_mesh3d,
+    spawn_circle_with_layout, spawn_cube_with_layout, spawn_line, spawn_polygon_with_layout,
+    spawn_primitive_from_mesh, spawn_rectangle_with_layout, spawn_sphere_with_layout,
+    spawn_triangle_with_layout, update_primitive_mesh,
 };
 
 use crate::world::EntityId;
@@ -109,12 +103,12 @@ impl App {
                 )?;
 
                 let rectangle_id1 = app.spawn_rectangle(
-                        vec3(0.0, 0.5, 0.5),
-                        0.3,
-                        0.3,
-                        vec3(1.0, 1.0, 1.0),
-                        VertexLayout::DebugLine3D,
-                    )?;
+                    vec3(0.0, 0.5, 0.5),
+                    0.3,
+                    0.3,
+                    vec3(1.0, 1.0, 1.0),
+                    VertexLayout::DebugLine3D,
+                )?;
 
                 let cube_id1 = app.spawn_cube(
                     vec3(0.0, 1.0, 1.0),
@@ -123,14 +117,13 @@ impl App {
                     VertexLayout::DebugLine3D,
                 )?;
 
-                let circle_id1 =
-                    app.spawn_circle(
-                        vec3(0.0, 2.0, 1.0),
-                        1.0,
-                        32,
-                        vec3(1.0, 1.0, 1.0),
-                        VertexLayout::DebugLine3D,
-                    )?;
+                let circle_id1 = app.spawn_circle(
+                    vec3(0.0, 2.0, 1.0),
+                    1.0,
+                    32,
+                    vec3(1.0, 1.0, 1.0),
+                    VertexLayout::DebugLine3D,
+                )?;
 
                 let polygon_id1 = app.spawn_polygon(
                     vec![
@@ -145,48 +138,31 @@ impl App {
                     VertexLayout::DebugLine3D,
                 )?;
 
-                let sphere_id1 =
-                    app.spawn_sphere(
-                        vec3(0.0, -1.0, 0.0),
-                        0.5, 16, 16,
-                        vec3(1.0, 1.0, 1.0),
-                        VertexLayout::DebugLine3D,
-                    )?;
+                let sphere_id1 = app.spawn_sphere(
+                    vec3(0.0, -1.0, 0.0),
+                    0.5,
+                    16,
+                    16,
+                    vec3(1.0, 1.0, 1.0),
+                    VertexLayout::DebugLine3D,
+                )?;
+
+                let line_id1 = app.spawn_line(
+                    vec3(0.0, -20.0, 0.0),
+                    vec3(0.0, 20.0, 0.0),
+                    vec3(1.0, 0.0, 1.0),
+                )?;
+                let line_id2 = app.spawn_line(
+                    vec3(0.0, 0.0, -20.0),
+                    vec3(0.0, 0.0, 20.0),
+                    vec3(1.0, 1.0, 0.0),
+                )?;
+                let line_id3 = app.spawn_line(
+                    vec3(-20.0, 0.0, 0.0),
+                    vec3(20.0, 0.0, 0.0),
+                    vec3(0.0, 1.0, 1.0),
+                )?;
             }
-            let triangle_count = app
-                .primitive_meshes
-                .iter()
-                .filter(|mesh| mesh.primitive_type == PrimitiveType::Triangle)
-                .count();
-            assert!(triangle_count == 2);
-
-            let rectangle_count = app
-                .primitive_meshes
-                .iter()
-                .filter(|mesh| mesh.primitive_type == PrimitiveType::Rectangle)
-                .count();
-            assert!(rectangle_count == 2);
-
-            let cube_count = app
-                .primitive_meshes
-                .iter()
-                .filter(|mesh| mesh.primitive_type == PrimitiveType::Cube)
-                .count();
-            assert!(cube_count == 2);
-
-            let circle_count = app
-                .primitive_meshes
-                .iter()
-                .filter(|mesh| mesh.primitive_type == PrimitiveType::Circle)
-                .count();
-            assert!(circle_count == 2);
-
-            let polygon_count = app
-                .primitive_meshes
-                .iter()
-                .filter(|mesh| mesh.primitive_type == PrimitiveType::Polygon)
-                .count();
-            assert!(polygon_count == 2);
         }
         app.prepare_renderer();
 
@@ -253,7 +229,7 @@ impl App {
                             color: vec3(1.0, 1.0, 1.0),
                             use_texture: true,
                             texture: viking_texture,
-                            pipeline_key: PipelineKey::DebugLine,
+                            pipeline_key: PipelineKey::DebugLine3D,
                         },
                     }),
                     None,
@@ -598,16 +574,16 @@ impl App {
             width,
             height,
             color,
-            vertex_layout
+            vertex_layout,
         )
     }
 
     pub unsafe fn spawn_cube(
         &mut self,
-        pos: Vec3, 
-        length: f32, 
+        pos: Vec3,
+        length: f32,
         color: Vec3,
-        vertex_layout: VertexLayout
+        vertex_layout: VertexLayout,
     ) -> Result<EntityId> {
         spawn_cube_with_layout(
             &mut self.world,
@@ -677,11 +653,20 @@ impl App {
             vertex_layout,
         )
     }
+
+    pub unsafe fn spawn_line(&mut self, pos0: Vec3, pos1: Vec3, color: Vec3) -> Result<EntityId> {
+        spawn_line(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            pos0,
+            pos1,
+            color,
+        )
+    }
 }
 
-unsafe fn load_models(
-    renderer: &mut VulkanRenderer,
-) -> Result<HashMap<String, MeshHandle>> {
+unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, MeshHandle>> {
     let mut models = HashMap::new();
 
     models.insert(

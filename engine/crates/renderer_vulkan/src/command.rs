@@ -1,6 +1,6 @@
 use super::VulkanRenderer;
 use super::device::QueueFamilyIndices;
-use super::types::VulkanData;
+use super::types::{PipelineKey, VulkanData};
 use anyhow::Result;
 use cgmath::{Deg, vec3};
 use vulkanalia::prelude::v1_0::*;
@@ -224,33 +224,59 @@ unsafe fn update_secondary_command_buffer(
         vk::IndexType::UINT32,
     );
 
-    let global_set = renderer.data.global_descriptor_sets[image_index];
-    let material_set = renderer.data.material_descriptor_sets[object.texture_index.0];
+    match pipeline.key {
+        PipelineKey::Mesh3D => {
+            let global_set = renderer.data.global_descriptor_sets[image_index];
+            let material_set = renderer.data.material_descriptor_sets[object.texture_index.0];
+            let sets = [global_set, material_set];
 
-    let sets = [global_set, material_set];
-    renderer.device.cmd_bind_descriptor_sets(
-        command_buffer,
-        vk::PipelineBindPoint::GRAPHICS,
-        pipeline.layout,
-        0,
-        &sets,
-        &[],
-    );
+            renderer.device.cmd_bind_descriptor_sets(
+                command_buffer,
+                vk::PipelineBindPoint::GRAPHICS,
+                pipeline.layout,
+                0,
+                &sets,
+                &[],
+            );
 
-    renderer.device.cmd_push_constants(
-        command_buffer,
-        pipeline.layout,
-        vk::ShaderStageFlags::VERTEX,
-        0,
-        model_bytes,
-    );
-    renderer.device.cmd_push_constants(
-        command_buffer,
-        pipeline.layout,
-        vk::ShaderStageFlags::FRAGMENT,
-        64,
-        material_bytes,
-    );
+            renderer.device.cmd_push_constants(
+                command_buffer,
+                pipeline.layout,
+                vk::ShaderStageFlags::VERTEX,
+                0,
+                model_bytes,
+            );
+            renderer.device.cmd_push_constants(
+                command_buffer,
+                pipeline.layout,
+                vk::ShaderStageFlags::FRAGMENT,
+                64,
+                material_bytes,
+            );
+        }
+        PipelineKey::DebugLine3D => {
+            let global_set = renderer.data.global_descriptor_sets[image_index];
+            let sets = [global_set];
+
+            renderer.device.cmd_bind_descriptor_sets(
+                command_buffer,
+                vk::PipelineBindPoint::GRAPHICS,
+                pipeline.layout,
+                0,
+                &sets,
+                &[],
+            );
+
+            renderer.device.cmd_push_constants(
+                command_buffer,
+                pipeline.layout,
+                vk::ShaderStageFlags::VERTEX,
+                0,
+                model_bytes,
+            );
+        }
+    }
+
     renderer
         .device
         .cmd_draw_indexed(command_buffer, mesh.index_count, 1, 0, 0, 0);

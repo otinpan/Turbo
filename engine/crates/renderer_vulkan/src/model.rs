@@ -10,6 +10,13 @@ use super::vertex::{DebugLineVertex, Mesh3DVertex, SourceVertex};
 pub struct SourceMesh {
     pub vertices: Vec<SourceVertex>,
     pub indices: Vec<u32>,
+    pub topology: SourceTopology, // to distingish primitive line when to_debugline_data
+}
+
+#[derive(Clone, Debug)]
+pub enum SourceTopology {
+    TriangleList,
+    LineList,
 }
 
 impl SourceMesh {
@@ -21,9 +28,14 @@ impl SourceMesh {
     }
 
     pub fn to_debugline_data(&self) -> MeshData<DebugLineVertex> {
+        let indices = match self.topology {
+            SourceTopology::TriangleList => triangle_indices_to_line_indices(&self.indices),
+            SourceTopology::LineList => self.indices.clone(),
+        };
+
         MeshData {
             vertices: self.vertices.iter().map(DebugLineVertex::from).collect(),
-            indices: triangle_indices_to_line_indices(&self.indices),
+            indices,
         }
     }
 }
@@ -92,11 +104,17 @@ pub fn load_model_source(file_path: &str) -> Result<SourceMesh> {
             }
         }
     }
-    Ok(SourceMesh { vertices, indices })
+    Ok(SourceMesh {
+        vertices,
+        indices,
+        topology: SourceTopology::TriangleList,
+    })
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::model::SourceTopology::TriangleList;
+
     use super::*;
     use cgmath::{vec2, vec3};
 
@@ -109,6 +127,7 @@ mod tests {
                 SourceVertex::new(vec3(0.0, 1.0, 0.0), vec3(1.0, 1.0, 1.0), vec2(0.0, 1.0)),
             ],
             indices: vec![0, 1, 2],
+            topology: SourceTopology::TriangleList,
         };
 
         let mesh_data = source.to_debugline_data();

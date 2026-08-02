@@ -97,7 +97,7 @@ pub struct TextureHandle(pub usize);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum PipelineKey {
     Mesh3D,
-    DebugLine,
+    DebugLine3D,
 }
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq)]

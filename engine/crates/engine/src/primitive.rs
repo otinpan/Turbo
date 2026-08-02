@@ -1,6 +1,8 @@
 use anyhow::{Result, bail};
 use cgmath::{vec2, vec3};
-use renderer_vulkan::{MeshHandle, SourceMesh, SourceVertex, VertexLayout, VulkanRenderer};
+use renderer_vulkan::{
+    MeshHandle, SourceMesh, SourceTopology, SourceVertex, VertexLayout, VulkanRenderer,
+};
 use turbo_math::Transform;
 
 use super::EntityId;
@@ -19,6 +21,7 @@ pub enum PrimitiveType {
     Circle,
     Polygon,
     Sphere,
+    Line,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -54,6 +57,11 @@ pub enum PrimitiveShape {
         rings: u32,    // the number of rings (parallel to the latitude)
         segments: u32, // the number of segments (parallel to the latitude)
     },
+    Line {
+        pos0: Vec3,
+        pos1: Vec3,
+        color: Vec3,
+    },
 }
 
 impl PrimitiveShape {
@@ -65,6 +73,7 @@ impl PrimitiveShape {
             Self::Circle { .. } => PrimitiveType::Circle,
             Self::Polygon { .. } => PrimitiveType::Polygon,
             Self::Sphere { .. } => PrimitiveType::Sphere,
+            Self::Line { .. } => PrimitiveType::Line,
         }
     }
 }
@@ -126,6 +135,7 @@ pub fn build_primitive_source(shape: PrimitiveShape) -> SourceMesh {
             rings,
             segments,
         } => build_sphere_source(radius, rings, segments),
+        PrimitiveShape::Line { pos0, pos1 ,color} => build_line_source(pos0, pos1,color),
     }
 }
 
@@ -140,7 +150,11 @@ fn build_triangle_source(points: [Vec3; 3]) -> SourceMesh {
 
     let indices = vec![0, 1, 2];
 
-    SourceMesh { vertices, indices }
+    SourceMesh {
+        vertices,
+        indices,
+        topology: SourceTopology::TriangleList,
+    }
 }
 
 fn build_rectangle_source(points: [Vec3; 4]) -> SourceMesh {
@@ -153,8 +167,11 @@ fn build_rectangle_source(points: [Vec3; 4]) -> SourceMesh {
     ];
 
     let indices = vec![0, 1, 2, 2, 3, 0];
-
-    SourceMesh { vertices, indices }
+    SourceMesh {
+        vertices,
+        indices,
+        topology: SourceTopology::TriangleList,
+    }
 }
 
 pub fn build_cube_source(points: [Vec3; 8]) -> SourceMesh {
@@ -181,8 +198,11 @@ pub fn build_cube_source(points: [Vec3; 8]) -> SourceMesh {
 
         indices.extend_from_slice(&[base, base + 1, base + 2, base + 2, base + 3, base]);
     }
-
-    SourceMesh { vertices, indices }
+    SourceMesh {
+        vertices,
+        indices,
+        topology: SourceTopology::TriangleList,
+    }
 }
 
 pub fn build_circle_source(radius: f32, segments: u32) -> SourceMesh {
@@ -213,8 +233,11 @@ pub fn build_circle_source(radius: f32, segments: u32) -> SourceMesh {
 
         indices.extend_from_slice(&[0, current, next]);
     }
-
-    SourceMesh { vertices, indices }
+    SourceMesh {
+        vertices,
+        indices,
+        topology: SourceTopology::TriangleList,
+    }
 }
 
 fn build_polygon_source(points: Vec<Vec3>) -> SourceMesh {
@@ -225,6 +248,7 @@ fn build_polygon_source(points: Vec<Vec3>) -> SourceMesh {
         return SourceMesh {
             vertices: Vec::new(),
             indices: Vec::new(),
+            topology: SourceTopology::LineList,
         };
     }
 
@@ -262,8 +286,11 @@ fn build_polygon_source(points: Vec<Vec3>) -> SourceMesh {
     }
 
     indices.extend(triangulate_polygon_yz(&points));
-
-    SourceMesh { vertices, indices }
+    SourceMesh {
+        vertices,
+        indices,
+        topology: SourceTopology::TriangleList,
+    }
 }
 
 // create triangle from polygon using era clipping
@@ -407,8 +434,26 @@ fn build_sphere_source(radius: f32, rings: u32, segments: u32) -> SourceMesh {
             indices.extend_from_slice(&[a, b, d, d, b, c]);
         }
     }
+    SourceMesh {
+        vertices,
+        indices,
+        topology: SourceTopology::TriangleList,
+    }
+}
 
-    SourceMesh { vertices, indices }
+fn build_line_source(pos0: Vec3, pos1: Vec3, color: Vec3) -> SourceMesh {
+    let vertices = vec![
+        SourceVertex::new(pos0, color, vec2(0.0, 0.0)),
+        SourceVertex::new(pos1, color, vec2(1.0, 1.0)),
+    ];
+
+    let indices = vec![0, 1];
+
+    SourceMesh {
+        vertices,
+        indices,
+        topology: SourceTopology::LineList,
+    }
 }
 
 // spawn primitive object //////////////////////////////////////////////
@@ -423,7 +468,7 @@ pub fn spawn_primitive_from_mesh(
 fn pipeline_key_for_layout(vertex_layout: VertexLayout) -> renderer_vulkan::PipelineKey {
     match vertex_layout {
         VertexLayout::Mesh3D => renderer_vulkan::PipelineKey::Mesh3D,
-        VertexLayout::DebugLine3D => renderer_vulkan::PipelineKey::DebugLine,
+        VertexLayout::DebugLine3D => renderer_vulkan::PipelineKey::DebugLine3D,
     }
 }
 
@@ -815,6 +860,32 @@ pub unsafe fn spawn_sphere_with_layout(
     };
 
     spawn_shape_with_layout(world, renderer, meshes, shape, center, color, vertex_layout)
+}
+
+pub unsafe fn spawn_line(
+    world: &mut World,
+    renderer: &mut VulkanRenderer,
+    meshes: &mut Vec<PrimitiveMesh>,
+    pos0: Vec3,
+    pos1: Vec3,
+    color: Vec3,
+) -> Result<EntityId> {
+    let center = (pos0 + pos1) / 2.0;
+    let shape = PrimitiveShape::Line {
+        pos0: pos0 - center,
+        pos1: pos1 - center,
+        color,
+    };
+
+    spawn_shape_with_layout(
+        world,
+        renderer,
+        meshes,
+        shape,
+        center,
+        color,
+        VertexLayout::DebugLine3D,
+    )
 }
 
 // update mesh ///////////////////////////////////////////////////////////

@@ -43,8 +43,8 @@ use self::image::{
 };
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::mesh::create_mesh;
-pub use self::model::SourceMesh;
 use self::model::{MeshData, load_model_source};
+pub use self::model::{SourceMesh, SourceTopology};
 use self::pipeline::{create_debug_line_pipeline, create_mesh3d_pipeline, create_render_pass};
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
@@ -207,11 +207,11 @@ impl VulkanRenderer {
         self.load_mesh_from_data(mesh_data, VertexLayout::Mesh3D)
     }
 
-    pub unsafe fn load_debug_line_from_model(&mut self, path: &str) -> Result<MeshHandle>{
-        let source=load_model_source(path)?;
-        let mesh_data=source.to_debugline_data();
+    pub unsafe fn load_debug_line_from_model(&mut self, path: &str) -> Result<MeshHandle> {
+        let source = load_model_source(path)?;
+        let mesh_data = source.to_debugline_data();
 
-        self.load_mesh_from_data(mesh_data,VertexLayout::DebugLine3D)
+        self.load_mesh_from_data(mesh_data, VertexLayout::DebugLine3D)
     }
 
     pub unsafe fn load_texture(&mut self, path: &str) -> Result<TextureHandle> {

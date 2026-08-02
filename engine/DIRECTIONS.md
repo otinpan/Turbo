@@ -77,6 +77,7 @@ SourceMesh has all vertex data.
 pub struct SourceMesh{
     pub vertices: Vec<SourceVertex>,
     pub indices: Vec<u32>,
+    pub topology: SourceTopology,
 }
 ```
 
