@@ -81,7 +81,19 @@ pub struct Mesh {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct MeshHandle(pub usize);
+pub struct MeshHandle {
+    pub index: usize,
+    pub vertex_layout: VertexLayout,
+}
+
+impl MeshHandle {
+    pub const fn new(index: usize, vertex_layout: VertexLayout) -> Self {
+        Self {
+            index,
+            vertex_layout,
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Texture {

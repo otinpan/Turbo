@@ -115,7 +115,11 @@ mod tests {
     use super::*;
     use crate::Material;
     use cgmath::vec3;
-    use renderer_vulkan::MeshHandle;
+    use renderer_vulkan::{MeshHandle, VertexLayout};
+
+    fn mesh_handle(index: usize) -> MeshHandle {
+        MeshHandle::new(index, VertexLayout::Mesh3D)
+    }
 
     fn spawn_renderable(world: &mut World, mesh: MeshHandle, transform: Transform) -> EntityId {
         world.spawn(
@@ -132,7 +136,7 @@ mod tests {
     #[test]
     fn spawn_adds_object_and_returns_unique_entity_ids() {
         let mut world = World::default();
-        let mesh = MeshHandle(0);
+        let mesh = mesh_handle(0);
 
         let first = spawn_renderable(&mut world, mesh, Transform::default());
         let second = spawn_renderable(&mut world, mesh, Transform::default());
@@ -146,7 +150,7 @@ mod tests {
     #[test]
     fn get_returns_object_for_entity_id() {
         let mut world = World::default();
-        let mesh = MeshHandle(7);
+        let mesh = mesh_handle(7);
         let transform = Transform {
             position: vec3(0.0, 1.0, 1.0),
             rotation: vec3(-1.0, 2.0, 3.0),
@@ -173,7 +177,7 @@ mod tests {
     #[test]
     fn get_mut_can_change_object_transform() {
         let mut world = World::default();
-        let id = spawn_renderable(&mut world, MeshHandle(0), Transform::default());
+        let id = spawn_renderable(&mut world, mesh_handle(0), Transform::default());
 
         world
             .get_mut(id)
@@ -194,8 +198,8 @@ mod tests {
     #[test]
     fn despawn_removes_only_matching_entity() {
         let mut world = World::default();
-        let first = spawn_renderable(&mut world, MeshHandle(0), Transform::default());
-        let second = spawn_renderable(&mut world, MeshHandle(1), Transform::default());
+        let first = spawn_renderable(&mut world, mesh_handle(0), Transform::default());
+        let second = spawn_renderable(&mut world, mesh_handle(1), Transform::default());
 
         let removed = world.despawn(first).expect("entity should be removed");
 
@@ -219,7 +223,7 @@ mod tests {
         let id = world.spawn(
             Transform::default(),
             Some(MeshRenderer {
-                mesh: MeshHandle(0),
+                mesh: mesh_handle(0),
                 material: Material::default(),
             }),
             None,

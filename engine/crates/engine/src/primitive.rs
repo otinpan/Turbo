@@ -9,6 +9,7 @@ use super::EntityId;
 use super::Material;
 use super::MeshRenderer;
 use super::World;
+use super::pipeline_key_for_layout;
 
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Vec2 = cgmath::Vector2<f32>;
@@ -134,23 +135,26 @@ pub unsafe fn create_primitive_with_layout(
 // build mesh. create vertices and indices from points //////////////////////////////////////////////////
 pub fn build_primitive_source(shape: PrimitiveShape) -> SourceMesh {
     match shape {
-        PrimitiveShape::Triangle { points ,color} => build_triangle_source(points,color),
-        PrimitiveShape::Rectangle { points ,color} => build_rectangle_source(points,color),
-        PrimitiveShape::Cube { points ,color} => build_cube_source(points,color),
-        PrimitiveShape::Circle { radius, segments,color } => build_circle_source(radius, segments,color),
-        PrimitiveShape::Polygon { points ,color} => build_polygon_source(points,color),
+        PrimitiveShape::Triangle { points, color } => build_triangle_source(points, color),
+        PrimitiveShape::Rectangle { points, color } => build_rectangle_source(points, color),
+        PrimitiveShape::Cube { points, color } => build_cube_source(points, color),
+        PrimitiveShape::Circle {
+            radius,
+            segments,
+            color,
+        } => build_circle_source(radius, segments, color),
+        PrimitiveShape::Polygon { points, color } => build_polygon_source(points, color),
         PrimitiveShape::Sphere {
             radius,
             rings,
             segments,
             color,
-        } => build_sphere_source(radius, rings, segments,color),
-        PrimitiveShape::Line { pos0, pos1 ,color} => build_line_source(pos0, pos1,color),
+        } => build_sphere_source(radius, rings, segments, color),
+        PrimitiveShape::Line { pos0, pos1, color } => build_line_source(pos0, pos1, color),
     }
 }
 
-fn build_triangle_source(points: [Vec3; 3],color: Vec3) -> SourceMesh {
-
+fn build_triangle_source(points: [Vec3; 3], color: Vec3) -> SourceMesh {
     let vertices = vec![
         SourceVertex::new(points[0], color, vec2(0.0, 0.0)),
         SourceVertex::new(points[1], color, vec2(1.0, 0.0)),
@@ -166,7 +170,7 @@ fn build_triangle_source(points: [Vec3; 3],color: Vec3) -> SourceMesh {
     }
 }
 
-fn build_rectangle_source(points: [Vec3; 4],color: Vec3) -> SourceMesh {
+fn build_rectangle_source(points: [Vec3; 4], color: Vec3) -> SourceMesh {
     let vertices = vec![
         SourceVertex::new(points[0], color, vec2(0.0, 0.0)),
         SourceVertex::new(points[1], color, vec2(1.0, 0.0)),
@@ -182,7 +186,7 @@ fn build_rectangle_source(points: [Vec3; 4],color: Vec3) -> SourceMesh {
     }
 }
 
-pub fn build_cube_source(points: [Vec3; 8],color: Vec3) -> SourceMesh {
+pub fn build_cube_source(points: [Vec3; 8], color: Vec3) -> SourceMesh {
     let faces = [
         [0, 1, 2, 3],
         [4, 7, 6, 5],
@@ -212,7 +216,7 @@ pub fn build_cube_source(points: [Vec3; 8],color: Vec3) -> SourceMesh {
     }
 }
 
-pub fn build_circle_source(radius: f32, segments: u32,color: Vec3) -> SourceMesh {
+pub fn build_circle_source(radius: f32, segments: u32, color: Vec3) -> SourceMesh {
     let segments = segments.max(3);
     let mut vertices = Vec::with_capacity(segments as usize + 1);
     let mut indices = Vec::with_capacity(segments as usize * 3);
@@ -402,7 +406,7 @@ fn fan_triangulate(size: usize) -> Vec<u32> {
     indices
 }
 
-fn build_sphere_source(radius: f32, rings: u32, segments: u32,color: Vec3) -> SourceMesh {
+fn build_sphere_source(radius: f32, rings: u32, segments: u32, color: Vec3) -> SourceMesh {
     let rings = rings.max(2);
     let segments = segments.max(3);
 
@@ -464,17 +468,16 @@ fn build_line_source(pos0: Vec3, pos1: Vec3, color: Vec3) -> SourceMesh {
 // spawn primitive object //////////////////////////////////////////////
 pub fn spawn_primitive_from_mesh(
     world: &mut World,
-    mesh_renderer: MeshRenderer,
+    mesh: MeshHandle,
+    material: Material,
     transform: Transform,
 ) -> Result<EntityId> {
-    Ok(world.spawn(transform, Some(mesh_renderer), None, vec3(0.0, 0.0, 0.0)))
-}
-
-fn pipeline_key_for_layout(vertex_layout: VertexLayout) -> renderer_vulkan::PipelineKey {
-    match vertex_layout {
-        VertexLayout::Mesh3D => renderer_vulkan::PipelineKey::Mesh3D,
-        VertexLayout::DebugLine3D => renderer_vulkan::PipelineKey::DebugLine3D,
-    }
+    Ok(world.spawn(
+        transform,
+        Some(MeshRenderer::new(mesh, material)?),
+        None,
+        vec3(0.0, 0.0, 0.0),
+    ))
 }
 
 unsafe fn spawn_shape_with_layout(
@@ -491,13 +494,11 @@ unsafe fn spawn_shape_with_layout(
 
     spawn_primitive_from_mesh(
         world,
-        MeshRenderer {
-            mesh: primitive_mesh.handle,
-            material: Material {
-                color,
-                pipeline_key: pipeline_key_for_layout(vertex_layout),
-                ..Material::default()
-            },
+        primitive_mesh.handle,
+        Material {
+            color,
+            pipeline_key: pipeline_key_for_layout(vertex_layout),
+            ..Default::default()
         },
         Transform {
             position,
@@ -754,7 +755,11 @@ pub unsafe fn spawn_circle_with_layout(
     color: Vec3,
     vertex_layout: VertexLayout,
 ) -> Result<EntityId> {
-    let shape = PrimitiveShape::Circle { radius, segments, color};
+    let shape = PrimitiveShape::Circle {
+        radius,
+        segments,
+        color,
+    };
 
     spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, vertex_layout)
 }
@@ -916,28 +921,22 @@ pub unsafe fn update_primitive_mesh(
     let source = build_primitive_source(shape);
 
     match mesh.vertex_layout {
-        VertexLayout::Mesh3D => {
-            renderer.update_mesh_from_data(
-                mesh.handle,
-                source.to_mesh3d_data(),
-                VertexLayout::Mesh3D,
-            )
-        }
-        VertexLayout::DebugLine3D => {
-            renderer.update_mesh_from_data(
-                mesh.handle,
-                source.to_debugline_data(),
-                VertexLayout::DebugLine3D,
-            )
-        }
+        VertexLayout::Mesh3D => renderer.update_mesh_from_data(
+            mesh.handle,
+            source.to_mesh3d_data(),
+            VertexLayout::Mesh3D,
+        ),
+        VertexLayout::DebugLine3D => renderer.update_mesh_from_data(
+            mesh.handle,
+            source.to_debugline_data(),
+            VertexLayout::DebugLine3D,
+        ),
     }
 }
 // test ///////////////////////////////////////////////////////////////////////
 #[cfg(test)]
 mod tests {
-    use crate::app::DEFAULT_TEXTURE;
-
-use super::*;
+    use super::*;
     use cgmath::vec3;
 
     fn white() -> Vec3 {
@@ -1095,5 +1094,71 @@ use super::*;
 
         assert!(source.vertices.is_empty());
         assert!(source.indices.is_empty());
+    }
+
+    #[test]
+    fn spawn_primitive_from_mesh_accepts_matching_mesh3d_material() {
+        let mut world = World::default();
+        let primitive_mesh = PrimitiveMesh {
+            handle: MeshHandle::new(0, VertexLayout::Mesh3D),
+            primitive_type: PrimitiveType::Triangle,
+            vertex_layout: VertexLayout::Mesh3D,
+        };
+
+        let result = spawn_primitive_from_mesh(
+            &mut world,
+            primitive_mesh.handle,
+            Material {
+                pipeline_key: renderer_vulkan::PipelineKey::Mesh3D,
+                ..Material::default()
+            },
+            Transform::default(),
+        );
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn spawn_primitive_from_mesh_accepts_matching_debugline_material() {
+        let mut world = World::default();
+        let primitive_mesh = PrimitiveMesh {
+            handle: MeshHandle::new(0, VertexLayout::DebugLine3D),
+            primitive_type: PrimitiveType::Line,
+            vertex_layout: VertexLayout::DebugLine3D,
+        };
+
+        let result = spawn_primitive_from_mesh(
+            &mut world,
+            primitive_mesh.handle,
+            Material {
+                pipeline_key: renderer_vulkan::PipelineKey::DebugLine3D,
+                ..Material::default()
+            },
+            Transform::default(),
+        );
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn spawn_primitive_from_mesh_rejects_mismatched_pipeline_and_vertex_layout() {
+        let mut world = World::default();
+        let primitive_mesh = PrimitiveMesh {
+            handle: MeshHandle::new(0, VertexLayout::Mesh3D),
+            primitive_type: PrimitiveType::Triangle,
+            vertex_layout: VertexLayout::Mesh3D,
+        };
+
+        let result = spawn_primitive_from_mesh(
+            &mut world,
+            primitive_mesh.handle,
+            Material {
+                pipeline_key: renderer_vulkan::PipelineKey::DebugLine3D,
+                ..Material::default()
+            },
+            Transform::default(),
+        );
+
+        assert!(result.is_err());
     }
 }

@@ -215,23 +215,31 @@ impl App {
                 .count();
 
             if self.positions.len() > index {
-                let id = self.world.spawn(
-                    Transform {
-                        position: self.positions[index],
-                        ..Default::default()
+                match MeshRenderer::new(
+                    viking_room,
+                    Material {
+                        color: vec3(1.0, 1.0, 1.0),
+                        use_texture: true,
+                        texture: viking_texture,
+                        pipeline_key: PipelineKey::DebugLine3D,
                     },
-                    Some(MeshRenderer {
-                        mesh: viking_room,
-                        material: Material {
-                            color: vec3(1.0, 1.0, 1.0),
-                            use_texture: true,
-                            texture: viking_texture,
-                            pipeline_key: PipelineKey::DebugLine3D,
-                        },
-                    }),
-                    None,
-                    vec3(20.0, 0.0, 0.0),
-                );
+                ){
+                    Ok(mesh_renderer) =>{
+                        let id = self.world.spawn(
+                            Transform {
+                                position: self.positions[index],
+                                ..Default::default()
+                            },
+                            Some(mesh_renderer),
+                            None,
+                            vec3(20.0, 0.0, 0.0),
+                        );
+                    }
+                    Err(e) =>{
+                        log::error!("Failed to spawn triangle primitive: {e:?}");
+                    }
+                };
+
             }
         }
 
@@ -239,127 +247,133 @@ impl App {
             let position = self.mouse_position_on_spawn_plane();
             let face_texture = self.use_texture("face");
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Triangle) {
-                let _id = spawn_primitive_from_mesh(
+                if let Err(e) = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::new(
-                        mesh,
-                        Material {
-                            color: vec3(1.0, 1.0, 1.0),
-                            use_texture: true,
-                            texture: face_texture,
-                            ..Default::default()
-                        },
-                    ),
+                    mesh,
+                    Material {
+                        color: vec3(1.0, 1.0, 1.0),
+                        use_texture: true,
+                        texture: face_texture,
+                        pipeline_key: PipelineKey::Mesh3D,
+                        ..Default::default()
+                    },
                     Transform {
                         position,
                         ..Default::default()
                     },
-                );
+                ) {
+                    log::error!("Failed to spawn triangle primitive: {e:?}");
+                }
             }
         }
 
         if self.input.key_pressed(KeyCode::KeyR) {
             let position = self.mouse_position_on_spawn_plane();
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Rectangle) {
-                let _id = spawn_primitive_from_mesh(
+                if let Err(e) = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::new(
-                        mesh,
-                        Material {
-                            color: vec3(1.0, 1.0, 1.0),
-                            use_texture: true,
-                            ..Default::default()
-                        },
-                    ),
+                    mesh,
+                    Material {
+                        color: vec3(1.0, 1.0, 1.0),
+                        use_texture: true,
+                        pipeline_key: PipelineKey::Mesh3D,
+                        ..Default::default()
+                    },
                     Transform {
                         position,
                         ..Default::default()
                     },
-                );
+                ) {
+                    log::error!("Failed to spawn rectangle primitive: {e:?}");
+                }
             }
         }
 
         if self.input.key_pressed(KeyCode::KeyC) {
             let position = self.mouse_position_on_spawn_plane();
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Cube) {
-                let _id = spawn_primitive_from_mesh(
+                if let Err(e) = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::new(
-                        mesh,
-                        Material {
-                            color: vec3(1.0, 1.0, 1.0),
-                            use_texture: true,
-                            ..Default::default()
-                        },
-                    ),
+                    mesh,
+                    Material {
+                        color: vec3(1.0, 1.0, 1.0),
+                        use_texture: true,
+                        pipeline_key: PipelineKey::DebugLine3D,
+                        ..Default::default()
+                    },
                     Transform {
                         position,
                         ..Default::default()
                     },
-                );
+                ) {
+                    log::error!("Failed to spawn cube primitive: {e:?}");
+                }
             }
         }
 
         if self.input.key_pressed(KeyCode::KeyI) {
             let position = self.mouse_position_on_spawn_plane();
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Circle) {
-                let _id = spawn_primitive_from_mesh(
+                if let Err(e) = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::new(
-                        mesh,
-                        Material {
-                            color: vec3(1.0, 1.0, 1.0),
-                            use_texture: true,
-                            ..Default::default()
-                        },
-                    ),
+                    mesh,
+                    Material {
+                        color: vec3(1.0, 1.0, 1.0),
+                        use_texture: true,
+                        pipeline_key: PipelineKey::Mesh3D,
+                        ..Default::default()
+                    },
                     Transform {
                         position,
                         ..Default::default()
                     },
-                );
+                ) {
+                    log::error!("Failed to spawn circle primitive: {e:?}");
+                }
             }
         }
 
         if self.input.key_pressed(KeyCode::KeyP) {
             let position = self.mouse_position_on_spawn_plane();
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Polygon) {
-                let _id = spawn_primitive_from_mesh(
+                if let Err(e) = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::new(
-                        mesh,
-                        Material {
-                            color: vec3(1.0, 1.0, 1.0),
-                            use_texture: true,
-                            ..Default::default()
-                        },
-                    ),
+                    mesh,
+                    Material {
+                        color: vec3(1.0, 1.0, 1.0),
+                        use_texture: true,
+                        pipeline_key: PipelineKey::Mesh3D,
+                        ..Default::default()
+                    },
                     Transform {
                         position,
                         ..Default::default()
                     },
-                );
+                ) {
+                    log::error!("Failed to spawn polygon primitive: {e:?}");
+                }
             }
         }
 
         if self.input.key_pressed(KeyCode::KeyE) {
             let position = self.mouse_position_on_spawn_plane();
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Sphere) {
-                let _id = spawn_primitive_from_mesh(
+                if let Err(e) = spawn_primitive_from_mesh(
                     &mut self.world,
-                    MeshRenderer::new(
-                        mesh,
-                        Material {
-                            color: vec3(1.0, 1.0, 1.0),
-                            use_texture: true,
-                            ..Default::default()
-                        },
-                    ),
+                    mesh,
+                    Material {
+                        color: vec3(1.0, 1.0, 1.0),
+                        use_texture: true,
+                        pipeline_key: PipelineKey::DebugLine3D,
+                        ..Default::default()
+                    },
                     Transform {
                         position,
                         ..Default::default()
                     },
-                );
+                ) {
+                    log::error!("Failed to spawn sphere primitive: {e:?}");
+                }
             }
         }
 
@@ -378,7 +392,7 @@ impl App {
                                 vec3(0.0, 0.2, -0.2),
                                 vec3(0.0, -0.5, -0.45),
                             ],
-                            color: vec3(1.0,0.0,0.0),
+                            color: vec3(1.0, 0.0, 0.0),
                         },
                     )?;
                 }
@@ -392,7 +406,7 @@ impl App {
                             radius: 2.0,
                             rings: 20,
                             segments: 20,
-                            color: vec3(0.0,1.0,1.0),
+                            color: vec3(0.0, 1.0, 1.0),
                         },
                     )?;
                 }
@@ -704,9 +718,8 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                     vec3(0.0, -0.5, -0.5),
                     vec3(0.0, 0.5, -0.5),
                 ],
-                color: vec3(1.0,1.0,1.0),
+                color: vec3(1.0, 1.0, 1.0),
             },
-
         )?,
         create_primitive_mesh3d(
             renderer,
@@ -717,10 +730,10 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                     vec3(0.0, 0.5, -0.5),
                     vec3(0.0, 0.5, 0.5),
                 ],
-                color: vec3(1.0,1.0,0.0),
+                color: vec3(1.0, 1.0, 0.0),
             },
         )?,
-        create_primitive_mesh3d(
+        create_primitive_debug_line(
             renderer,
             PrimitiveShape::Cube {
                 points: [
@@ -733,7 +746,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                     vec3(-0.5, 0.5, -0.5),
                     vec3(-0.5, -0.5, -0.5),
                 ],
-                color: vec3(1.0,0.0,0.0),
+                color: vec3(1.0, 0.0, 0.0),
             },
         )?,
         create_primitive_mesh3d(
@@ -741,7 +754,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
             PrimitiveShape::Circle {
                 radius: 1.0,
                 segments: 32,
-                color: vec3(0.0,1.0,1.0),
+                color: vec3(0.0, 1.0, 1.0),
             },
         )?,
         create_primitive_mesh3d(
@@ -754,16 +767,16 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                     vec3(0.0, 0.0, -0.6),
                     vec3(0.0, -0.5, -0.4),
                 ],
-                color: vec3(0.0,1.0,0.0),
+                color: vec3(0.0, 1.0, 0.0),
             },
         )?,
-        create_primitive_mesh3d(
+        create_primitive_debug_line(
             renderer,
             PrimitiveShape::Sphere {
                 radius: 1.0,
                 rings: 32,
                 segments: 32,
-                color: vec3(0.0,0.0,1.0),
+                color: vec3(0.0, 0.0, 1.0),
             },
         )?,
     ];
@@ -778,9 +791,21 @@ mod tests {
     #[test]
     fn created_world_object_count_matches_created_entity_id_count() {
         let mut world = World::default();
-        let triangle_mesh = MeshHandle(0);
-        let rectangle_mesh = MeshHandle(1);
-        let cube_mesh = MeshHandle(2);
+        let triangle_mesh = PrimitiveMesh {
+            handle: MeshHandle::new(0, VertexLayout::Mesh3D),
+            primitive_type: PrimitiveType::Triangle,
+            vertex_layout: VertexLayout::Mesh3D,
+        };
+        let rectangle_mesh = PrimitiveMesh {
+            handle: MeshHandle::new(1, VertexLayout::Mesh3D),
+            primitive_type: PrimitiveType::Rectangle,
+            vertex_layout: VertexLayout::Mesh3D,
+        };
+        let cube_mesh = PrimitiveMesh {
+            handle: MeshHandle::new(2, VertexLayout::Mesh3D),
+            primitive_type: PrimitiveType::Cube,
+            vertex_layout: VertexLayout::Mesh3D,
+        };
 
         let ids = vec![
             world.spawn(
@@ -798,19 +823,22 @@ mod tests {
             ),
             spawn_primitive_from_mesh(
                 &mut world,
-                MeshRenderer::default_material(triangle_mesh),
+                triangle_mesh.handle,
+                Material::default(),
                 Transform::default(),
             )
             .unwrap(),
             spawn_primitive_from_mesh(
                 &mut world,
-                MeshRenderer::default_material(rectangle_mesh),
+                rectangle_mesh.handle,
+                Material::default(),
                 Transform::default(),
             )
             .unwrap(),
             spawn_primitive_from_mesh(
                 &mut world,
-                MeshRenderer::default_material(cube_mesh),
+                cube_mesh.handle,
+                Material::default(),
                 Transform::default(),
             )
             .unwrap(),

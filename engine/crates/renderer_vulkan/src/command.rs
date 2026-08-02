@@ -165,7 +165,7 @@ unsafe fn update_secondary_command_buffer(
     //  Model
     let object = &renderer.data.render_objects[model_index];
     let pipeline = renderer.data.pipeline(object.pipeline_key);
-    let mesh = &renderer.data.meshes[object.mesh_index.0];
+    let mesh = &renderer.data.meshes[object.mesh_index.index];
 
     let model = object.transform.matrix();
 

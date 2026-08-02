@@ -253,7 +253,7 @@ impl VulkanRenderer {
             return Err(anyhow!("Mesh vertices and indices must not be empty."));
         }
 
-        let mesh_index = mesh_handle.0;
+        let mesh_index = mesh_handle.index;
         let mesh = self
             .data
             .meshes
@@ -334,7 +334,7 @@ impl VulkanRenderer {
         )?;
         self.data.meshes.push(mesh);
 
-        Ok(MeshHandle(self.data.meshes.len() - 1))
+        Ok(MeshHandle::new(self.data.meshes.len() - 1, vertex_layout))
     }
 
     pub fn set_render_items(&mut self, render_items: Vec<RenderItem>) {
