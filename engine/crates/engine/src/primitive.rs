@@ -1,7 +1,8 @@
 use anyhow::{Result, bail};
 use cgmath::{vec2, vec3};
 use renderer_vulkan::{
-    MeshHandle, SourceMesh, SourceTopology, SourceVertex, VertexLayout, VulkanRenderer,
+    MeshHandle, SourceMesh, SourceTopology, SourceVertex, VertexLayout, 
+    VulkanRenderer, PipelineKey,
 };
 use turbo_math::Transform;
 
@@ -9,7 +10,6 @@ use super::EntityId;
 use super::Material;
 use super::MeshRenderer;
 use super::World;
-use super::pipeline_key_for_layout;
 
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Vec2 = cgmath::Vector2<f32>;
@@ -487,8 +487,10 @@ unsafe fn spawn_shape_with_layout(
     shape: PrimitiveShape,
     position: Vec3,
     color: Vec3,
-    vertex_layout: VertexLayout,
+    alpha: f32,
+    pipeline_key: PipelineKey,
 ) -> Result<EntityId> {
+    let vertex_layout=pipeline_key.required_vertex_layout();
     let primitive_mesh = create_primitive_with_layout(renderer, shape, vertex_layout)?;
     meshes.push(primitive_mesh);
 
@@ -497,7 +499,8 @@ unsafe fn spawn_shape_with_layout(
         primitive_mesh.handle,
         Material {
             color,
-            pipeline_key: pipeline_key_for_layout(vertex_layout),
+            pipeline_key,
+            alpha,
             ..Default::default()
         },
         Transform {
@@ -508,48 +511,6 @@ unsafe fn spawn_shape_with_layout(
 }
 
 // create new object ////////////////////////////////////////
-pub unsafe fn spawn_triangle_mesh3d(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    p0: Vec3,
-    p1: Vec3,
-    p2: Vec3,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_triangle_with_layout(
-        world,
-        renderer,
-        meshes,
-        p0,
-        p1,
-        p2,
-        color,
-        VertexLayout::Mesh3D,
-    )
-}
-
-pub unsafe fn spawn_triangle_debug_line(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    p0: Vec3,
-    p1: Vec3,
-    p2: Vec3,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_triangle_with_layout(
-        world,
-        renderer,
-        meshes,
-        p0,
-        p1,
-        p2,
-        color,
-        VertexLayout::DebugLine3D,
-    )
-}
-
 pub unsafe fn spawn_triangle_with_layout(
     world: &mut World,
     renderer: &mut VulkanRenderer,
@@ -558,7 +519,8 @@ pub unsafe fn spawn_triangle_with_layout(
     p1: Vec3,
     p2: Vec3,
     color: Vec3,
-    vertex_layout: VertexLayout,
+    alpha: f32,
+    pipeline_key: PipelineKey,
 ) -> Result<EntityId> {
     let center = (p0 + p1 + p2) / 3.0;
     let shape = PrimitiveShape::Triangle {
@@ -566,52 +528,10 @@ pub unsafe fn spawn_triangle_with_layout(
         color,
     };
 
-    spawn_shape_with_layout(world, renderer, meshes, shape, center, color, vertex_layout)
+    spawn_shape_with_layout(world, renderer, meshes, shape, center, color, alpha, pipeline_key)
 }
 
 // parallel to yz
-pub unsafe fn spawn_rectangle_mesh3d(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    pos: Vec3,
-    width: f32,
-    height: f32,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_rectangle_with_layout(
-        world,
-        renderer,
-        meshes,
-        pos,
-        width,
-        height,
-        color,
-        VertexLayout::Mesh3D,
-    )
-}
-
-pub unsafe fn spawn_rectangle_debug_line(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    pos: Vec3,
-    width: f32,
-    height: f32,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_rectangle_with_layout(
-        world,
-        renderer,
-        meshes,
-        pos,
-        width,
-        height,
-        color,
-        VertexLayout::DebugLine3D,
-    )
-}
-
 pub unsafe fn spawn_rectangle_with_layout(
     world: &mut World,
     renderer: &mut VulkanRenderer,
@@ -620,7 +540,8 @@ pub unsafe fn spawn_rectangle_with_layout(
     width: f32,
     height: f32,
     color: Vec3,
-    vertex_layout: VertexLayout,
+    alpha: f32,
+    pipeline_key: PipelineKey,
 ) -> Result<EntityId> {
     let half_width = width * 0.5;
     let half_height = height * 0.5;
@@ -634,46 +555,9 @@ pub unsafe fn spawn_rectangle_with_layout(
         color,
     };
 
-    spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, vertex_layout)
+    spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, alpha, pipeline_key)
 }
 
-pub unsafe fn spawn_cube_mesh3d(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    pos: Vec3,
-    length: f32,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_cube_with_layout(
-        world,
-        renderer,
-        meshes,
-        pos,
-        length,
-        color,
-        VertexLayout::Mesh3D,
-    )
-}
-
-pub unsafe fn spawn_cube_debug_line(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    pos: Vec3,
-    length: f32,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_cube_with_layout(
-        world,
-        renderer,
-        meshes,
-        pos,
-        length,
-        color,
-        VertexLayout::DebugLine3D,
-    )
-}
 
 pub unsafe fn spawn_cube_with_layout(
     world: &mut World,
@@ -682,7 +566,8 @@ pub unsafe fn spawn_cube_with_layout(
     pos: Vec3,
     length: f32,
     color: Vec3,
-    vertex_layout: VertexLayout,
+    alpha: f32,
+    pipeline_key: PipelineKey,
 ) -> Result<EntityId> {
     let h = length * 0.5;
     let shape = PrimitiveShape::Cube {
@@ -699,52 +584,10 @@ pub unsafe fn spawn_cube_with_layout(
         color,
     };
 
-    spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, vertex_layout)
+    spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, alpha,  pipeline_key)
 }
 
 // parallel to yz
-pub unsafe fn spawn_circle_mesh3d(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    pos: Vec3,
-    radius: f32,
-    segments: u32,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_circle_with_layout(
-        world,
-        renderer,
-        meshes,
-        pos,
-        radius,
-        segments,
-        color,
-        VertexLayout::Mesh3D,
-    )
-}
-
-pub unsafe fn spawn_circle_debug_line(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    pos: Vec3,
-    radius: f32,
-    segments: u32,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_circle_with_layout(
-        world,
-        renderer,
-        meshes,
-        pos,
-        radius,
-        segments,
-        color,
-        VertexLayout::DebugLine3D,
-    )
-}
-
 pub unsafe fn spawn_circle_with_layout(
     world: &mut World,
     renderer: &mut VulkanRenderer,
@@ -753,7 +596,8 @@ pub unsafe fn spawn_circle_with_layout(
     radius: f32,
     segments: u32,
     color: Vec3,
-    vertex_layout: VertexLayout,
+    alpha: f32,
+    pipeline_key: PipelineKey,
 ) -> Result<EntityId> {
     let shape = PrimitiveShape::Circle {
         radius,
@@ -761,35 +605,9 @@ pub unsafe fn spawn_circle_with_layout(
         color,
     };
 
-    spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, vertex_layout)
+    spawn_shape_with_layout(world, renderer, meshes, shape, pos, color, alpha, pipeline_key)
 }
 
-pub unsafe fn spawn_polygon_mesh3d(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    points: Vec<Vec3>,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_polygon_with_layout(world, renderer, meshes, points, color, VertexLayout::Mesh3D)
-}
-
-pub unsafe fn spawn_polygon_debug_line(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    points: Vec<Vec3>,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_polygon_with_layout(
-        world,
-        renderer,
-        meshes,
-        points,
-        color,
-        VertexLayout::DebugLine3D,
-    )
-}
 
 pub unsafe fn spawn_polygon_with_layout(
     world: &mut World,
@@ -797,7 +615,8 @@ pub unsafe fn spawn_polygon_with_layout(
     meshes: &mut Vec<PrimitiveMesh>,
     points: Vec<Vec3>,
     color: Vec3,
-    vertex_layout: VertexLayout,
+    alpha: f32,
+    pipeline_key: PipelineKey,
 ) -> Result<EntityId> {
     let center = points.iter().copied().sum::<Vec3>() / points.len() as f32;
 
@@ -807,54 +626,9 @@ pub unsafe fn spawn_polygon_with_layout(
         color,
     };
 
-    spawn_shape_with_layout(world, renderer, meshes, shape, center, color, vertex_layout)
+    spawn_shape_with_layout(world, renderer, meshes, shape, center, color, alpha,  pipeline_key)
 }
 
-pub unsafe fn spawn_sphere_mesh3d(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    center: Vec3,
-    radius: f32,
-    rings: u32,
-    segments: u32,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_sphere_with_layout(
-        world,
-        renderer,
-        meshes,
-        center,
-        radius,
-        rings,
-        segments,
-        color,
-        VertexLayout::Mesh3D,
-    )
-}
-
-pub unsafe fn spawn_sphere_debug_line(
-    world: &mut World,
-    renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
-    center: Vec3,
-    radius: f32,
-    rings: u32,
-    segments: u32,
-    color: Vec3,
-) -> Result<EntityId> {
-    spawn_sphere_with_layout(
-        world,
-        renderer,
-        meshes,
-        center,
-        radius,
-        rings,
-        segments,
-        color,
-        VertexLayout::DebugLine3D,
-    )
-}
 
 pub unsafe fn spawn_sphere_with_layout(
     world: &mut World,
@@ -865,7 +639,8 @@ pub unsafe fn spawn_sphere_with_layout(
     rings: u32,
     segments: u32,
     color: Vec3,
-    vertex_layout: VertexLayout,
+    alpha: f32,
+    pipeline_key: PipelineKey,
 ) -> Result<EntityId> {
     let shape = PrimitiveShape::Sphere {
         radius,
@@ -874,7 +649,7 @@ pub unsafe fn spawn_sphere_with_layout(
         color,
     };
 
-    spawn_shape_with_layout(world, renderer, meshes, shape, center, color, vertex_layout)
+    spawn_shape_with_layout(world, renderer, meshes, shape, center, color, alpha,  pipeline_key)
 }
 
 pub unsafe fn spawn_line(
@@ -884,6 +659,7 @@ pub unsafe fn spawn_line(
     pos0: Vec3,
     pos1: Vec3,
     color: Vec3,
+    alpha: f32,
 ) -> Result<EntityId> {
     let center = (pos0 + pos1) / 2.0;
     let shape = PrimitiveShape::Line {
@@ -899,7 +675,8 @@ pub unsafe fn spawn_line(
         shape,
         center,
         color,
-        VertexLayout::DebugLine3D,
+        alpha,
+        PipelineKey::DebugLine3D,
     )
 }
 

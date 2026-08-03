@@ -4,6 +4,7 @@ use renderer_vulkan::{
     MeshHandle, PipelineKey, RenderCamera, RenderItem, TextureHandle, VertexLayout, VulkanRenderer,
 };
 use std::collections::HashMap;
+use std::io::pipe;
 use turbo_math::Transform;
 use winit::event::{MouseButton, WindowEvent};
 use winit::keyboard::KeyCode;
@@ -96,7 +97,18 @@ impl App {
                     vec3(0.0, 0.5, 0.2),
                     vec3(0.0, 0.0, 0.5),
                     vec3(0.0, 1.0, 1.0),
-                    VertexLayout::DebugLine3D,
+                    0.5,
+                    PipelineKey::Transparent3D,
+                )?;
+
+                let triangle_id2=app.spawn_triangle(
+                    vec3(-10.0, -0.2, -0.5),
+                    vec3(-10.0, 0.5, 0.2),
+                    vec3(-10.0, 0.0, 0.5),
+                    vec3(0.0, 1.0, 1.0),
+                    0.5,
+                    PipelineKey::DebugLine3D,
+                    
                 )?;
 
                 let rectangle_id1 = app.spawn_rectangle(
@@ -104,14 +116,32 @@ impl App {
                     0.3,
                     0.3,
                     vec3(1.0, 0.0, 1.0),
-                    VertexLayout::DebugLine3D,
+                    0.5,
+                    PipelineKey::Transparent3D,
+                )?;
+
+                let rectangle_id2 = app.spawn_rectangle(
+                    vec3(-10.0, 0.5, 0.5),
+                    0.3,
+                    0.3,
+                    vec3(1.0, 0.0, 1.0),
+                    0.5,
+                    PipelineKey::DebugLine3D,
                 )?;
 
                 let cube_id1 = app.spawn_cube(
                     vec3(0.0, 1.0, 1.0),
                     1.0,
                     vec3(1.0, 1.0, 0.0),
-                    VertexLayout::DebugLine3D,
+                    0.5,
+                    PipelineKey::Transparent3D,
+                )?;
+                let cube_id2 = app.spawn_cube(
+                    vec3(-10.0, 1.0, 1.0),
+                    1.0,
+                    vec3(1.0, 1.0, 0.0),
+                    0.5,
+                    PipelineKey::DebugLine3D,
                 )?;
 
                 let circle_id1 = app.spawn_circle(
@@ -119,7 +149,16 @@ impl App {
                     1.0,
                     32,
                     vec3(0.0, 0.0, 1.0),
-                    VertexLayout::DebugLine3D,
+                    0.5,
+                    PipelineKey::Transparent3D,
+                )?;
+                let circle_id2 = app.spawn_circle(
+                    vec3(-10.0, 2.0, 1.0),
+                    1.0,
+                    32,
+                    vec3(0.0, 0.0, 1.0),
+                    0.5,
+                    PipelineKey::Transparent3D,
                 )?;
 
                 let polygon_id1 = app.spawn_polygon(
@@ -132,7 +171,21 @@ impl App {
                         vec3(0.0, -0.1, 1.2),
                     ],
                     vec3(0.0, 1.0, 0.0),
-                    VertexLayout::DebugLine3D,
+                    0.5,
+                    PipelineKey::Transparent3D,
+                )?;
+                let polygon_id2 = app.spawn_polygon(
+                    vec![
+                        vec3(-10.0, -0.4, -1.0),
+                        vec3(-10.0, -0.2, 0.0),
+                        vec3(-10.0, 0.5, -0.3),
+                        vec3(-10.0, 0.3, 0.2),
+                        vec3(-10.0, 0.0, 1.0),
+                        vec3(-10.0, -0.1, 1.2),
+                    ],
+                    vec3(0.0, 1.0, 0.0),
+                    0.5,
+                    PipelineKey::DebugLine3D,
                 )?;
 
                 let sphere_id1 = app.spawn_sphere(
@@ -141,23 +194,36 @@ impl App {
                     16,
                     16,
                     vec3(1.0, 0.0, 0.0),
-                    VertexLayout::DebugLine3D,
+                    0.5,
+                    PipelineKey::Transparent3D,
+                )?;
+                let sphere_id1 = app.spawn_sphere(
+                    vec3(-10.0, -1.0, 0.0),
+                    0.5,
+                    16,
+                    16,
+                    vec3(1.0, 0.0, 0.0),
+                    0.5,
+                    PipelineKey::DebugLine3D,
                 )?;
 
                 let line_id1 = app.spawn_line(
                     vec3(0.0, -20.0, 0.0),
                     vec3(0.0, 20.0, 0.0),
                     vec3(1.0, 0.0, 1.0),
+                    1.0,
                 )?;
                 let line_id2 = app.spawn_line(
                     vec3(0.0, 0.0, -20.0),
                     vec3(0.0, 0.0, 20.0),
                     vec3(1.0, 1.0, 0.0),
+                    1.0,
                 )?;
                 let line_id3 = app.spawn_line(
                     vec3(-20.0, 0.0, 0.0),
                     vec3(20.0, 0.0, 0.0),
                     vec3(0.0, 1.0, 1.0),
+                    1.0,
                 )?;
             }
         }
@@ -219,6 +285,7 @@ impl App {
                     viking_room,
                     Material {
                         color: vec3(1.0, 1.0, 1.0),
+                        alpha: 1.0,
                         use_texture: true,
                         texture: viking_texture,
                         pipeline_key: PipelineKey::DebugLine3D,
@@ -524,6 +591,7 @@ impl App {
                 Some(RenderItem {
                     mesh_index: mesh_renderer.mesh,
                     transform: object.transform.clone(),
+                    alpha: mesh_renderer.material.alpha,
                     material_color: mesh_renderer.material.color,
                     use_texture: mesh_renderer.material.use_texture,
                     texture_index: mesh_renderer.material.texture,
@@ -557,7 +625,8 @@ impl App {
         p1: Vec3,
         p2: Vec3,
         color: Vec3,
-        vertex_layout: VertexLayout,
+        alpha: f32,
+        pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
         spawn_triangle_with_layout(
             &mut self.world,
@@ -567,7 +636,8 @@ impl App {
             p1,
             p2,
             color,
-            vertex_layout,
+            alpha,
+            pipeline_key
         )
     }
 
@@ -577,7 +647,8 @@ impl App {
         width: f32,
         height: f32,
         color: Vec3,
-        vertex_layout: VertexLayout,
+        alpha: f32,
+        pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
         spawn_rectangle_with_layout(
             &mut self.world,
@@ -587,7 +658,8 @@ impl App {
             width,
             height,
             color,
-            vertex_layout,
+            alpha,
+            pipeline_key,
         )
     }
 
@@ -596,7 +668,8 @@ impl App {
         pos: Vec3,
         length: f32,
         color: Vec3,
-        vertex_layout: VertexLayout,
+        alpha: f32,
+        pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
         spawn_cube_with_layout(
             &mut self.world,
@@ -605,7 +678,8 @@ impl App {
             pos,
             length,
             color,
-            vertex_layout,
+            alpha,
+            pipeline_key,
         )
     }
 
@@ -615,7 +689,8 @@ impl App {
         radius: f32,
         segments: u32,
         color: Vec3,
-        vertex_layout: VertexLayout,
+        alpha: f32,
+        pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
         spawn_circle_with_layout(
             &mut self.world,
@@ -625,7 +700,8 @@ impl App {
             radius,
             segments,
             color,
-            vertex_layout,
+            alpha,
+            pipeline_key,
         )
     }
 
@@ -633,7 +709,8 @@ impl App {
         &mut self,
         points: Vec<Vec3>,
         color: Vec3,
-        vertex_layout: VertexLayout,
+        alpha: f32,
+        pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
         spawn_polygon_with_layout(
             &mut self.world,
@@ -641,7 +718,8 @@ impl App {
             &mut self.primitive_meshes,
             points,
             color,
-            vertex_layout,
+            alpha,
+            pipeline_key
         )
     }
 
@@ -652,7 +730,8 @@ impl App {
         rings: u32,
         segments: u32,
         color: Vec3,
-        vertex_layout: VertexLayout,
+        alpha: f32,
+        pipeline_key: PipelineKey
     ) -> Result<EntityId> {
         spawn_sphere_with_layout(
             &mut self.world,
@@ -663,11 +742,18 @@ impl App {
             rings,
             segments,
             color,
-            vertex_layout,
+            alpha,
+            pipeline_key
         )
     }
 
-    pub unsafe fn spawn_line(&mut self, pos0: Vec3, pos1: Vec3, color: Vec3) -> Result<EntityId> {
+    pub unsafe fn spawn_line(
+        &mut self,
+        pos0: Vec3,
+        pos1: Vec3, 
+        color: Vec3,
+        alpha: f32,
+    ) -> Result<EntityId> {
         spawn_line(
             &mut self.world,
             &mut self.renderer,
@@ -675,6 +761,7 @@ impl App {
             pos0,
             pos1,
             color,
+            alpha,
         )
     }
 }

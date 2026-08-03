@@ -45,7 +45,10 @@ use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::mesh::create_mesh;
 use self::model::{MeshData, load_model_source};
 pub use self::model::{SourceMesh, SourceTopology};
-use self::pipeline::{create_debug_line_pipeline, create_mesh3d_pipeline, create_render_pass};
+use self::pipeline::{
+    create_debug_line_pipeline, create_mesh3d_pipeline, create_render_pass,
+    create_transparent3d_pipeline,
+};
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::{Mesh, VulkanData};
@@ -83,8 +86,7 @@ impl VulkanRenderer {
         create_render_pass(&instance, &device, &mut data)?;
         create_global_descriptor_set_layout(&device, &mut data)?;
         create_material_descriptor_set_layout(&device, &mut data)?;
-        create_mesh3d_pipeline(&device, &mut data)?;
-        create_debug_line_pipeline(&device, &mut data)?;
+        create_pipelines(&device, &mut data)?;
         create_command_pools(&instance, &device, &mut data)?;
         create_color_objects(&instance, &device, &mut data)?;
         create_depth_objects(&instance, &device, &mut data)?;
@@ -355,8 +357,7 @@ impl VulkanRenderer {
         create_swapchain(window, &self.instance, &self.device, &mut self.data)?;
         create_swapchain_image_views(&self.device, &mut self.data)?;
         create_render_pass(&self.instance, &self.device, &mut self.data)?;
-        create_mesh3d_pipeline(&self.device, &mut self.data)?;
-        create_debug_line_pipeline(&self.device, &mut self.data)?;
+        create_pipelines(&self.device, &mut self.data)?;
         create_depth_objects(&self.instance, &self.device, &mut self.data)?;
         create_framebuffers(&self.device, &mut self.data)?;
         create_uniform_buffers(&self.instance, &self.device, &mut self.data)?;
@@ -465,4 +466,12 @@ impl VulkanRenderer {
             .for_each(|v| self.device.destroy_image_view(*v, None));
         self.device.destroy_swapchain_khr(self.data.swapchain, None);
     }
+}
+
+unsafe fn create_pipelines(device: &Device, data: &mut VulkanData) -> Result<()> {
+    create_mesh3d_pipeline(device, data)?;
+    create_debug_line_pipeline(device, data)?;
+    create_transparent3d_pipeline(device, data)?;
+
+    Ok(())
 }

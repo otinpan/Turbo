@@ -7,12 +7,12 @@ $OutDir = Join-Path $Root "shaders/compiled"
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
 glslc `
-    (Join-Path $ShaderDir "shader.vert") `
-    -o (Join-Path $OutDir "vert.spv")
+    (Join-Path $ShaderDir "mesh3d.vert") `
+    -o (Join-Path $OutDir "mesh3d_vert.spv")
 
 glslc `
-    (Join-Path $ShaderDir "shader.frag") `
-    -o (Join-Path $OutDir "frag.spv")
+    (Join-Path $ShaderDir "mesh3d.frag") `
+    -o (Join-Path $OutDir "mesh3d_frag.spv")
 
 glslc `
     (Join-Path $ShaderDir "debug_line.vert") `
@@ -22,4 +22,11 @@ glslc `
     (Join-Path $ShaderDir "debug_line.frag") `
     -o (Join-Path $OutDir "debug_line_frag.spv")
 
+glslc `
+    (Join-Path $ShaderDir "transparent3d.vert") `
+    -o (Join-Path $OutDir "transparent3d_vert.spv")
+
+glslc `
+    (Join-Path $ShaderDir "transparent3d.frag") `
+    -o (Join-Path $OutDir "transparent3d_frag.spv")
 Write-Host "Shaders compiled to $OutDir"

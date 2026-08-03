@@ -2,7 +2,10 @@
 ## Flow
 handle
 ```rust
-pub struct MeshHandle(pub usize);
+pub struct MeshHandle{
+  index: usize,
+  vertex_pipeline: VertexPipeline,
+};
 ```
 ```rust
 pub struct TextureHandle(pub usize);
@@ -163,4 +166,41 @@ pipeline and descriptor set is linked in `update_secondary_command_buffer` in `c
         0,
         model_bytes,
     );
+```
+
+### Spawn Object
+interfaces are 
+```rust
+pub fn spawn_primitive_from_mesh(
+    world: &mut World,
+    mesh: MeshHandle,
+    material: Material,
+    transform: Transform,
+) -> Result<Entity>{
+  world.spawn(
+    ...,
+    Some(MeshRenderer::new(mesh, material)?),
+  )
+}
+```
+and
+```rust
+    pub fn spawn(
+        &mut self,
+        transform: Transform,
+        mesh_renderer: Option<MeshRenderer>,
+        camera: Option<CameraComponent>,
+        rotate_speed: Vec3,
+    ) -> EntityId {
+
+    }
+```
+
+The consistency between meshdata and material, whitch means linking vertex and pipeline (binding to vertex layout), are guaranteed by `new` interface.
+
+The reason that `Material` has `PipelineKey` is single vertex layout will match multiple pipeline.
+
+```
+VertexLayout: Mesh3D
+-> PipelineLayout: Mesh3D, Lit3D, Skybox ...
 ```

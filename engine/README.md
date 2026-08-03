@@ -41,7 +41,7 @@
   - ~~RenderItem に material_index または texture_index を持たせる~~
   - ~~command buffer で global set と material set を bind~~
 * Pipeline複数作成
-  - DebugLine3D: 線を描画
+  - ~~DebugLine3D: 線を描画~~
   - Transparent3D: 透明オブジェクトの生成
   - Lit3D: ライティング付きの3Dオブジェクトを描画
   - Ui2D: 2DのUIや画像を画面に貼り付ける

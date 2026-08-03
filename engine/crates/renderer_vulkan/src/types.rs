@@ -110,6 +110,17 @@ pub struct TextureHandle(pub usize);
 pub enum PipelineKey {
     Mesh3D,
     DebugLine3D,
+    Transparent3D,
+}
+
+impl PipelineKey {
+    pub const fn required_vertex_layout(self) -> VertexLayout {
+        match self {
+            PipelineKey::Mesh3D => VertexLayout::Mesh3D,
+            PipelineKey::Transparent3D => VertexLayout::Mesh3D,
+            PipelineKey::DebugLine3D => VertexLayout::DebugLine3D,
+        }
+    }
 }
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq)]
@@ -135,6 +146,7 @@ impl VulkanData {
 pub struct RenderItem {
     pub mesh_index: MeshHandle,
     pub transform: Transform,
+    pub alpha: f32,
     // material
     pub material_color: cgmath::Vector3<f32>,
     pub use_texture: bool,

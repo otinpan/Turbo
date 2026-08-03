@@ -114,9 +114,7 @@ pub unsafe fn update_command_buffer(
         vk::SubpassContents::SECONDARY_COMMAND_BUFFERS,
     );
 
-    let visible_indices = (0..renderer.data.render_objects.len())
-        .filter(|&i| renderer.data.render_objects[i].is_visible)
-        .collect::<Vec<_>>();
+    let visible_indices = sorted_render_indices(&renderer.data);
     let secondary_command_buffers = visible_indices
         .into_iter()
         .map(|i| update_secondary_command_buffer(renderer, image_index, i))
@@ -132,6 +130,45 @@ pub unsafe fn update_command_buffer(
     renderer.device.end_command_buffer(command_buffer)?;
 
     Ok(())
+}
+
+// sort in o
+fn sorted_render_indices(data: &VulkanData) -> Vec<usize> {
+    let mut opaque_indices = Vec::new();
+    let mut transparent_indices = Vec::new();
+
+    for (index, object) in data.render_objects.iter().enumerate() {
+        if !object.is_visible {
+            continue;
+        }
+
+        if object.pipeline_key == PipelineKey::Transparent3D {
+            transparent_indices.push(index);
+        } else {
+            opaque_indices.push(index);
+        }
+    }
+
+    // order near is faster
+    let camera_position = data.camera.position;
+    transparent_indices.sort_by(|&a, &b| {
+        let distance_a =
+            distance_squared(data.render_objects[a].transform.position, camera_position);
+        let distance_b =
+            distance_squared(data.render_objects[b].transform.position, camera_position);
+
+        distance_b
+            .partial_cmp(&distance_a)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    opaque_indices.extend(transparent_indices);
+    opaque_indices
+}
+
+fn distance_squared(a: cgmath::Vector3<f32>, b: cgmath::Vector3<f32>) -> f32 {
+    let d = a - b;
+    d.x * d.x + d.y * d.y + d.z * d.z
 }
 
 unsafe fn update_secondary_command_buffer(
@@ -177,7 +214,7 @@ unsafe fn update_secondary_command_buffer(
             object.material_color.x,
             object.material_color.y,
             object.material_color.z,
-            1.0,
+            object.alpha,
         ],
         material_flags: [if object.use_texture { 1.0 } else { 0.0 }, 0.0, 0.0, 0.0],
     };
@@ -273,6 +310,35 @@ unsafe fn update_secondary_command_buffer(
                 vk::ShaderStageFlags::VERTEX,
                 0,
                 model_bytes,
+            );
+        }
+        PipelineKey::Transparent3D =>{
+            let global_set=renderer.data.global_descriptor_sets[image_index];
+            let material_set=renderer.data.material_descriptor_sets[object.texture_index.0];
+            let sets=[global_set,material_set];
+
+            renderer.device.cmd_bind_descriptor_sets(
+                command_buffer,
+                vk::PipelineBindPoint::GRAPHICS,
+                pipeline.layout,
+                0,
+                &sets,
+                &[],
+            );
+
+            renderer.device.cmd_push_constants(
+                command_buffer,
+                pipeline.layout,
+                vk::ShaderStageFlags::VERTEX,
+                0,
+                model_bytes,
+            );
+            renderer.device.cmd_push_constants(
+                command_buffer,
+                pipeline.layout,
+                vk::ShaderStageFlags::FRAGMENT,
+                64,
+                material_bytes,
             );
         }
     }

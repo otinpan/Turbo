@@ -12,4 +12,4 @@ mod mesh_renderer;
 
 pub use camera::CameraComponent;
 pub use material::Material;
-pub use mesh_renderer::{MeshRenderer, pipeline_key_for_layout};
+pub use mesh_renderer::{MeshRenderer};
