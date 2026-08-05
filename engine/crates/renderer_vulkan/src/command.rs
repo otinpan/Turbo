@@ -344,7 +344,9 @@ unsafe fn update_secondary_command_buffer(
         PipelineKey::Lit3D =>{
             let global_set = renderer.data.global_descriptor_sets[image_index];
             let material_set = renderer.data.material_descriptor_sets[object.texture_index.0];
-            let sets = [global_set, material_set];
+            let light_set=renderer.data.light_descriptor_sets[image_index];
+
+            let sets = [global_set, material_set, light_set];
 
             renderer.device.cmd_bind_descriptor_sets(
                 command_buffer,

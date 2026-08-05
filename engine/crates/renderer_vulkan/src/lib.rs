@@ -34,6 +34,7 @@ use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use vulkanalia::window as vk_window;
 use winit::window::Window;
 
+
 use self::buffer::{copy_buffer, create_buffer};
 use self::command::{create_command_buffers, create_command_pools, update_command_buffer};
 use self::device::{create_logical_device, pick_physical_device};
@@ -55,8 +56,10 @@ use self::types::{Mesh, VulkanData};
 pub use self::types::{MeshHandle, PipelineKey, RenderCamera, RenderItem, TextureHandle};
 use self::uniform::{
     create_descriptor_pool, create_global_descriptor_set_layout, create_global_descriptor_sets,
-    create_material_descriptor_set_layout, create_material_descriptor_sets, create_uniform_buffers,
-    update_uniform_buffer,
+    create_material_descriptor_set_layout, create_material_descriptor_sets, 
+    create_light_descriptor_set_layout, create_light_descriptor_sets,
+    create_uniform_buffers,update_uniform_buffer,
+    create_light_uniform_buffers, update_light_uniform_buffer,
 };
 pub use self::vertex::{DebugLineVertex, Mesh3DVertex, SourceVertex, VertexLayout};
 
@@ -86,6 +89,7 @@ impl VulkanRenderer {
         create_render_pass(&instance, &device, &mut data)?;
         create_global_descriptor_set_layout(&device, &mut data)?;
         create_material_descriptor_set_layout(&device, &mut data)?;
+        create_light_descriptor_set_layout(&device, &mut data)?;
         create_pipelines(&device, &mut data)?;
         create_command_pools(&instance, &device, &mut data)?;
         create_color_objects(&instance, &device, &mut data)?;
@@ -95,9 +99,11 @@ impl VulkanRenderer {
         let white_texture = create_white_texture(&instance, &device, &mut data)?;
         data.textures.push(white_texture);
         create_uniform_buffers(&instance, &device, &mut data)?;
+        create_light_uniform_buffers(&instance, &device, &mut data)?;
         create_descriptor_pool(&device, &mut data)?;
         create_global_descriptor_sets(&device, &mut data)?;
         create_material_descriptor_sets(&device, &mut data)?;
+        create_light_descriptor_sets(&device, &mut data)?;
         create_command_buffers(&device, &mut data)?;
         create_sync_objects(&device, &mut data)?;
         Ok(Self {
@@ -148,6 +154,7 @@ impl VulkanRenderer {
         // uniform buffer <-> descriptor set <-> pipeline layout <-> pipeline <-> shader
         update_command_buffer(self, image_index)?;
         update_uniform_buffer(self, image_index)?;
+        update_light_uniform_buffer(self,image_index)?;
 
         // 6. wait image_available_semaphores
         let wait_semaphores = &[self.data.image_available_semaphores[self.frame]];
@@ -234,9 +241,11 @@ impl VulkanRenderer {
                 .destroy_descriptor_pool(self.data.descriptor_pool, None);
             self.data.global_descriptor_sets.clear();
             self.data.material_descriptor_sets.clear();
+            self.data.light_descriptor_sets.clear();
             create_descriptor_pool(&self.device, &mut self.data)?;
             create_global_descriptor_sets(&self.device, &mut self.data)?;
             create_material_descriptor_sets(&self.device, &mut self.data)?;
+            create_light_descriptor_sets(&self.device, &mut self.data)?;
         }
 
         Ok(TextureHandle(index))
@@ -368,9 +377,11 @@ impl VulkanRenderer {
         create_depth_objects(&self.instance, &self.device, &mut self.data)?;
         create_framebuffers(&self.device, &mut self.data)?;
         create_uniform_buffers(&self.instance, &self.device, &mut self.data)?;
+        create_light_uniform_buffers(&self.instance, &self.device, &mut self.data)?;
         create_descriptor_pool(&self.device, &mut self.data)?;
         create_global_descriptor_sets(&self.device, &mut self.data)?;
         create_material_descriptor_sets(&self.device, &mut self.data)?;
+        create_light_descriptor_sets(&self.device, &mut self.data)?;
         create_command_buffers(&self.device, &mut self.data)?;
         create_render_finished_semaphores(&self.device, &mut self.data)?;
         self.data.images_in_flight = vec![vk::Fence::null(); self.data.swapchain_images.len()];
@@ -402,6 +413,8 @@ impl VulkanRenderer {
 
         self.device
             .destroy_descriptor_set_layout(self.data.material_descriptor_set_layout, None);
+        self.device
+            .destroy_descriptor_set_layout(self.data.light_descriptor_set_layout, None);
         self.device
             .destroy_descriptor_set_layout(self.data.global_descriptor_set_layout, None);
 
@@ -450,6 +463,15 @@ impl VulkanRenderer {
             .for_each(|m| self.device.free_memory(m, None));
         self.data.global_descriptor_sets.clear();
         self.data.material_descriptor_sets.clear();
+        self.data.light_descriptor_sets.clear();
+        self.data
+            .light_uniform_buffers
+            .drain(..)
+            .for_each(|b| self.device.destroy_buffer(b, None));
+        self.data
+            .light_uniform_buffers_memory
+            .drain(..)
+            .for_each(|m| self.device.free_memory(m, None));
         self.data
             .render_finished_semaphores
             .drain(..)

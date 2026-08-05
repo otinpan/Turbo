@@ -1,6 +1,5 @@
 use anyhow::Result;
-use cgmath::num_traits::clamp_max;
-use cgmath::{Deg, point3, vec3};
+use cgmath::{Deg, point3};
 use std::mem::size_of;
 use std::ptr::copy_nonoverlapping as memcpy;
 use vulkanalia::prelude::v1_0::*;
@@ -16,9 +15,14 @@ type Mat4 = cgmath::Matrix4<f32>;
 struct UniformBufferObject {
     view: Mat4,
     proj: Mat4,
-    light_direction: [f32;4],
-    light_color: [f32;4],
-    ambient_color: [f32; 4],
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct LightUniformBufferObject {
+    pub direction: [f32; 4], // xyz = light direction, w unused
+    pub color: [f32; 4],     // rgb = color, w = intensity
+    pub ambient: [f32; 4],   // rgb = color, w = intensity
 }
 
 pub unsafe fn create_global_descriptor_set_layout(
@@ -29,7 +33,7 @@ pub unsafe fn create_global_descriptor_set_layout(
         .binding(0)
         .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
         .descriptor_count(1)
-        .stage_flags(vk::ShaderStageFlags::VERTEX | vk::ShaderStageFlags::FRAGMENT);
+        .stage_flags(vk::ShaderStageFlags::VERTEX);
 
     let bindings = &[ubo_binding];
     let info = vk::DescriptorSetLayoutCreateInfo::builder().bindings(bindings);
@@ -57,36 +61,34 @@ pub unsafe fn create_material_descriptor_set_layout(
     Ok(())
 }
 
-pub unsafe fn create_uniform_buffers(
-    instance: &Instance,
+pub unsafe fn create_light_descriptor_set_layout(
     device: &Device,
     data: &mut VulkanData,
-) -> Result<()> {
-    data.uniform_buffers.clear();
-    data.uniform_buffers_memory.clear();
+) -> Result<()>{
+    let light_binding=vk::DescriptorSetLayoutBinding::builder()
+        .binding(0)
+        .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
+        .descriptor_count(1)
+        .stage_flags(vk::ShaderStageFlags::FRAGMENT);
 
-    for _ in 0..data.swapchain_images.len() {
-        let (uniform_buffer, uniform_buffer_memory) = create_buffer(
-            instance,
-            device,
-            data,
-            size_of::<UniformBufferObject>() as u64,
-            vk::BufferUsageFlags::UNIFORM_BUFFER,
-            vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
-        )?;
+    let bindings=&[light_binding];
+    let info=vk::DescriptorSetLayoutCreateInfo::builder().bindings(bindings);
 
-        data.uniform_buffers.push(uniform_buffer);
-        data.uniform_buffers_memory.push(uniform_buffer_memory);
-    }
+    data.light_descriptor_set_layout=device.create_descriptor_set_layout(&info,None)?;
 
     Ok(())
 }
 
+
 // create pool to record descriptor_set
 pub unsafe fn create_descriptor_pool(device: &Device, data: &mut VulkanData) -> Result<()> {
+    let uniform_descriptor_count = data.swapchain_images.len() * 2;
+    let max_sets =
+        data.swapchain_images.len() + data.textures.len() + data.swapchain_images.len();
+
     let ubo_size = vk::DescriptorPoolSize::builder()
         .type_(vk::DescriptorType::UNIFORM_BUFFER)
-        .descriptor_count(data.swapchain_images.len() as u32);
+        .descriptor_count(uniform_descriptor_count as u32);
 
     let sampler_size = vk::DescriptorPoolSize::builder()
         .type_(vk::DescriptorType::COMBINED_IMAGE_SAMPLER)
@@ -95,7 +97,7 @@ pub unsafe fn create_descriptor_pool(device: &Device, data: &mut VulkanData) -> 
     let pool_sizes = &[ubo_size, sampler_size];
     let info = vk::DescriptorPoolCreateInfo::builder()
         .pool_sizes(pool_sizes)
-        .max_sets((data.swapchain_images.len() + data.textures.len()) as u32);
+        .max_sets(max_sets as u32);
 
     data.descriptor_pool = device.create_descriptor_pool(&info, None)?;
 
@@ -167,6 +169,61 @@ pub unsafe fn create_material_descriptor_sets(
     Ok(())
 }
 
+
+pub unsafe fn create_light_descriptor_sets(device: &Device, data: &mut VulkanData) -> Result<()>{
+    let layouts = vec![data.light_descriptor_set_layout; data.swapchain_images.len()];
+
+    let info = vk::DescriptorSetAllocateInfo::builder()
+        .descriptor_pool(data.descriptor_pool)
+        .set_layouts(&layouts);
+
+    data.light_descriptor_sets = device.allocate_descriptor_sets(&info)?;
+
+    for i in 0..data.swapchain_images.len() {
+        let buffer_info = vk::DescriptorBufferInfo::builder()
+            .buffer(data.light_uniform_buffers[i])
+            .offset(0)
+            .range(size_of::<LightUniformBufferObject>() as u64);
+
+        let buffer_infos = &[buffer_info];
+
+        let ubo_write = vk::WriteDescriptorSet::builder()
+            .dst_set(data.light_descriptor_sets[i])
+            .dst_binding(0)
+            .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
+            .buffer_info(buffer_infos);
+
+        device.update_descriptor_sets(&[ubo_write], &[] as &[vk::CopyDescriptorSet]);
+    }
+
+    Ok(())
+}
+
+pub unsafe fn create_uniform_buffers(
+    instance: &Instance,
+    device: &Device,
+    data: &mut VulkanData,
+) -> Result<()> {
+    data.uniform_buffers.clear();
+    data.uniform_buffers_memory.clear();
+
+    for _ in 0..data.swapchain_images.len() {
+        let (uniform_buffer, uniform_buffer_memory) = create_buffer(
+            instance,
+            device,
+            data,
+            size_of::<UniformBufferObject>() as u64,
+            vk::BufferUsageFlags::UNIFORM_BUFFER,
+            vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
+        )?;
+
+        data.uniform_buffers.push(uniform_buffer);
+        data.uniform_buffers_memory.push(uniform_buffer_memory);
+    }
+
+    Ok(())
+}
+
 pub unsafe fn update_uniform_buffer(
     renderer: &mut VulkanRenderer,
     image_index: usize,
@@ -199,12 +256,10 @@ pub unsafe fn update_uniform_buffer(
             camera.far,
         );
 
+
     let ubo = UniformBufferObject {
         view,
         proj,
-        light_direction: [1.0, -1.0, -1.0, 0.0],
-        light_color: [1.0, 1.0, 1.0, 1.0],
-        ambient_color: [0.15, 0.15, 0.15, 1.0],
     };
 
     // map gpu memory
@@ -222,5 +277,57 @@ pub unsafe fn update_uniform_buffer(
     renderer
         .device
         .unmap_memory(renderer.data.uniform_buffers_memory[image_index]);
+    Ok(())
+}
+
+
+pub unsafe fn create_light_uniform_buffers(
+    instance: &Instance,
+    device: &Device,
+    data: &mut VulkanData,
+) -> Result<()>{
+    data.light_uniform_buffers.clear();
+    data.light_uniform_buffers_memory.clear();
+
+    for _ in 0..data.swapchain_images.len(){
+        let (light_uniform_buffer, light_uniform_buffer_memory)=create_buffer(
+            instance,
+            device,
+            data,
+            size_of::<LightUniformBufferObject>() as u64,
+            vk::BufferUsageFlags::UNIFORM_BUFFER,
+            vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
+        )?;
+
+        data.light_uniform_buffers.push(light_uniform_buffer);
+        data.light_uniform_buffers_memory.push(light_uniform_buffer_memory);
+    }
+
+    Ok(())
+}
+
+pub unsafe fn update_light_uniform_buffer(
+    renderer: &mut VulkanRenderer,
+    image_index: usize,
+) -> Result<()>{
+    let light=LightUniformBufferObject{
+        direction: [-0.8,-1.0,-1.0,0.0],
+        color: [1.0,1.0,1.0,1.0],
+        ambient: [0.15,0.15,0.15,1.0],
+    };
+
+    let memory=renderer.device.map_memory(
+        renderer.data.light_uniform_buffers_memory[image_index],
+        0,
+        size_of::<LightUniformBufferObject>() as u64,
+        vk::MemoryMapFlags::empty(),
+    )?;
+
+    memcpy(&light,memory.cast(),1);
+
+    renderer
+        .device
+        .unmap_memory(renderer.data.light_uniform_buffers_memory[image_index]);
+
     Ok(())
 }

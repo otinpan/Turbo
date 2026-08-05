@@ -2,13 +2,11 @@
 
 layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
-layout(set = 0, binding = 0) uniform GlobalUniform {
-  mat4 view;
-  mat4 proj;
+layout(set = 2, binding = 0) uniform LightUniform {
   vec4 lightDirection;
   vec4 lightColor;
   vec4 ambientColor;
-} ubo;
+} light;
 
 layout(push_constant) uniform PushConstants {
   layout(offset = 64) vec4 materialColor;
@@ -30,11 +28,12 @@ void main() {
 
   vec3 normal = normalize(fragNormal);
 
-  vec3 lightDir = normalize(-ubo.lightDirection.xyz);
+  vec3 lightDir = normalize(-light.lightDirection.xyz);
 
   float diffuse = max(dot(normal, lightDir), 0.0);
 
-  vec3 lighting = ubo.ambientColor.rgb + ubo.lightColor.rgb * diffuse;
+  vec3 lighting = light.ambientColor.rgb * light.ambientColor.a
+    + light.lightColor.rgb * light.lightColor.a * diffuse;
   vec3 rgb = base.rgb * fragColor * lighting;
 
   outColor = vec4(rgb, base.a);

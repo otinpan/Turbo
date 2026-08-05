@@ -29,8 +29,10 @@ pub struct VulkanData {
     // Descriptors
     pub global_descriptor_set_layout: vk::DescriptorSetLayout,
     pub material_descriptor_set_layout: vk::DescriptorSetLayout,
+    pub light_descriptor_set_layout: vk::DescriptorSetLayout,
     pub global_descriptor_sets: Vec<vk::DescriptorSet>,
     pub material_descriptor_sets: Vec<vk::DescriptorSet>,
+    pub light_descriptor_sets: Vec<vk::DescriptorSet>,
     pub descriptor_pool: vk::DescriptorPool,
     // Framebuffers
     pub framebuffers: Vec<vk::Framebuffer>,
@@ -46,6 +48,8 @@ pub struct VulkanData {
     // Buffers
     pub uniform_buffers: Vec<vk::Buffer>,
     pub uniform_buffers_memory: Vec<vk::DeviceMemory>,
+    pub light_uniform_buffers: Vec<vk::Buffer>,
+    pub light_uniform_buffers_memory: Vec<vk::DeviceMemory>,
     // Command Buffers
     pub command_pools: Vec<vk::CommandPool>,
     pub command_buffers: Vec<vk::CommandBuffer>,

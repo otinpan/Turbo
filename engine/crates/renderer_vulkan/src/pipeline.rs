@@ -535,6 +535,7 @@ pub unsafe fn create_lit3d_pipeline(device: &Device, data: &mut VulkanData) ->Re
     let set_layouts = &[
         data.global_descriptor_set_layout,
         data.material_descriptor_set_layout,
+        data.light_descriptor_set_layout,
     ];
     let push_constant_ranges = &[vert_push_constant_range, frag_push_constant_range];
     let layout_info = vk::PipelineLayoutCreateInfo::builder()

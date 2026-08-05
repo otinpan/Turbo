@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow};
 use cgmath::{InnerSpace, vec2, vec3};
 use renderer_vulkan::{
     MeshHandle, PipelineKey, RenderCamera, RenderItem, TextureHandle,
-    VulkanRenderer, VertexLayout,
+    VulkanRenderer,
 };
 use std::collections::HashMap;
 use turbo_math::Transform;
@@ -127,7 +127,7 @@ impl App {
                     vec3(-5.0, 0.5, 0.2),
                     vec3(-5.0, 0.0, 0.5),
                     vec3(0.0, 1.0, 1.0),
-                    0.5,
+                    0.8,
                     PipelineKey::Lit3D,
                 )?;
 
@@ -160,7 +160,7 @@ impl App {
                     0.3,
                     0.3,
                     vec3(1.0, 0.0, 1.0),
-                    0.5,
+                    0.8,
                     PipelineKey::Lit3D,
                 )?;
 
@@ -189,7 +189,7 @@ impl App {
                     vec3(-5.0, 1.0, 1.0),
                     1.0,
                     vec3(1.0, 1.0, 0.0),
-                    0.5,
+                    0.8,
                     PipelineKey::Lit3D,
                 )?;
 
@@ -222,7 +222,7 @@ impl App {
                     1.0,
                     32,
                     vec3(0.0, 0.0, 1.0),
-                    0.5,
+                    0.8,
                     PipelineKey::Lit3D,
                 )?;
 
@@ -275,7 +275,7 @@ impl App {
                         vec3(-5.0, -0.1, 1.2),
                     ],
                     vec3(0.0, 1.0, 0.0),
-                    0.5,
+                    0.8,
                     PipelineKey::Lit3D,
                 )?;
 
@@ -312,7 +312,7 @@ impl App {
                     16,
                     16,
                     vec3(1.0, 0.0, 0.0),
-                    0.5,
+                    0.8,
                     PipelineKey::Lit3D,
                 )?;
 
