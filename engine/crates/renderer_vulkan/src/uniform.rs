@@ -16,6 +16,9 @@ type Mat4 = cgmath::Matrix4<f32>;
 struct UniformBufferObject {
     view: Mat4,
     proj: Mat4,
+    light_direction: [f32;4],
+    light_color: [f32;4],
+    ambient_color: [f32; 4],
 }
 
 pub unsafe fn create_global_descriptor_set_layout(
@@ -26,7 +29,7 @@ pub unsafe fn create_global_descriptor_set_layout(
         .binding(0)
         .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
         .descriptor_count(1)
-        .stage_flags(vk::ShaderStageFlags::VERTEX);
+        .stage_flags(vk::ShaderStageFlags::VERTEX | vk::ShaderStageFlags::FRAGMENT);
 
     let bindings = &[ubo_binding];
     let info = vk::DescriptorSetLayoutCreateInfo::builder().bindings(bindings);
@@ -196,7 +199,13 @@ pub unsafe fn update_uniform_buffer(
             camera.far,
         );
 
-    let ubo = UniformBufferObject { view, proj };
+    let ubo = UniformBufferObject {
+        view,
+        proj,
+        light_direction: [1.0, -1.0, -1.0, 0.0],
+        light_color: [1.0, 1.0, 1.0, 1.0],
+        ambient_color: [0.15, 0.15, 0.15, 1.0],
+    };
 
     // map gpu memory
     let memory = renderer.device.map_memory(

@@ -341,6 +341,35 @@ unsafe fn update_secondary_command_buffer(
                 material_bytes,
             );
         }
+        PipelineKey::Lit3D =>{
+            let global_set = renderer.data.global_descriptor_sets[image_index];
+            let material_set = renderer.data.material_descriptor_sets[object.texture_index.0];
+            let sets = [global_set, material_set];
+
+            renderer.device.cmd_bind_descriptor_sets(
+                command_buffer,
+                vk::PipelineBindPoint::GRAPHICS,
+                pipeline.layout,
+                0,
+                &sets,
+                &[],
+            );
+
+            renderer.device.cmd_push_constants(
+                command_buffer,
+                pipeline.layout,
+                vk::ShaderStageFlags::VERTEX,
+                0,
+                model_bytes,
+            );
+            renderer.device.cmd_push_constants(
+                command_buffer,
+                pipeline.layout,
+                vk::ShaderStageFlags::FRAGMENT,
+                64,
+                material_bytes,
+            );
+        }
     }
 
     renderer

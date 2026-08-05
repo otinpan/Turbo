@@ -111,6 +111,7 @@ pub enum PipelineKey {
     Mesh3D,
     DebugLine3D,
     Transparent3D,
+    Lit3D,
 }
 
 impl PipelineKey {
@@ -119,6 +120,7 @@ impl PipelineKey {
             PipelineKey::Mesh3D => VertexLayout::Mesh3D,
             PipelineKey::Transparent3D => VertexLayout::Mesh3D,
             PipelineKey::DebugLine3D => VertexLayout::DebugLine3D,
+            PipelineKey::Lit3D => VertexLayout::Lit3D,
         }
     }
 }

@@ -1,10 +1,10 @@
 use anyhow::{Result, anyhow};
 use cgmath::{InnerSpace, vec2, vec3};
 use renderer_vulkan::{
-    MeshHandle, PipelineKey, RenderCamera, RenderItem, TextureHandle, VertexLayout, VulkanRenderer,
+    MeshHandle, PipelineKey, RenderCamera, RenderItem, TextureHandle,
+    VulkanRenderer, VertexLayout,
 };
 use std::collections::HashMap;
-use std::io::pipe;
 use turbo_math::Transform;
 use winit::event::{MouseButton, WindowEvent};
 use winit::keyboard::KeyCode;
@@ -13,7 +13,12 @@ use winit::window::Window;
 pub const DEFAULT_TEXTURE: TextureHandle = TextureHandle(0);
 
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveShape, PrimitiveType, create_primitive_debug_line, create_primitive_mesh3d, spawn_circle_with_layout, spawn_cube_with_layout, spawn_line, spawn_polygon_with_layout, spawn_primitive_from_mesh, spawn_rectangle_with_layout, spawn_sphere_with_layout, spawn_triangle_with_layout, update_primitive_mesh,
+    PrimitiveMesh, PrimitiveShape, PrimitiveType, 
+    create_primitive_debug_line, create_primitive_mesh3d, create_primitive_lit3d,
+    spawn_circle_with_layout, spawn_cube_with_layout, spawn_line, 
+    spawn_polygon_with_layout, spawn_rectangle_with_layout, 
+    spawn_sphere_with_layout, spawn_triangle_with_layout, 
+    update_primitive_mesh, spawn_primitive_from_mesh, 
 };
 
 use crate::world::EntityId;
@@ -58,7 +63,7 @@ impl App {
         // camera //////////////////
         world.spawn(
             Transform {
-                position: vec3(5.0, 0.0, 0.0),
+                position: vec3(10.0, 0.0, 0.0),
                 ..Default::default()
             },
             None,
@@ -92,6 +97,14 @@ impl App {
         {
             // create primitive ////////////////////////////
             unsafe {
+                let triangle_id0 = app.spawn_triangle(
+                    vec3(5.0, -0.2, -0.5),
+                    vec3(5.0, 0.5, 0.2),
+                    vec3(5.0, 0.0, 0.5),
+                    vec3(0.0, 1.0, 1.0),
+                    0.5,
+                    PipelineKey::Mesh3D,
+                )?;
                 let triangle_id1 = app.spawn_triangle(
                     vec3(0.0, -0.2, -0.5),
                     vec3(0.0, 0.5, 0.2),
@@ -100,7 +113,6 @@ impl App {
                     0.5,
                     PipelineKey::Transparent3D,
                 )?;
-
                 let triangle_id2=app.spawn_triangle(
                     vec3(-10.0, -0.2, -0.5),
                     vec3(-10.0, 0.5, 0.2),
@@ -110,7 +122,23 @@ impl App {
                     PipelineKey::DebugLine3D,
                     
                 )?;
+                let triangle_id3=app.spawn_triangle(
+                    vec3(-5.0, -0.2, -0.5),
+                    vec3(-5.0, 0.5, 0.2),
+                    vec3(-5.0, 0.0, 0.5),
+                    vec3(0.0, 1.0, 1.0),
+                    0.5,
+                    PipelineKey::Lit3D,
+                )?;
 
+                let rectangle_id0 = app.spawn_rectangle(
+                    vec3(5.0, 0.5, 0.5),
+                    0.3,
+                    0.3,
+                    vec3(1.0, 0.0, 1.0),
+                    0.5,
+                    PipelineKey::Mesh3D,
+                )?;
                 let rectangle_id1 = app.spawn_rectangle(
                     vec3(0.0, 0.5, 0.5),
                     0.3,
@@ -119,7 +147,6 @@ impl App {
                     0.5,
                     PipelineKey::Transparent3D,
                 )?;
-
                 let rectangle_id2 = app.spawn_rectangle(
                     vec3(-10.0, 0.5, 0.5),
                     0.3,
@@ -128,7 +155,22 @@ impl App {
                     0.5,
                     PipelineKey::DebugLine3D,
                 )?;
+                let rectangle_id3 = app.spawn_rectangle(
+                    vec3(-5.0, 0.5, 0.5),
+                    0.3,
+                    0.3,
+                    vec3(1.0, 0.0, 1.0),
+                    0.5,
+                    PipelineKey::Lit3D,
+                )?;
 
+                let cube_id0 = app.spawn_cube(
+                    vec3(5.0, 1.0, 1.0),
+                    1.0,
+                    vec3(1.0, 1.0, 0.0),
+                    0.5,
+                    PipelineKey::Mesh3D,
+                )?;
                 let cube_id1 = app.spawn_cube(
                     vec3(0.0, 1.0, 1.0),
                     1.0,
@@ -143,7 +185,22 @@ impl App {
                     0.5,
                     PipelineKey::DebugLine3D,
                 )?;
+                let cube_id3 = app.spawn_cube(
+                    vec3(-5.0, 1.0, 1.0),
+                    1.0,
+                    vec3(1.0, 1.0, 0.0),
+                    0.5,
+                    PipelineKey::Lit3D,
+                )?;
 
+                let circle_id0 = app.spawn_circle(
+                    vec3(5.0, 2.0, 1.0),
+                    1.0,
+                    32,
+                    vec3(0.0, 0.0, 1.0),
+                    0.5,
+                    PipelineKey::Mesh3D,
+                )?;
                 let circle_id1 = app.spawn_circle(
                     vec3(0.0, 2.0, 1.0),
                     1.0,
@@ -158,9 +215,30 @@ impl App {
                     32,
                     vec3(0.0, 0.0, 1.0),
                     0.5,
-                    PipelineKey::Transparent3D,
+                    PipelineKey::DebugLine3D,
+                )?;
+                let circle_id3 = app.spawn_circle(
+                    vec3(-5.0, 2.0, 1.0),
+                    1.0,
+                    32,
+                    vec3(0.0, 0.0, 1.0),
+                    0.5,
+                    PipelineKey::Lit3D,
                 )?;
 
+                let polygon_id0 = app.spawn_polygon(
+                    vec![
+                        vec3(5.0, -0.4, -1.0),
+                        vec3(5.0, -0.2, 0.0),
+                        vec3(5.0, 0.5, -0.3),
+                        vec3(5.0, 0.3, 0.2),
+                        vec3(5.0, 0.0, 1.0),
+                        vec3(5.0, -0.1, 1.2),
+                    ],
+                    vec3(0.0, 1.0, 0.0),
+                    0.5,
+                    PipelineKey::Mesh3D,
+                )?;
                 let polygon_id1 = app.spawn_polygon(
                     vec![
                         vec3(0.0, -0.4, -1.0),
@@ -187,7 +265,29 @@ impl App {
                     0.5,
                     PipelineKey::DebugLine3D,
                 )?;
+                let polygon_id3 = app.spawn_polygon(
+                    vec![
+                        vec3(-5.0, -0.4, -1.0),
+                        vec3(-5.0, -0.2, 0.0),
+                        vec3(-5.0, 0.5, -0.3),
+                        vec3(-5.0, 0.3, 0.2),
+                        vec3(-5.0, 0.0, 1.0),
+                        vec3(-5.0, -0.1, 1.2),
+                    ],
+                    vec3(0.0, 1.0, 0.0),
+                    0.5,
+                    PipelineKey::Lit3D,
+                )?;
 
+                let sphere_id0 = app.spawn_sphere(
+                    vec3(5.0, -1.0, 0.0),
+                    0.5,
+                    16,
+                    16,
+                    vec3(1.0, 0.0, 0.0),
+                    0.5,
+                    PipelineKey::Mesh3D,
+                )?;
                 let sphere_id1 = app.spawn_sphere(
                     vec3(0.0, -1.0, 0.0),
                     0.5,
@@ -197,7 +297,7 @@ impl App {
                     0.5,
                     PipelineKey::Transparent3D,
                 )?;
-                let sphere_id1 = app.spawn_sphere(
+                let sphere_id2 = app.spawn_sphere(
                     vec3(-10.0, -1.0, 0.0),
                     0.5,
                     16,
@@ -205,6 +305,15 @@ impl App {
                     vec3(1.0, 0.0, 0.0),
                     0.5,
                     PipelineKey::DebugLine3D,
+                )?;
+                let sphere_id3 = app.spawn_sphere(
+                    vec3(-5.0, -1.0, 0.0),
+                    0.5,
+                    16,
+                    16,
+                    vec3(1.0, 0.0, 0.0),
+                    0.5,
+                    PipelineKey::Lit3D,
                 )?;
 
                 let line_id1 = app.spawn_line(
@@ -266,8 +375,15 @@ impl App {
             }
         }
         if self.input.key_pressed(KeyCode::ArrowRight) {
-            let viking_room = self.use_model("viking_room_debug_line")?;
+            let viking_room_mesh3d = self.use_model("viking_room")?;
+            let viking_room_debug_line = self.use_model("viking_room_debug_line")?;
+            let viking_room_lit3d = self.use_model("viking_room_lit3d")?;
             let viking_texture = self.use_texture("viking_room");
+            let viking_meshes = [
+                viking_room_mesh3d,
+                viking_room_debug_line,
+                viking_room_lit3d,
+            ];
             let index = self
                 .world
                 .objects()
@@ -276,19 +392,26 @@ impl App {
                     object
                         .mesh_renderer
                         .as_ref()
-                        .is_some_and(|mesh_renderer| mesh_renderer.mesh == viking_room)
+                        .is_some_and(|mesh_renderer| viking_meshes.contains(&mesh_renderer.mesh))
                 })
                 .count();
 
             if self.positions.len() > index {
+                let variants = [
+                    (viking_room_mesh3d, PipelineKey::Mesh3D, 1.0),
+                    (viking_room_debug_line, PipelineKey::DebugLine3D, 1.0),
+                    (viking_room_mesh3d, PipelineKey::Transparent3D, 0.5),
+                    (viking_room_lit3d, PipelineKey::Lit3D, 1.0),
+                ];
+                let (mesh, pipeline_key, alpha) = variants[index];
                 match MeshRenderer::new(
-                    viking_room,
+                    mesh,
                     Material {
                         color: vec3(1.0, 1.0, 1.0),
-                        alpha: 1.0,
+                        alpha,
                         use_texture: true,
                         texture: viking_texture,
-                        pipeline_key: PipelineKey::DebugLine3D,
+                        pipeline_key,
                     },
                 ){
                     Ok(mesh_renderer) =>{
@@ -431,7 +554,7 @@ impl App {
                     Material {
                         color: vec3(1.0, 1.0, 1.0),
                         use_texture: true,
-                        pipeline_key: PipelineKey::DebugLine3D,
+                        pipeline_key: PipelineKey::Lit3D,
                         ..Default::default()
                     },
                     Transform {
@@ -777,6 +900,10 @@ unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, M
         "viking_room_debug_line".to_string(),
         renderer.load_debug_line_from_model("assets/models/viking_room.obj")?,
     );
+    models.insert(
+        "viking_room_lit3d".to_string(),
+        renderer.load_lit3d_from_model("assets/models/viking_room.obj")?,
+    );
 
     Ok(models)
 }
@@ -857,7 +984,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                 color: vec3(0.0, 1.0, 0.0),
             },
         )?,
-        create_primitive_debug_line(
+        create_primitive_lit3d(
             renderer,
             PrimitiveShape::Sphere {
                 radius: 1.0,

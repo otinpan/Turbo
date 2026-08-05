@@ -29,4 +29,12 @@ glslc `
 glslc `
     (Join-Path $ShaderDir "transparent3d.frag") `
     -o (Join-Path $OutDir "transparent3d_frag.spv")
+
+glslc `
+    (Join-Path $ShaderDir "lit3d.vert") `
+    -o (Join-Path $OutDir "lit3d_vert.spv")
+
+glslc `
+    (Join-Path $ShaderDir "lit3d.frag") `
+    -o (Join-Path $OutDir "lit3d_frag.spv")
 Write-Host "Shaders compiled to $OutDir"

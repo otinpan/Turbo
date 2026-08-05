@@ -17,14 +17,16 @@ pub struct SourceVertex {
     pub pos: Vec3,
     pub color: Vec3,
     pub tex_coord: Vec2, // points of a texture
+    pub normal: Vec3,
 }
 
 impl SourceVertex {
-    pub fn new(pos: Vec3, color: Vec3, tex_coord: Vec2) -> Self {
+    pub fn new(pos: Vec3, color: Vec3, tex_coord: Vec2, normal: Vec3) -> Self {
         Self {
             pos,
             color,
             tex_coord,
+            normal,
         }
     }
 }
@@ -33,6 +35,7 @@ impl SourceVertex {
 pub enum VertexLayout {
     Mesh3D,
     DebugLine3D,
+    Lit3D,
 }
 
 #[repr(C)]
@@ -50,6 +53,46 @@ impl From<&SourceVertex> for Mesh3DVertex {
             color: v.color,
             tex_coord: v.tex_coord,
         }
+    }
+}
+
+impl Mesh3DVertex {
+    pub const fn new(pos: Vec3, color: Vec3, tex_coord: Vec2) -> Self {
+        Self {
+            pos,
+            color,
+            tex_coord,
+        }
+    }
+    pub fn binding_description() -> vk::VertexInputBindingDescription {
+        vk::VertexInputBindingDescription::builder()
+            .binding(0)
+            .stride(size_of::<Mesh3DVertex>() as u32)
+            .input_rate(vk::VertexInputRate::VERTEX)
+            .build()
+    }
+
+    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 3] {
+        let pos = vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(0)
+            .format(vk::Format::R32G32B32_SFLOAT)
+            .offset(0)
+            .build();
+        let color = vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(1)
+            .format(vk::Format::R32G32B32_SFLOAT)
+            .offset(size_of::<Vec3>() as u32)
+            .build();
+        let tex_coord = vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(2)
+            .format(vk::Format::R32G32_SFLOAT)
+            .offset((size_of::<Vec3>() + size_of::<Vec3>()) as u32)
+            .build();
+
+        [pos, color, tex_coord]
     }
 }
 
@@ -100,49 +143,13 @@ impl DebugLineVertex {
     }
 }
 
-impl Mesh3DVertex {
-    pub const fn new(pos: Vec3, color: Vec3, tex_coord: Vec2) -> Self {
-        Self {
-            pos,
-            color,
-            tex_coord,
-        }
-    }
-    pub fn binding_description() -> vk::VertexInputBindingDescription {
-        vk::VertexInputBindingDescription::builder()
-            .binding(0)
-            .stride(size_of::<Mesh3DVertex>() as u32)
-            .input_rate(vk::VertexInputRate::VERTEX)
-            .build()
-    }
-
-    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 3] {
-        let pos = vk::VertexInputAttributeDescription::builder()
-            .binding(0)
-            .location(0)
-            .format(vk::Format::R32G32B32_SFLOAT)
-            .offset(0)
-            .build();
-        let color = vk::VertexInputAttributeDescription::builder()
-            .binding(0)
-            .location(1)
-            .format(vk::Format::R32G32B32_SFLOAT)
-            .offset(size_of::<Vec3>() as u32)
-            .build();
-        let tex_coord = vk::VertexInputAttributeDescription::builder()
-            .binding(0)
-            .location(2)
-            .format(vk::Format::R32G32_SFLOAT)
-            .offset((size_of::<Vec3>() + size_of::<Vec3>()) as u32)
-            .build();
-
-        [pos, color, tex_coord]
-    }
-}
 
 impl PartialEq for SourceVertex {
     fn eq(&self, other: &Self) -> bool {
-        self.pos == other.pos && self.color == other.color && self.tex_coord == other.tex_coord
+        self.pos == other.pos
+            && self.color == other.color
+            && self.tex_coord == other.tex_coord
+            && self.normal == other.normal
     }
 }
 
@@ -158,6 +165,9 @@ impl Hash for SourceVertex {
         self.color[2].to_bits().hash(state);
         self.tex_coord[0].to_bits().hash(state);
         self.tex_coord[1].to_bits().hash(state);
+        self.normal[0].to_bits().hash(state);
+        self.normal[1].to_bits().hash(state);
+        self.normal[2].to_bits().hash(state);
     }
 }
 
@@ -201,4 +211,71 @@ pub unsafe fn create_vertex_buffer<V>(
     device.destroy_buffer(staging_buffer, None);
     device.free_memory(staging_buffer_memory, None);
     Ok((vertex_buffer, vertex_buffer_memory))
+}
+
+#[repr(C)]
+#[derive(Copy,Clone,Debug)]
+pub struct Lit3DVertex{
+    pub pos: Vec3,
+    pub color: Vec3,
+    pub tex_coord: Vec2,
+    pub normal: Vec3,
+}
+
+impl From<&SourceVertex> for Lit3DVertex{
+    fn from(v: &SourceVertex) -> Self{
+        Self{
+            pos: v.pos,
+            color: v.color,
+            tex_coord: v.tex_coord,
+            normal: v.normal,
+        }
+    }
+}
+
+
+impl Lit3DVertex{
+    pub const fn new(pos: Vec3, color: Vec3, tex_coord: Vec2, normal: Vec3) -> Self{
+        Self { pos, color, tex_coord, normal }
+    }
+
+    pub fn binding_description() -> vk::VertexInputBindingDescription{
+        vk::VertexInputBindingDescription::builder()
+            .binding(0)
+            .stride(size_of::<Lit3DVertex>() as u32)
+            .input_rate(vk::VertexInputRate::VERTEX)
+            .build()
+    }
+
+    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 4]{
+        let pos=vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(0)
+            .format(vk::Format::R32G32B32_SFLOAT)
+            .offset(0)
+            .build();
+
+        let color=vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(1)
+            .format(vk::Format::R32G32B32_SFLOAT)
+            .offset(size_of::<Vec3>() as u32)
+            .build();
+
+        let tex_coord=vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(2)
+            .format(vk::Format::R32G32_SFLOAT)
+            .offset((size_of::<Vec3>()+size_of::<Vec3>()) as u32)
+            .build();
+
+        let normal=vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(3)
+            .format(vk::Format::R32G32B32_SFLOAT)
+            .offset((size_of::<Vec3>()+size_of::<Vec3>()+size_of::<Vec2>()) as u32)
+            .build();
+
+        [pos,color,tex_coord,normal]
+    }
 }

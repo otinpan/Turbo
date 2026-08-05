@@ -1,5 +1,5 @@
 use anyhow::{Result, bail};
-use cgmath::{vec2, vec3};
+use cgmath::{InnerSpace, vec2, vec3};
 use renderer_vulkan::{
     MeshHandle, SourceMesh, SourceTopology, SourceVertex, VertexLayout, 
     VulkanRenderer, PipelineKey,
@@ -121,6 +121,19 @@ pub unsafe fn create_primitive_debug_line(
     })
 }
 
+pub unsafe fn create_primitive_lit3d(
+    renderer: &mut VulkanRenderer,
+    shape: PrimitiveShape,
+) -> Result<PrimitiveMesh>{
+    let primitive_type=shape.primitive_type();
+    let source=build_primitive_source(shape);
+    let mesh_data=source.to_lit3d_data();
+
+    let handle=renderer.load_mesh_from_data(mesh_data,VertexLayout::Lit3D)?;
+
+    Ok(PrimitiveMesh { handle, primitive_type, vertex_layout: VertexLayout::Lit3D })
+}
+
 pub unsafe fn create_primitive_with_layout(
     renderer: &mut VulkanRenderer,
     shape: PrimitiveShape,
@@ -129,6 +142,7 @@ pub unsafe fn create_primitive_with_layout(
     match vertex_layout {
         VertexLayout::Mesh3D => create_primitive_mesh3d(renderer, shape),
         VertexLayout::DebugLine3D => create_primitive_debug_line(renderer, shape),
+        VertexLayout::Lit3D => create_primitive_lit3d(renderer,shape),
     }
 }
 
@@ -155,10 +169,11 @@ pub fn build_primitive_source(shape: PrimitiveShape) -> SourceMesh {
 }
 
 fn build_triangle_source(points: [Vec3; 3], color: Vec3) -> SourceMesh {
+    let normal = face_normal(points[0], points[1], points[2]);
     let vertices = vec![
-        SourceVertex::new(points[0], color, vec2(0.0, 0.0)),
-        SourceVertex::new(points[1], color, vec2(1.0, 0.0)),
-        SourceVertex::new(points[2], color, vec2(0.5, 1.0)),
+        SourceVertex::new(points[0], color, vec2(0.0, 0.0), normal),
+        SourceVertex::new(points[1], color, vec2(1.0, 0.0), normal),
+        SourceVertex::new(points[2], color, vec2(0.5, 1.0), normal),
     ];
 
     let indices = vec![0, 1, 2];
@@ -171,11 +186,12 @@ fn build_triangle_source(points: [Vec3; 3], color: Vec3) -> SourceMesh {
 }
 
 fn build_rectangle_source(points: [Vec3; 4], color: Vec3) -> SourceMesh {
+    let normal = face_normal(points[0], points[1], points[2]);
     let vertices = vec![
-        SourceVertex::new(points[0], color, vec2(0.0, 0.0)),
-        SourceVertex::new(points[1], color, vec2(1.0, 0.0)),
-        SourceVertex::new(points[2], color, vec2(1.0, 1.0)),
-        SourceVertex::new(points[3], color, vec2(0.0, 1.0)),
+        SourceVertex::new(points[0], color, vec2(0.0, 0.0), normal),
+        SourceVertex::new(points[1], color, vec2(1.0, 0.0), normal),
+        SourceVertex::new(points[2], color, vec2(1.0, 1.0), normal),
+        SourceVertex::new(points[3], color, vec2(0.0, 1.0), normal),
     ];
 
     let indices = vec![0, 1, 2, 2, 3, 0];
@@ -201,11 +217,12 @@ pub fn build_cube_source(points: [Vec3; 8], color: Vec3) -> SourceMesh {
 
     for face in faces {
         let base = vertices.len() as u32;
+        let normal = face_normal(points[face[0]], points[face[1]], points[face[2]]);
 
-        vertices.push(SourceVertex::new(points[face[0]], color, vec2(0.0, 0.0)));
-        vertices.push(SourceVertex::new(points[face[1]], color, vec2(1.0, 0.0)));
-        vertices.push(SourceVertex::new(points[face[2]], color, vec2(1.0, 1.0)));
-        vertices.push(SourceVertex::new(points[face[3]], color, vec2(0.0, 1.0)));
+        vertices.push(SourceVertex::new(points[face[0]], color, vec2(0.0, 0.0), normal));
+        vertices.push(SourceVertex::new(points[face[1]], color, vec2(1.0, 0.0), normal));
+        vertices.push(SourceVertex::new(points[face[2]], color, vec2(1.0, 1.0), normal));
+        vertices.push(SourceVertex::new(points[face[3]], color, vec2(0.0, 1.0), normal));
 
         indices.extend_from_slice(&[base, base + 1, base + 2, base + 2, base + 3, base]);
     }
@@ -218,6 +235,7 @@ pub fn build_cube_source(points: [Vec3; 8], color: Vec3) -> SourceMesh {
 
 pub fn build_circle_source(radius: f32, segments: u32, color: Vec3) -> SourceMesh {
     let segments = segments.max(3);
+    let normal = vec3(1.0, 0.0, 0.0);
     let mut vertices = Vec::with_capacity(segments as usize + 1);
     let mut indices = Vec::with_capacity(segments as usize * 3);
 
@@ -225,6 +243,7 @@ pub fn build_circle_source(radius: f32, segments: u32, color: Vec3) -> SourceMes
         vec3(0.0, 0.0, 0.0),
         color,
         vec2(0.5, 0.5),
+        normal,
     ));
 
     for i in 0..segments {
@@ -234,7 +253,7 @@ pub fn build_circle_source(radius: f32, segments: u32, color: Vec3) -> SourceMes
         let u = angle.cos() * 0.5 + 0.5;
         let v = angle.sin() * 0.5 + 0.5;
 
-        vertices.push(SourceVertex::new(vec3(0.0, y, z), color, vec2(u, v)));
+        vertices.push(SourceVertex::new(vec3(0.0, y, z), color, vec2(u, v), normal));
     }
 
     for i in 0..segments {
@@ -251,7 +270,6 @@ pub fn build_circle_source(radius: f32, segments: u32, color: Vec3) -> SourceMes
 }
 
 fn build_polygon_source(points: Vec<Vec3>, color: Vec3) -> SourceMesh {
-    let color = default_color();
     let size = points.len();
 
     if size < 3 {
@@ -279,6 +297,7 @@ fn build_polygon_source(points: Vec<Vec3>, color: Vec3) -> SourceMesh {
 
     let width = max_y - min_y;
     let height = max_z - min_z;
+    let normal = polygon_normal_yz(&points);
 
     for p in &points {
         let u = if width.abs() > f32::EPSILON {
@@ -292,7 +311,7 @@ fn build_polygon_source(points: Vec<Vec3>, color: Vec3) -> SourceMesh {
             0.0
         };
 
-        vertices.push(SourceVertex::new(*p, color, vec2(u, v)));
+        vertices.push(SourceVertex::new(*p, color, vec2(u, v), normal));
     }
 
     indices.extend(triangulate_polygon_yz(&points));
@@ -427,8 +446,10 @@ fn build_sphere_source(radius: f32, rings: u32, segments: u32, color: Vec3) -> S
             let x = radius * theta.sin() * phi.cos();
             let y = radius * theta.sin() * phi.sin();
             let z = radius * theta.cos();
+            let position = vec3(x, y, z);
+            let normal = normalized_or(position, vec3(0.0, 0.0, 1.0));
 
-            vertices.push(SourceVertex::new(vec3(x, y, z), color, vec2(u, v)));
+            vertices.push(SourceVertex::new(position, color, vec2(u, v), normal));
         }
     }
 
@@ -451,9 +472,10 @@ fn build_sphere_source(radius: f32, rings: u32, segments: u32, color: Vec3) -> S
 }
 
 fn build_line_source(pos0: Vec3, pos1: Vec3, color: Vec3) -> SourceMesh {
+    let normal = vec3(1.0, 0.0, 0.0);
     let vertices = vec![
-        SourceVertex::new(pos0, color, vec2(0.0, 0.0)),
-        SourceVertex::new(pos1, color, vec2(1.0, 1.0)),
+        SourceVertex::new(pos0, color, vec2(0.0, 0.0), normal),
+        SourceVertex::new(pos1, color, vec2(1.0, 1.0), normal),
     ];
 
     let indices = vec![0, 1];
@@ -462,6 +484,26 @@ fn build_line_source(pos0: Vec3, pos1: Vec3, color: Vec3) -> SourceMesh {
         vertices,
         indices,
         topology: SourceTopology::LineList,
+    }
+}
+
+fn face_normal(p0: Vec3, p1: Vec3, p2: Vec3) -> Vec3 {
+    normalized_or((p1 - p0).cross(p2 - p0), vec3(1.0, 0.0, 0.0))
+}
+
+fn polygon_normal_yz(points: &[Vec3]) -> Vec3 {
+    if signed_area_yz(points) >= 0.0 {
+        vec3(1.0, 0.0, 0.0)
+    } else {
+        vec3(-1.0, 0.0, 0.0)
+    }
+}
+
+fn normalized_or(value: Vec3, fallback: Vec3) -> Vec3 {
+    if value.magnitude2() <= f32::EPSILON {
+        fallback
+    } else {
+        value.normalize()
     }
 }
 
@@ -708,6 +750,11 @@ pub unsafe fn update_primitive_mesh(
             source.to_debugline_data(),
             VertexLayout::DebugLine3D,
         ),
+        VertexLayout::Lit3D => renderer.update_mesh_from_data(
+            mesh.handle,
+            source.to_lit3d_data(),
+            VertexLayout::Lit3D,
+        ),
     }
 }
 // test ///////////////////////////////////////////////////////////////////////
@@ -718,6 +765,34 @@ mod tests {
 
     fn white() -> Vec3 {
         vec3(1.0, 1.0, 1.0)
+    }
+
+    #[test]
+    fn check_face_normal() {
+        assert_eq!(
+            face_normal(
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 1.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+            ),
+            vec3(1.0, 0.0, 0.0)
+        );
+        assert_eq!(
+            face_normal(
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(0.0, 1.0, 0.0),
+            ),
+            vec3(-1.0, 0.0, 0.0)
+        );
+        assert_eq!(
+            face_normal(
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 1.0, 0.0),
+            ),
+            vec3(1.0, 0.0, 0.0)
+        );
     }
 
     #[test]
@@ -937,5 +1012,10 @@ mod tests {
         );
 
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn check_face_nomal(){
+        
     }
 }

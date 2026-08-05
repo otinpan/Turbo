@@ -1,6 +1,6 @@
 use super::Material;
 use anyhow::{Result, bail};
-use renderer_vulkan::{MeshHandle, VertexLayout};
+use renderer_vulkan::MeshHandle;
 
 
 #[derive(Clone, Debug)]
