@@ -10,6 +10,8 @@ use super::types::VulkanData;
 
 type Mat4 = cgmath::Matrix4<f32>;
 
+pub const MAX_POINT_LIGHTS: usize=8;
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 struct UniformBufferObject {
@@ -20,9 +22,13 @@ struct UniformBufferObject {
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct LightUniformBufferObject {
-    pub direction: [f32; 4], // xyz = light direction, w unused
-    pub color: [f32; 4],     // rgb = color, w = intensity
-    pub ambient: [f32; 4],   // rgb = color, w = intensity
+    pub direction: [f32; 4],
+    pub color: [f32; 4],
+    pub ambient: [f32; 4],
+
+    pub point_light_params: [f32; 4],
+    pub point_light_positions: [[f32; 4]; MAX_POINT_LIGHTS],
+    pub point_light_colors: [[f32; 4]; MAX_POINT_LIGHTS],
 }
 
 pub unsafe fn create_global_descriptor_set_layout(
@@ -310,10 +316,25 @@ pub unsafe fn update_light_uniform_buffer(
     renderer: &mut VulkanRenderer,
     image_index: usize,
 ) -> Result<()>{
+    let mut point_light_positions = [[0.0; 4]; MAX_POINT_LIGHTS];
+    let mut point_light_colors = [[0.0; 4]; MAX_POINT_LIGHTS];
+
+    point_light_positions[0] = [0.0, 0.0, 2.5, 6.0];
+    point_light_colors[0] = [1.0, 0.85, 0.65, 2.0];
+
+    point_light_positions[1] = [-5.0, 2.0, 1.5, 5.0];
+    point_light_colors[1] = [0.35, 0.55, 1.0, 1.5];
+
+    point_light_positions[2] = [5.0, -2.0, 1.5, 5.0];
+    point_light_colors[2] = [1.0, 0.35, 0.45, 1.5];
+
     let light=LightUniformBufferObject{
         direction: [-0.8,-1.0,-1.0,0.0],
-        color: [1.0,1.0,1.0,1.0],
-        ambient: [0.15,0.15,0.15,1.0],
+        color: [0.5,0.5,0.5,1.0],
+        ambient: [0.10,0.10,0.10,1.0],
+        point_light_params: [3.0, 0.0, 0.0, 0.0],
+        point_light_positions,
+        point_light_colors,
     };
 
     let memory=renderer.device.map_memory(

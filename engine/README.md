@@ -51,8 +51,8 @@
     - create_lit3d_pipelineの作成 + create_pipelinesに追加
     - command_buffer編集
     - 複数ライトを持たせる
-      - light descriptor setの作成
-      - Directional LightとAmbientを1つ
+      - ~~light descriptor setの作成~~
+      - ~~Directional LightとAmbientを1つ~~
       - PointLightの追加 (位置)
       - SpotLightの追加 (位置+方向)
   - Ui2D: 2DのUIや画像を画面に貼り付ける

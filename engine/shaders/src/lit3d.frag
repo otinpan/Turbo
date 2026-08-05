@@ -1,11 +1,17 @@
 #version 450
 
+const int MAX_POINT_LIGHTS = 8;
+
 layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
 layout(set = 2, binding = 0) uniform LightUniform {
-  vec4 lightDirection;
-  vec4 lightColor;
+  vec4 directionalDirection;
+  vec4 directionalColor;
   vec4 ambientColor;
+
+  vec4 pointLightParams;
+  vec4 pointLightPositions[MAX_POINT_LIGHTS];
+  vec4 pointLightColors[MAX_POINT_LIGHTS];
 } light;
 
 layout(push_constant) uniform PushConstants {
@@ -16,6 +22,7 @@ layout(push_constant) uniform PushConstants {
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 fragTexCoord;
 layout(location = 2) in vec3 fragNormal;
+layout(location = 3) in vec3 fragWorldPos;
 
 layout(location = 0) out vec4 outColor;
 
@@ -28,12 +35,31 @@ void main() {
 
   vec3 normal = normalize(fragNormal);
 
-  vec3 lightDir = normalize(-light.lightDirection.xyz);
+  vec3 lighting = light.ambientColor.rgb * light.ambientColor.a;
 
-  float diffuse = max(dot(normal, lightDir), 0.0);
+  vec3 dirLightDir = normalize(-light.directionalDirection.xyz);
+  float dirDiffuse = max(dot(normal, dirLightDir), 0.0);
+  lighting += light.directionalColor.rgb * light.directionalColor.a * dirDiffuse;
 
-  vec3 lighting = light.ambientColor.rgb * light.ambientColor.a
-    + light.lightColor.rgb * light.lightColor.a * diffuse;
+  int pointLightCount = int(light.pointLightParams.x);
+
+  for (int i = 0; i < pointLightCount; i++) {
+    vec3 toLight = light.pointLightPositions[i].xyz - fragWorldPos;
+    float distance = length(toLight);
+    vec3 pointLightDir = normalize(toLight);
+
+    float radius = light.pointLightPositions[i].w;
+    float attenuation = clamp(1.0 - distance / radius, 0.0, 1.0);
+    attenuation *= attenuation;
+
+    float pointDiffuse = max(dot(normal, pointLightDir), 0.0);
+
+    lighting += light.pointLightColors[i].rgb
+      * light.pointLightColors[i].a
+      * pointDiffuse
+      * attenuation;
+  }
+
   vec3 rgb = base.rgb * fragColor * lighting;
 
   outColor = vec4(rgb, base.a);
