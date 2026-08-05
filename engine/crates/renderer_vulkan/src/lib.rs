@@ -374,6 +374,7 @@ impl VulkanRenderer {
         create_swapchain_image_views(&self.device, &mut self.data)?;
         create_render_pass(&self.instance, &self.device, &mut self.data)?;
         create_pipelines(&self.device, &mut self.data)?;
+        create_color_objects(&self.instance, &self.device, &mut self.data)?;
         create_depth_objects(&self.instance, &self.device, &mut self.data)?;
         create_framebuffers(&self.device, &mut self.data)?;
         create_uniform_buffers(&self.instance, &self.device, &mut self.data)?;
@@ -390,11 +391,6 @@ impl VulkanRenderer {
 
     pub unsafe fn destroy(&mut self) {
         self.device.device_wait_idle().unwrap();
-
-        self.device
-            .destroy_image_view(self.data.color_image_view, None);
-        self.device.free_memory(self.data.color_image_memory, None);
-        self.device.destroy_image(self.data.color_image, None);
 
         self.destroy_swapchain();
 
@@ -480,6 +476,10 @@ impl VulkanRenderer {
             .framebuffers
             .drain(..)
             .for_each(|f| self.device.destroy_framebuffer(f, None));
+        self.device
+            .destroy_image_view(self.data.color_image_view, None);
+        self.device.destroy_image(self.data.color_image, None);
+        self.device.free_memory(self.data.color_image_memory, None);
         self.device
             .destroy_image_view(self.data.depth_image_view, None);
         self.device.destroy_image(self.data.depth_image, None);

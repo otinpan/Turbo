@@ -1,5 +1,6 @@
 use anyhow::Result;
 use cgmath::{Deg, point3};
+use cgmath::InnerSpace;
 use std::mem::size_of;
 use std::ptr::copy_nonoverlapping as memcpy;
 use vulkanalia::prelude::v1_0::*;
@@ -339,12 +340,32 @@ pub unsafe fn update_light_uniform_buffer(
     point_light_positions[2] = [-5.0, -2.0, 1.5, 5.0];
     point_light_colors[2] = [1.0, 0.35, 0.45, 1.5];
 
-    spot_light_positions[0] = [-3.0, -1.5, 0.0, 8.0];
-    spot_light_directions[0] = [-1.0, 1.0, 0.0, 0.0];
+
+    let spot_light_pos=renderer.data.camera.position;
+    let forward = renderer.data.camera.target - renderer.data.camera.position;
+    let spot_light_dir = if forward.magnitude2() > f32::EPSILON {
+        forward.normalize()
+    } else {
+        cgmath::vec3(1.0, 0.0, 0.0)
+    };
+
+    spot_light_positions[0]=[
+        spot_light_pos.x,
+        spot_light_pos.y,
+        spot_light_pos.z,
+        12.0,
+    ];
+
+    spot_light_directions[0]=[
+        spot_light_dir.x,
+        spot_light_dir.y,
+        spot_light_dir.z,
+        0.0,
+    ];
     spot_light_colors[0] = [1.0, 1.0, 0.85, 3.0];
     spot_light_cone_params[0] = [
-        15.0_f32.to_radians().cos(),
-        25.0_f32.to_radians().cos(),
+        15.0_f32.to_radians().cos(), //inner
+        15.0_f32.to_radians().cos(), //outer
         0.0,
         0.0,
     ];
