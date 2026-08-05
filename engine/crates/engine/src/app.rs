@@ -63,7 +63,7 @@ impl App {
         // camera //////////////////
         world.spawn(
             Transform {
-                position: vec3(10.0, 0.0, 0.0),
+                position: vec3(-1.0, 0.0, 0.0),
                 ..Default::default()
             },
             None,
