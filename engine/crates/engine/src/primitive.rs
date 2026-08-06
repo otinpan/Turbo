@@ -134,6 +134,19 @@ pub unsafe fn create_primitive_lit3d(
     Ok(PrimitiveMesh { handle, primitive_type, vertex_layout: VertexLayout::Lit3D })
 }
 
+pub unsafe fn create_primitive_ui2d(
+    renderer: &mut VulkanRenderer,
+    shape: PrimitiveShape,
+) -> Result<PrimitiveMesh>{
+    let primitive_type=shape.primitive_type();
+    let source=build_primitive_source(shape);
+    let mesh_data=source.to_ui2d_data();
+
+    let handle=renderer.load_mesh_from_data(mesh_data,VertexLayout::Ui2D)?;
+
+    Ok(PrimitiveMesh{handle, primitive_type,vertex_layout: VertexLayout::Ui2D})
+}
+
 pub unsafe fn create_primitive_with_layout(
     renderer: &mut VulkanRenderer,
     shape: PrimitiveShape,
@@ -143,6 +156,7 @@ pub unsafe fn create_primitive_with_layout(
         VertexLayout::Mesh3D => create_primitive_mesh3d(renderer, shape),
         VertexLayout::DebugLine3D => create_primitive_debug_line(renderer, shape),
         VertexLayout::Lit3D => create_primitive_lit3d(renderer,shape),
+        VertexLayout::Ui2D => create_primitive_ui2d(renderer,shape),
     }
 }
 
@@ -755,6 +769,11 @@ pub unsafe fn update_primitive_mesh(
             source.to_lit3d_data(),
             VertexLayout::Lit3D,
         ),
+        VertexLayout::Ui2D => renderer.update_mesh_from_data(
+            mesh.handle,
+            source.to_ui2d_data(),
+            VertexLayout::Ui2D,
+        )
     }
 }
 // test ///////////////////////////////////////////////////////////////////////

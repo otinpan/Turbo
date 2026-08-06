@@ -37,4 +37,12 @@ glslc `
 glslc `
     (Join-Path $ShaderDir "lit3d.frag") `
     -o (Join-Path $OutDir "lit3d_frag.spv")
+
+glslc `
+    (Join-Path $ShaderDir "ui2d.vert") `
+    -o (Join-Path $OutDir "ui2d_vert.spv")
+
+glslc `
+    (Join-Path $ShaderDir "ui2d.frag") `
+    -o (Join-Path $OutDir "ui2d_frag.spv")
 Write-Host "Shaders compiled to $OutDir"

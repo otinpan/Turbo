@@ -4,7 +4,10 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 
-use super::vertex::{DebugLineVertex, Mesh3DVertex, Lit3DVertex, SourceVertex};
+use super::vertex::{
+    Ui2DVertex, DebugLineVertex, Mesh3DVertex, Lit3DVertex, 
+    SourceVertex,
+};
 
 #[derive(Clone, Debug)]
 pub struct SourceMesh {
@@ -42,6 +45,13 @@ impl SourceMesh {
     pub fn to_lit3d_data(&self) -> MeshData<Lit3DVertex>{
         MeshData { 
             vertices: self.vertices.iter().map(Lit3DVertex::from).collect(),
+            indices: self.indices.clone()
+        }
+    }
+
+    pub fn to_ui2d_data(&self) -> MeshData<Ui2DVertex>{
+        MeshData{
+            vertices: self.vertices.iter().map(Ui2DVertex::from).collect(),
             indices: self.indices.clone()
         }
     }

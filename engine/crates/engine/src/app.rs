@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow};
 use cgmath::{InnerSpace, vec2, vec3};
 use renderer_vulkan::{
     MeshHandle, PipelineKey, RenderCamera, RenderItem, TextureHandle,
-    VulkanRenderer,
+    VulkanRenderer, VertexLayout,
 };
 use std::collections::HashMap;
 use turbo_math::Transform;
@@ -14,7 +14,7 @@ pub const DEFAULT_TEXTURE: TextureHandle = TextureHandle(0);
 
 use crate::primitive::{
     PrimitiveMesh, PrimitiveShape, PrimitiveType, 
-    create_primitive_debug_line, create_primitive_mesh3d, create_primitive_lit3d,
+    create_primitive_debug_line, create_primitive_mesh3d, create_primitive_lit3d, create_primitive_ui2d,
     spawn_circle_with_layout, spawn_cube_with_layout, spawn_line, 
     spawn_polygon_with_layout, spawn_rectangle_with_layout, 
     spawn_sphere_with_layout, spawn_triangle_with_layout, 
@@ -130,6 +130,14 @@ impl App {
                     1.0,
                     PipelineKey::Lit3D,
                 )?;
+                let triangle_ui2d=app.spawn_triangle(
+                    vec3(0.0,-0.6,0.5),
+                    vec3(0.0,-0.7,0.7),
+                    vec3(0.0,-0.8,0.5),
+                    vec3(0.0,1.0,1.0),
+                    0.4,
+                    PipelineKey::Ui2D,
+                )?;
 
                 let rectangle_id0 = app.spawn_rectangle(
                     vec3(5.0, 0.5, 0.5),
@@ -225,6 +233,16 @@ impl App {
                     1.0,
                     PipelineKey::Lit3D,
                 )?;
+                /* 
+                let circle_ui2d = app.spawn_circle(
+                    vec3(0.0, 0.5, 0.5),
+                    0.2,
+                    32,
+                    vec3(0.0, 0.0, 1.0),
+                    1.0,
+                    PipelineKey::Ui2D,
+                )?;
+                */
 
                 let polygon_id0 = app.spawn_polygon(
                     vec![
@@ -444,7 +462,7 @@ impl App {
                         color: vec3(1.0, 1.0, 1.0),
                         use_texture: true,
                         texture: face_texture,
-                        pipeline_key: PipelineKey::Mesh3D,
+                        pipeline_key: PipelineKey::Lit3D,
                         ..Default::default()
                     },
                     Transform {
@@ -459,6 +477,7 @@ impl App {
 
         if self.input.key_pressed(KeyCode::KeyR) {
             let position = self.mouse_position_on_spawn_plane();
+            let face_texture=self.use_texture("face");
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Rectangle) {
                 if let Err(e) = spawn_primitive_from_mesh(
                     &mut self.world,
@@ -466,7 +485,8 @@ impl App {
                     Material {
                         color: vec3(1.0, 1.0, 1.0),
                         use_texture: true,
-                        pipeline_key: PipelineKey::Mesh3D,
+                        texture: face_texture,
+                        pipeline_key: PipelineKey::Ui2D,
                         ..Default::default()
                     },
                     Transform {
@@ -597,6 +617,23 @@ impl App {
                             rings: 20,
                             segments: 20,
                             color: vec3(0.0, 1.0, 1.0),
+                        },
+                    )?;
+                }
+            }
+            if let Some(mesh) = self.primitive_mesh(PrimitiveType::Rectangle){
+                unsafe{
+                    update_primitive_mesh(
+                        &mut self.renderer,
+                        mesh,
+                        PrimitiveShape::Rectangle { 
+                            points:[
+                                vec3(0.0, -0.2,0.2),
+                                vec3(0.0, -0.2,-0.2),
+                                vec3(0.0, 0.2,-0.2),
+                                vec3(0.0,0.2,0.2)
+                            ], 
+                            color: vec3(1.0,1.0,1.0)
                         },
                     )?;
                 }
@@ -924,7 +961,7 @@ unsafe fn load_textures(renderer: &mut VulkanRenderer) -> Result<HashMap<String,
 
 unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<PrimitiveMesh>> {
     let primitive_meshes = vec![
-        create_primitive_mesh3d(
+        create_primitive_lit3d(
             renderer,
             PrimitiveShape::Triangle {
                 points: [
@@ -935,7 +972,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
                 color: vec3(1.0, 1.0, 1.0),
             },
         )?,
-        create_primitive_mesh3d(
+        create_primitive_ui2d(
             renderer,
             PrimitiveShape::Rectangle {
                 points: [

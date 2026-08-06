@@ -1,4 +1,5 @@
 use anyhow::Result;
+use vulkanalia::vk::ColorBlendEquationEXT;
 use std::hash::{Hash, Hasher};
 use std::ptr::copy_nonoverlapping as memcpy;
 use vulkanalia::prelude::v1_0::*;
@@ -36,6 +37,7 @@ pub enum VertexLayout {
     Mesh3D,
     DebugLine3D,
     Lit3D,
+    Ui2D,
 }
 
 #[repr(C)]
@@ -277,5 +279,63 @@ impl Lit3DVertex{
             .build();
 
         [pos,color,tex_coord,normal]
+    }
+}
+
+
+#[repr(C)]
+#[derive(Copy,Clone,Debug)]
+pub struct Ui2DVertex{
+    pub pos: Vec2,
+    pub color: Vec3,
+    pub tex_coord: Vec2,
+}
+
+impl From<&SourceVertex> for Ui2DVertex{
+    fn from(v: &SourceVertex) -> Self{
+        Self { 
+            pos: cgmath::vec2(v.pos.y,v.pos.z),
+            color: v.color,
+            tex_coord: v.tex_coord
+        }
+    }
+}
+
+impl Ui2DVertex{
+    pub const fn new(pos: Vec2,color: Vec3, tex_coord: Vec2) -> Self{
+        Self { pos, color, tex_coord }
+    }
+
+    pub fn binding_description() -> vk::VertexInputBindingDescription{
+        vk::VertexInputBindingDescription::builder()
+            .binding(0)
+            .stride(size_of::<Ui2DVertex>() as u32)
+            .input_rate(vk::VertexInputRate::VERTEX)
+            .build()
+    }
+
+    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 3]{
+        let pos=vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(0)
+            .format(vk::Format::R32G32_SFLOAT)
+            .offset(0)
+            .build();
+
+        let color=vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(1)
+            .format(vk::Format::R32G32B32_SFLOAT)
+            .offset(size_of::<Vec2>() as u32)
+            .build();
+
+        let tex_coord=vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(2)
+            .format(vk::Format::R32G32_SFLOAT)
+            .offset((size_of::<Vec2>() +size_of::<Vec3>()) as u32)
+            .build();
+
+        [pos,color,tex_coord]
     }
 }

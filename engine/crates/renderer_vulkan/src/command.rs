@@ -14,6 +14,12 @@ struct FragmentPushConstants {
     material_flags: [f32; 4],
 }
 
+#[repr(C)]
+#[derive(Copy, Clone)]
+struct Ui2DTransformPushConstants {
+    transform: [f32; 4],
+}
+
 // command pool ////////////////////////////////////////////////////////////
 // created command buffers are pushed into graphics queue in render()
 // this command buffer is created at once
@@ -136,16 +142,17 @@ pub unsafe fn update_command_buffer(
 fn sorted_render_indices(data: &VulkanData) -> Vec<usize> {
     let mut opaque_indices = Vec::new();
     let mut transparent_indices = Vec::new();
+    let mut ui_indices = Vec::new();
 
     for (index, object) in data.render_objects.iter().enumerate() {
         if !object.is_visible {
             continue;
         }
 
-        if object.pipeline_key == PipelineKey::Transparent3D {
-            transparent_indices.push(index);
-        } else {
-            opaque_indices.push(index);
+        match object.pipeline_key {
+            PipelineKey::Transparent3D => transparent_indices.push(index),
+            PipelineKey::Ui2D => ui_indices.push(index),
+            _ => opaque_indices.push(index),
         }
     }
 
@@ -163,6 +170,7 @@ fn sorted_render_indices(data: &VulkanData) -> Vec<usize> {
     });
 
     opaque_indices.extend(transparent_indices);
+    opaque_indices.extend(ui_indices);
     opaque_indices
 }
 
@@ -369,6 +377,47 @@ unsafe fn update_secondary_command_buffer(
                 pipeline.layout,
                 vk::ShaderStageFlags::FRAGMENT,
                 64,
+                material_bytes,
+            );
+        }
+        PipelineKey::Ui2D =>{
+            let material_set=renderer.data.material_descriptor_sets[object.texture_index.0];
+            let sets=[material_set];
+            let ui_transform = Ui2DTransformPushConstants {
+                transform: [
+                    object.transform.position.y,
+                    object.transform.position.z,
+                    object.transform.scale.y,
+                    object.transform.scale.z,
+                ],
+            };
+            let ui_transform_bytes = std::slice::from_raw_parts(
+                &ui_transform as *const Ui2DTransformPushConstants as *const u8,
+                std::mem::size_of::<Ui2DTransformPushConstants>(),
+            );
+
+            renderer.device.cmd_bind_descriptor_sets(
+                command_buffer,
+                vk::PipelineBindPoint::GRAPHICS,
+                pipeline.layout,
+                0,
+                &sets,
+                &[],
+            );
+
+            renderer.device.cmd_push_constants(
+                command_buffer,
+                pipeline.layout,
+                vk::ShaderStageFlags::VERTEX,
+                0,
+                ui_transform_bytes,
+            );
+
+            renderer.device.cmd_push_constants(
+                command_buffer,
+                pipeline.layout,
+                vk::ShaderStageFlags::FRAGMENT,
+                16,
                 material_bytes,
             );
         }
