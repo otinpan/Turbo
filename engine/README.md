@@ -56,11 +56,9 @@
       - PointLightの追加 (位置)
       - SpotLightの追加 (位置+方向)
   - Ui2D: 2DのUIや画像を画面に貼り付ける
-    - ui2d専用のprimitive_mesh生成関数
-      - spawn_triangle_ui2d
-      - build_triangle_ui2d
   - Skybox: 空や背景描画
   - ShadowMap: 色を出さずに、depthだけを描画
+  - 描画関数を使いやすく抽象化
 
 
 create_primitivesでcreate_primitive_debug_lineでprimitiveを作った後に、spawnでmesh3dのことをするとクラッシュする
