@@ -2,8 +2,10 @@ use anyhow::{Result, anyhow};
 use cgmath::{InnerSpace, vec2, vec3};
 use renderer_vulkan::{
     MeshHandle, PipelineKey, RenderCamera, RenderItem, TextureHandle,
-    VulkanRenderer, VertexLayout,
+    VulkanRenderer,
 };
+#[cfg(test)]
+use renderer_vulkan::VertexLayout;
 use std::collections::HashMap;
 use turbo_math::Transform;
 use winit::event::{MouseButton, WindowEvent};
@@ -15,9 +17,9 @@ pub const DEFAULT_TEXTURE: TextureHandle = TextureHandle(0);
 use crate::primitive::{
     PrimitiveMesh, PrimitiveShape, PrimitiveType, 
     create_primitive_debug_line, create_primitive_mesh3d, create_primitive_lit3d, create_primitive_ui2d,
-    spawn_circle_with_layout, spawn_cube_with_layout, spawn_line, 
-    spawn_polygon_with_layout, spawn_rectangle_with_layout, 
-    spawn_sphere_with_layout, spawn_triangle_with_layout, 
+    spawn_circle_with_material, spawn_cube_with_material, spawn_line_with_material, 
+    spawn_polygon_with_material, spawn_rectangle_with_material, 
+    spawn_sphere_with_material, spawn_triangle_with_material, 
     update_primitive_mesh, spawn_primitive_from_mesh, 
 };
 
@@ -31,6 +33,7 @@ use super::Time;
 use super::World;
 
 pub type Vec3 = cgmath::Vector3<f32>;
+pub type Vec2 = cgmath::Vector2<f32>;
 
 pub struct App {
     pub renderer: VulkanRenderer,
@@ -97,140 +100,165 @@ impl App {
         {
             // create primitive ////////////////////////////
             unsafe {
-                let triangle_id0 = app.spawn_triangle(
+                let triangle_id0 = app.spawn_triangle_3d(
                     vec3(5.0, -0.2, -0.5),
                     vec3(5.0, 0.5, 0.2),
                     vec3(5.0, 0.0, 0.5),
                     vec3(0.0, 1.0, 1.0),
                     0.5,
+                    None,
                     PipelineKey::Mesh3D,
                 )?;
-                let triangle_id1 = app.spawn_triangle(
+                let triangle_id1 = app.spawn_triangle_3d(
                     vec3(0.0, -0.2, -0.5),
                     vec3(0.0, 0.5, 0.2),
                     vec3(0.0, 0.0, 0.5),
                     vec3(0.0, 1.0, 1.0),
                     0.5,
+                    None,
                     PipelineKey::Transparent3D,
                 )?;
-                let triangle_id2=app.spawn_triangle(
+                let triangle_id2=app.spawn_triangle_3d(
                     vec3(-10.0, -0.2, -0.5),
                     vec3(-10.0, 0.5, 0.2),
                     vec3(-10.0, 0.0, 0.5),
                     vec3(0.0, 1.0, 1.0),
                     0.5,
+                    None,
                     PipelineKey::DebugLine3D,
                     
                 )?;
-                let triangle_id3=app.spawn_triangle(
+                let triangle_id3=app.spawn_triangle_3d(
                     vec3(-5.0, -0.2, -0.5),
                     vec3(-5.0, 0.5, 0.2),
                     vec3(-5.0, 0.0, 0.5),
                     vec3(0.0, 1.0, 1.0),
                     1.0,
+                    None,
                     PipelineKey::Lit3D,
                 )?;
-                let triangle_ui2d=app.spawn_triangle(
+                let triangle_ui2d=app.spawn_triangle_3d(
                     vec3(0.0,-0.6,0.5),
                     vec3(0.0,-0.7,0.7),
                     vec3(0.0,-0.8,0.5),
                     vec3(0.0,1.0,1.0),
                     0.4,
+                    None,
                     PipelineKey::Ui2D,
                 )?;
 
-                let rectangle_id0 = app.spawn_rectangle(
+                let rectangle_id0 = app.spawn_rectangle_3d(
                     vec3(5.0, 0.5, 0.5),
                     0.3,
                     0.3,
+                    vec3(0.0, 0.0, 0.0),
                     vec3(1.0, 0.0, 1.0),
                     0.5,
+                    None,
                     PipelineKey::Mesh3D,
                 )?;
-                let rectangle_id1 = app.spawn_rectangle(
+                let rectangle_id1 = app.spawn_rectangle_3d(
                     vec3(0.0, 0.5, 0.5),
                     0.3,
                     0.3,
+                    vec3(0.0, 0.0, 0.0),
                     vec3(1.0, 0.0, 1.0),
                     0.5,
+                    None,
                     PipelineKey::Transparent3D,
                 )?;
-                let rectangle_id2 = app.spawn_rectangle(
+                let rectangle_id2 = app.spawn_rectangle_3d(
                     vec3(-10.0, 0.5, 0.5),
                     0.3,
                     0.3,
+                    vec3(0.0, 0.0, 0.0),
                     vec3(1.0, 0.0, 1.0),
                     0.5,
+                    None,
                     PipelineKey::DebugLine3D,
                 )?;
-                let rectangle_id3 = app.spawn_rectangle(
+                let rectangle_id3 = app.spawn_rectangle_3d(
                     vec3(-5.0, 0.5, 0.5),
                     0.3,
                     0.3,
+                    vec3(0.0, 0.0, 0.0),
                     vec3(1.0, 0.0, 1.0),
                     1.0,
+                    None,
                     PipelineKey::Lit3D,
                 )?;
 
-                let cube_id0 = app.spawn_cube(
+                let cube_id0 = app.spawn_cube_3d(
                     vec3(5.0, 1.0, 1.0),
                     1.0,
+                    vec3(0.0, 0.0, 0.0),
                     vec3(1.0, 1.0, 0.0),
                     0.5,
+                    None,
                     PipelineKey::Mesh3D,
                 )?;
-                let cube_id1 = app.spawn_cube(
+                let cube_id1 = app.spawn_cube_3d(
                     vec3(0.0, 1.0, 1.0),
                     1.0,
+                    vec3(0.0, 0.0, 0.0),
                     vec3(1.0, 1.0, 0.0),
                     0.5,
+                    None,
                     PipelineKey::Transparent3D,
                 )?;
-                let cube_id2 = app.spawn_cube(
+                let cube_id2 = app.spawn_cube_3d(
                     vec3(-10.0, 1.0, 1.0),
                     1.0,
+                    vec3(0.0, 0.0, 0.0),
                     vec3(1.0, 1.0, 0.0),
                     0.5,
+                    None,
                     PipelineKey::DebugLine3D,
                 )?;
-                let cube_id3 = app.spawn_cube(
+                let cube_id3 = app.spawn_cube_3d(
                     vec3(-5.0, 1.0, 1.0),
                     1.0,
+                    vec3(0.0, 45.0, 0.0),
                     vec3(1.0, 1.0, 0.0),
                     1.0,
+                    None,
                     PipelineKey::Lit3D,
                 )?;
 
-                let circle_id0 = app.spawn_circle(
+                let circle_id0 = app.spawn_circle_3d(
                     vec3(5.0, 2.0, 1.0),
                     1.0,
                     32,
                     vec3(0.0, 0.0, 1.0),
                     0.5,
+                    None,
                     PipelineKey::Mesh3D,
                 )?;
-                let circle_id1 = app.spawn_circle(
+                let circle_id1 = app.spawn_circle_3d(
                     vec3(0.0, 2.0, 1.0),
                     1.0,
                     32,
                     vec3(0.0, 0.0, 1.0),
                     0.5,
+                    None,
                     PipelineKey::Transparent3D,
                 )?;
-                let circle_id2 = app.spawn_circle(
+                let circle_id2 = app.spawn_circle_3d(
                     vec3(-10.0, 2.0, 1.0),
                     1.0,
                     32,
                     vec3(0.0, 0.0, 1.0),
                     0.5,
+                    None,
                     PipelineKey::DebugLine3D,
                 )?;
-                let circle_id3 = app.spawn_circle(
+                let circle_id3 = app.spawn_circle_3d(
                     vec3(-5.0, 2.0, 1.0),
                     1.0,
                     32,
                     vec3(0.0, 0.0, 1.0),
                     1.0,
+                    None,
                     PipelineKey::Lit3D,
                 )?;
                 /* 
@@ -244,7 +272,7 @@ impl App {
                 )?;
                 */
 
-                let polygon_id0 = app.spawn_polygon(
+                let polygon_id0 = app.spawn_polygon_3d(
                     vec![
                         vec3(5.0, -0.4, -1.0),
                         vec3(5.0, -0.2, 0.0),
@@ -255,9 +283,10 @@ impl App {
                     ],
                     vec3(0.0, 1.0, 0.0),
                     0.5,
+                    None,
                     PipelineKey::Mesh3D,
                 )?;
-                let polygon_id1 = app.spawn_polygon(
+                let polygon_id1 = app.spawn_polygon_3d(
                     vec![
                         vec3(0.0, -0.4, -1.0),
                         vec3(0.0, -0.2, 0.0),
@@ -268,9 +297,10 @@ impl App {
                     ],
                     vec3(0.0, 1.0, 0.0),
                     0.5,
+                    None,
                     PipelineKey::Transparent3D,
                 )?;
-                let polygon_id2 = app.spawn_polygon(
+                let polygon_id2 = app.spawn_polygon_3d(
                     vec![
                         vec3(-10.0, -0.4, -1.0),
                         vec3(-10.0, -0.2, 0.0),
@@ -281,9 +311,10 @@ impl App {
                     ],
                     vec3(0.0, 1.0, 0.0),
                     0.5,
+                    None,
                     PipelineKey::DebugLine3D,
                 )?;
-                let polygon_id3 = app.spawn_polygon(
+                let polygon_id3 = app.spawn_polygon_3d(
                     vec![
                         vec3(-5.0, -0.4, -1.0),
                         vec3(-5.0, -0.2, 0.0),
@@ -294,59 +325,64 @@ impl App {
                     ],
                     vec3(0.0, 1.0, 0.0),
                     1.0,
+                    None,
                     PipelineKey::Lit3D,
                 )?;
 
-                let sphere_id0 = app.spawn_sphere(
+                let sphere_id0 = app.spawn_sphere_3d(
                     vec3(5.0, -1.0, 0.0),
                     0.5,
                     16,
                     16,
                     vec3(1.0, 0.0, 0.0),
                     0.5,
+                    None,
                     PipelineKey::Mesh3D,
                 )?;
-                let sphere_id1 = app.spawn_sphere(
+                let sphere_id1 = app.spawn_sphere_3d(
                     vec3(0.0, -1.0, 0.0),
                     0.5,
                     16,
                     16,
                     vec3(1.0, 0.0, 0.0),
                     0.5,
+                    None,
                     PipelineKey::Transparent3D,
                 )?;
-                let sphere_id2 = app.spawn_sphere(
+                let sphere_id2 = app.spawn_sphere_3d(
                     vec3(-10.0, -1.0, 0.0),
                     0.5,
                     16,
                     16,
                     vec3(1.0, 0.0, 0.0),
                     0.5,
+                    None,
                     PipelineKey::DebugLine3D,
                 )?;
-                let sphere_id3 = app.spawn_sphere(
+                let sphere_id3 = app.spawn_sphere_3d(
                     vec3(-5.0, -1.0, 0.0),
                     0.5,
                     16,
                     16,
                     vec3(1.0, 0.0, 0.0),
                     1.0,
+                    None,
                     PipelineKey::Lit3D,
                 )?;
 
-                let line_id1 = app.spawn_line(
+                let line_id1 = app.spawn_line_3d(
                     vec3(0.0, -20.0, 0.0),
                     vec3(0.0, 20.0, 0.0),
                     vec3(1.0, 0.0, 1.0),
                     1.0,
                 )?;
-                let line_id2 = app.spawn_line(
+                let line_id2 = app.spawn_line_3d(
                     vec3(0.0, 0.0, -20.0),
                     vec3(0.0, 0.0, 20.0),
                     vec3(1.0, 1.0, 0.0),
                     1.0,
                 )?;
-                let line_id3 = app.spawn_line(
+                let line_id3 = app.spawn_line_3d(
                     vec3(-20.0, 0.0, 0.0),
                     vec3(20.0, 0.0, 0.0),
                     vec3(0.0, 1.0, 1.0),
@@ -633,6 +669,7 @@ impl App {
                                 vec3(0.0, 0.2,-0.2),
                                 vec3(0.0,0.2,0.2)
                             ], 
+        
                             color: vec3(1.0,1.0,1.0)
                         },
                     )?;
@@ -779,111 +816,221 @@ impl App {
     }
 
     // spawn primitive shape ////////////////////////////
-    pub unsafe fn spawn_triangle(
+    fn material(
+        color: Vec3,
+        alpha: f32,
+        texture: Option<TextureHandle>,
+        pipeline_key: PipelineKey,
+    ) -> Material {
+        let use_texture = texture.is_some();
+        let texture = texture.unwrap_or(DEFAULT_TEXTURE);
+
+        Material {
+            color,
+            alpha,
+            use_texture,
+            texture,
+            pipeline_key,
+        }
+    }
+
+    pub unsafe fn spawn_triangle_3d(
         &mut self,
         p0: Vec3,
         p1: Vec3,
         p2: Vec3,
         color: Vec3,
         alpha: f32,
+        texture: Option<TextureHandle>,
         pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
-        spawn_triangle_with_layout(
+        let material = Self::material(color, alpha, texture, pipeline_key);
+        spawn_triangle_with_material(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
             p0,
             p1,
             p2,
-            color,
-            alpha,
-            pipeline_key
+            material,
         )
     }
 
-    pub unsafe fn spawn_rectangle(
+    pub unsafe fn spawn_triangle_2d(
+        &mut self,
+        p0: Vec2,
+        p1: Vec2,
+        p2: Vec2,
+        color: Vec3,
+        alpha: f32,
+        texture: Option<TextureHandle>,
+    ) -> Result<EntityId>{
+        let material = Self::material(color, alpha, texture, PipelineKey::Ui2D);
+        spawn_triangle_with_material(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            vec3(0.0,p0.x,p0.y),
+            vec3(0.0,p1.x,p1.y),
+            vec3(0.0,p2.x,p2.y),
+            material
+        )
+    }
+
+    pub unsafe fn spawn_rectangle_3d(
         &mut self,
         pos: Vec3,
         width: f32,
         height: f32,
+        rotation: Vec3,
         color: Vec3,
         alpha: f32,
+        texture: Option<TextureHandle>,
         pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
-        spawn_rectangle_with_layout(
-            &mut self.world,
-            &mut self.renderer,
-            &mut self.primitive_meshes,
-            pos,
-            width,
-            height,
-            color,
-            alpha,
-            pipeline_key,
+        let material = Self::material(color, alpha, texture, pipeline_key);
+
+        spawn_rectangle_with_material(
+           &mut self.world,
+           &mut self.renderer,
+           &mut self.primitive_meshes,
+           pos,
+           width,
+           height,
+           rotation,
+           material,
         )
     }
 
-    pub unsafe fn spawn_cube(
+    pub unsafe fn spawn_rectangle_2d(
+        &mut self,
+        pos: Vec2,
+        width: f32,
+        height: f32,
+        rotation: f32,
+        color: Vec3,
+        alpha: f32,
+        texture: Option<TextureHandle>,
+    ) -> Result<EntityId>{
+        let material = Self::material(color, alpha, texture, PipelineKey::Ui2D);
+
+        spawn_rectangle_with_material(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            vec3(0.0,pos.x,pos.y),
+            width,
+            height,
+            vec3(rotation, 0.0, 0.0),
+            material
+        )
+    }
+
+    pub unsafe fn spawn_cube_3d(
         &mut self,
         pos: Vec3,
         length: f32,
+        rotation: Vec3,
         color: Vec3,
         alpha: f32,
+        texture: Option<TextureHandle>,
         pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
-        spawn_cube_with_layout(
+        let material = Self::material(color, alpha, texture, pipeline_key);
+        spawn_cube_with_material(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
             pos,
             length,
-            color,
-            alpha,
-            pipeline_key,
+            rotation,
+            material,
         )
     }
 
-    pub unsafe fn spawn_circle(
+    pub unsafe fn spawn_circle_3d(
         &mut self,
         pos: Vec3,
         radius: f32,
         segments: u32,
         color: Vec3,
         alpha: f32,
+        texture: Option<TextureHandle>,
         pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
-        spawn_circle_with_layout(
+        let material = Self::material(color, alpha, texture, pipeline_key);
+        spawn_circle_with_material(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
             pos,
             radius,
             segments,
-            color,
-            alpha,
-            pipeline_key,
+            material,
         )
     }
 
-    pub unsafe fn spawn_polygon(
+    pub unsafe fn spawn_circle_2d(
+        &mut self,
+        pos: Vec2,
+        radius: f32,
+        segments: u32,
+        color: Vec3,
+        alpha: f32,
+        texture: Option<TextureHandle>,
+    ) -> Result<EntityId> {
+        let material = Self::material(color, alpha, texture, PipelineKey::Ui2D);
+        spawn_circle_with_material(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            vec3(0.0,pos.x,pos.y),
+            radius,
+            segments,
+            material,
+        )
+    }
+
+    pub unsafe fn spawn_polygon_3d(
         &mut self,
         points: Vec<Vec3>,
         color: Vec3,
         alpha: f32,
+        texture: Option<TextureHandle>,
         pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
-        spawn_polygon_with_layout(
+        let material = Self::material(color, alpha, texture, pipeline_key);
+        spawn_polygon_with_material(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
             points,
-            color,
-            alpha,
-            pipeline_key
+            material,
+        )
+    }
+    pub unsafe fn spawn_polygon_2d(
+        &mut self,
+        points: Vec<Vec2>,
+        color: Vec3,
+        alpha: f32,
+        texture: Option<TextureHandle>,
+    ) -> Result<EntityId> {
+        let material = Self::material(color, alpha, texture, PipelineKey::Ui2D);
+        let points = points
+            .into_iter()
+            .map(|p| vec3(0.0, p.x, p.y))
+            .collect();
+
+        spawn_polygon_with_material(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            points,
+            material,
         )
     }
 
-    pub unsafe fn spawn_sphere(
+    pub unsafe fn spawn_sphere_3d(
         &mut self,
         center: Vec3,
         radius: f32,
@@ -891,9 +1038,11 @@ impl App {
         segments: u32,
         color: Vec3,
         alpha: f32,
+        texture: Option<TextureHandle>,
         pipeline_key: PipelineKey
     ) -> Result<EntityId> {
-        spawn_sphere_with_layout(
+        let material = Self::material(color, alpha, texture, pipeline_key);
+        spawn_sphere_with_material(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
@@ -901,29 +1050,57 @@ impl App {
             radius,
             rings,
             segments,
-            color,
-            alpha,
-            pipeline_key
+            material,
         )
     }
 
-    pub unsafe fn spawn_line(
+    pub unsafe fn spawn_line_3d(
         &mut self,
         pos0: Vec3,
         pos1: Vec3, 
         color: Vec3,
         alpha: f32,
     ) -> Result<EntityId> {
-        spawn_line(
+        let material = Self::material(color, alpha, None, PipelineKey::DebugLine3D);
+        spawn_line_with_material(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
             pos0,
             pos1,
-            color,
-            alpha,
+            material,
         )
     }
+
+
+    pub unsafe fn spawn_line_2d(
+        &mut self,
+        pos0: Vec2,
+        pos1: Vec2,
+        color: Vec3,
+        width: f32,
+        alpha: f32,
+    ) -> Result<EntityId>{
+        let material = Self::material(color, alpha, None, PipelineKey::Ui2D);
+        let from=vec3(0.0,pos0.x,pos0.y);
+        let to=vec3(0.0,pos1.x,pos1.y);
+        let center=(from+to)/2.0;
+        let delta = to - from;
+        let length = (delta.y * delta.y + delta.z * delta.z).sqrt();
+        let rotation=vec3((-delta.y).atan2(delta.z).to_degrees(), 0.0, 0.0);
+        spawn_rectangle_with_material(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            center,
+            width,
+            length,
+            rotation,
+            material,
+        )
+    }
+
+    
 }
 
 unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, MeshHandle>> {
