@@ -38,6 +38,7 @@ pub enum VertexLayout {
     DebugLine3D,
     Lit3D,
     Ui2D,
+    Skybox,
 }
 
 #[repr(C)]
@@ -337,5 +338,47 @@ impl Ui2DVertex{
             .build();
 
         [pos,color,tex_coord]
+    }
+}
+
+
+#[repr(C)]
+#[derive(Copy,Clone,Debug)]
+pub struct SkyboxVertex{
+    pub pos: Vec3,
+}
+
+impl From<&SourceVertex> for SkyboxVertex{
+    fn from(v: &SourceVertex) -> Self{
+        Self { 
+            pos: v.pos,
+        }
+    }
+}
+
+
+impl SkyboxVertex{
+    pub const fn new(pos: Vec3) -> Self{
+        Self { pos }
+    }
+
+    pub fn binding_description() -> vk::VertexInputBindingDescription{
+        vk::VertexInputBindingDescription::builder()
+            .binding(0)
+            .stride(size_of::<SkyboxVertex>() as u32)
+            .input_rate(vk::VertexInputRate::VERTEX)
+            .build()
+    }
+
+    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 1]{
+        let pos=vk::VertexInputAttributeDescription::builder()
+            .binding(0)
+            .location(0)
+            .format(vk::Format::R32G32B32_SFLOAT)
+            .offset(0)
+            .build();
+
+
+        [pos]
     }
 }

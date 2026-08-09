@@ -20,15 +20,16 @@ pub unsafe fn create_texture(
     let decoder = png::Decoder::new(image);
     let mut reader = decoder.read_info()?;
 
-    let mut pixels = vec![0; reader.info().raw_bytes()];
-    reader.next_frame(&mut pixels)?;
+    let mut pixels = vec![0; reader.output_buffer_size()];
+    let info = reader.next_frame(&mut pixels)?;
+    let pixels = &pixels[..info.buffer_size()];
 
     let pixels = match (reader.info().color_type, reader.info().bit_depth) {
         (png::ColorType::Rgb, png::BitDepth::Eight) => pixels
             .chunks_exact(3)
             .flat_map(|rgb| [rgb[0], rgb[1], rgb[2], 255])
             .collect::<Vec<_>>(),
-        (png::ColorType::Rgba, png::BitDepth::Eight) => pixels,
+        (png::ColorType::Rgba, png::BitDepth::Eight) => pixels.to_vec(),
         (color_type, bit_depth) => {
             return Err(anyhow!(
                 "Unsupported PNG format: {:?} {:?}",
@@ -43,6 +44,71 @@ pub unsafe fn create_texture(
     create_texture_from_pixels(instance, device, data, &pixels, width, height)
 }
 
+pub unsafe fn create_skybox_texture(
+    instance: &Instance,
+    device: &Device,
+    data: &mut VulkanData,
+    paths: [&str; 6],
+) -> Result<Texture>{
+    let mut pixels = Vec::new();
+    let mut width = 0;
+    let mut height = 0;
+
+    for path in paths {
+        let image = File::open(path)?;
+
+        let decoder = png::Decoder::new(image);
+        let mut reader = decoder.read_info()?;
+
+        let mut face_pixels = vec![0; reader.output_buffer_size()];
+        let info = reader.next_frame(&mut face_pixels)?;
+        let face_pixels = &face_pixels[..info.buffer_size()];
+
+        let face_pixels = match (reader.info().color_type, reader.info().bit_depth) {
+            (png::ColorType::Rgb, png::BitDepth::Eight) => face_pixels
+                .chunks_exact(3)
+                .flat_map(|rgb| [rgb[0], rgb[1], rgb[2], 255])
+                .collect::<Vec<_>>(),
+            (png::ColorType::Rgba, png::BitDepth::Eight) => face_pixels.to_vec(),
+            (color_type, bit_depth) => {
+                return Err(anyhow!(
+                    "Unsupported skybox PNG format: {:?} {:?}",
+                    color_type,
+                    bit_depth,
+                ));
+            }
+        };
+
+        let (face_width, face_height) = reader.info().size();
+        if face_width != face_height {
+            return Err(anyhow!(
+                "Skybox face must be square: {} is {}x{}.",
+                path,
+                face_width,
+                face_height,
+            ));
+        }
+
+        if width == 0 {
+            width = face_width;
+            height = face_height;
+        } else if width != face_width || height != face_height {
+            return Err(anyhow!(
+                "All skybox faces must have the same size. Expected {}x{}, got {}x{} for {}.",
+                width,
+                height,
+                face_width,
+                face_height,
+                path,
+            ));
+        }
+
+        pixels.extend_from_slice(&face_pixels);
+    }
+
+    create_cubemap_texture_from_pixels(instance, device, data, &pixels, width, height)
+}
+
 pub unsafe fn create_white_texture(
     instance: &Instance,
     device: &Device,
@@ -51,6 +117,21 @@ pub unsafe fn create_white_texture(
     let pixels = [255, 255, 255, 255];
 
     create_texture_from_pixels(instance, device, data, &pixels, 1, 1)
+}
+
+pub unsafe fn create_black_skybox_texture(
+    instance: &Instance,
+    device: &Device,
+    data: &mut VulkanData,
+) -> Result<Texture> {
+    let face = [0, 0, 0, 255];
+    let mut pixels = Vec::with_capacity(face.len() * 6);
+
+    for _ in 0..6 {
+        pixels.extend_from_slice(&face);
+    }
+
+    create_cubemap_texture_from_pixels(instance, device, data, &pixels, 1, 1)
 }
 
 // texture image ///////////////////////////////////////////////
@@ -136,6 +217,108 @@ pub unsafe fn create_texture_from_pixels(
     })
 }
 
+unsafe fn create_cubemap_texture_from_pixels(
+    instance: &Instance,
+    device: &Device,
+    data: &mut VulkanData,
+    pixels: &[u8],
+    width: u32,
+    height: u32,
+) -> Result<Texture> {
+    let mip_levels = 1;
+    let layer_count = 6;
+    let expected_size = width as usize * height as usize * 4 * layer_count;
+
+    if pixels.len() != expected_size {
+        return Err(anyhow!(
+            "Skybox pixel data size mismatch. Expected {} bytes, got {} bytes.",
+            expected_size,
+            pixels.len(),
+        ));
+    }
+
+    let size = pixels.len() as u64;
+
+    let (staging_buffer, staging_buffer_memory) = create_buffer(
+        instance,
+        device,
+        data,
+        size,
+        vk::BufferUsageFlags::TRANSFER_SRC,
+        vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
+    )?;
+
+    let memory = device.map_memory(staging_buffer_memory, 0, size, vk::MemoryMapFlags::empty())?;
+    memcpy(pixels.as_ptr(), memory.cast(), pixels.len());
+    device.unmap_memory(staging_buffer_memory);
+
+    let (image, image_memory) = create_image_with_options(
+        instance,
+        device,
+        data,
+        width,
+        height,
+        mip_levels,
+        layer_count as u32,
+        vk::SampleCountFlags::_1,
+        vk::Format::R8G8B8A8_SRGB,
+        vk::ImageTiling::OPTIMAL,
+        vk::ImageUsageFlags::SAMPLED | vk::ImageUsageFlags::TRANSFER_DST,
+        vk::MemoryPropertyFlags::DEVICE_LOCAL,
+        vk::ImageCreateFlags::CUBE_COMPATIBLE,
+    )?;
+
+    transition_image_layout_layers(
+        device,
+        data,
+        image,
+        vk::ImageLayout::UNDEFINED,
+        vk::ImageLayout::TRANSFER_DST_OPTIMAL,
+        mip_levels,
+        layer_count as u32,
+    )?;
+
+    copy_buffer_to_image_layers(
+        device,
+        data,
+        staging_buffer,
+        image,
+        width,
+        height,
+        layer_count as u32,
+    )?;
+
+    transition_image_layout_layers(
+        device,
+        data,
+        image,
+        vk::ImageLayout::TRANSFER_DST_OPTIMAL,
+        vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+        mip_levels,
+        layer_count as u32,
+    )?;
+
+    device.destroy_buffer(staging_buffer, None);
+    device.free_memory(staging_buffer_memory, None);
+
+    let image_view = create_image_view_with_options(
+        device,
+        image,
+        vk::Format::R8G8B8A8_SRGB,
+        vk::ImageAspectFlags::COLOR,
+        mip_levels,
+        layer_count as u32,
+        vk::ImageViewType::CUBE,
+    )?;
+
+    Ok(Texture {
+        image,
+        image_memory,
+        image_view,
+        mip_levels,
+    })
+}
+
 unsafe fn create_image(
     instance: &Instance,
     device: &Device,
@@ -149,6 +332,38 @@ unsafe fn create_image(
     usage: vk::ImageUsageFlags,
     properties: vk::MemoryPropertyFlags,
 ) -> Result<(vk::Image, vk::DeviceMemory)> {
+    create_image_with_options(
+        instance,
+        device,
+        data,
+        width,
+        height,
+        mip_levels,
+        1,
+        samples,
+        format,
+        tiling,
+        usage,
+        properties,
+        vk::ImageCreateFlags::empty(),
+    )
+}
+
+unsafe fn create_image_with_options(
+    instance: &Instance,
+    device: &Device,
+    data: &VulkanData,
+    width: u32,
+    height: u32,
+    mip_levels: u32,
+    array_layers: u32,
+    samples: vk::SampleCountFlags,
+    format: vk::Format,
+    tiling: vk::ImageTiling,
+    usage: vk::ImageUsageFlags,
+    properties: vk::MemoryPropertyFlags,
+    flags: vk::ImageCreateFlags,
+) -> Result<(vk::Image, vk::DeviceMemory)> {
     // instraction what type of image
     let info = vk::ImageCreateInfo::builder()
         .image_type(vk::ImageType::_2D)
@@ -158,14 +373,14 @@ unsafe fn create_image(
             depth: 1,
         })
         .mip_levels(mip_levels)
-        .array_layers(1)
+        .array_layers(array_layers)
         .format(format)
         .tiling(tiling)
         .initial_layout(vk::ImageLayout::UNDEFINED)
         .usage(usage)
         .sharing_mode(vk::SharingMode::EXCLUSIVE)
         .samples(samples)
-        .flags(vk::ImageCreateFlags::empty());
+        .flags(flags);
 
     // create image, but not allocated in GPU memory
     let image = device.create_image(&info, None)?;
@@ -217,6 +432,26 @@ unsafe fn transition_image_layout(
     new_layout: vk::ImageLayout,
     mip_levels: u32,
 ) -> Result<()> {
+    transition_image_layout_layers(
+        device,
+        data,
+        image,
+        old_layout,
+        new_layout,
+        mip_levels,
+        1,
+    )
+}
+
+unsafe fn transition_image_layout_layers(
+    device: &Device,
+    data: &VulkanData,
+    image: vk::Image,
+    old_layout: vk::ImageLayout,
+    new_layout: vk::ImageLayout,
+    mip_levels: u32,
+    layer_count: u32,
+) -> Result<()> {
     let (src_access_mask, dst_access_mask, src_stage_mask, dst_stage_mask) =
         match (old_layout, new_layout) {
             (vk::ImageLayout::UNDEFINED, vk::ImageLayout::TRANSFER_DST_OPTIMAL) => (
@@ -241,7 +476,7 @@ unsafe fn transition_image_layout(
         .base_mip_level(0)
         .level_count(mip_levels)
         .base_array_layer(0)
-        .layer_count(1);
+        .layer_count(layer_count);
 
     let barrier = vk::ImageMemoryBarrier::builder()
         .old_layout(old_layout)
@@ -277,6 +512,18 @@ unsafe fn copy_buffer_to_image(
     width: u32,
     height: u32,
 ) -> Result<()> {
+    copy_buffer_to_image_layers(device, data, buffer, image, width, height, 1)
+}
+
+unsafe fn copy_buffer_to_image_layers(
+    device: &Device,
+    data: &VulkanData,
+    buffer: vk::Buffer,
+    image: vk::Image,
+    width: u32,
+    height: u32,
+    layer_count: u32,
+) -> Result<()> {
     // create command_buffer
     let command_buffer = begin_single_time_commands(device, data)?;
 
@@ -284,7 +531,7 @@ unsafe fn copy_buffer_to_image(
         .aspect_mask(vk::ImageAspectFlags::COLOR)
         .mip_level(0)
         .base_array_layer(0)
-        .layer_count(1);
+        .layer_count(layer_count);
 
     let region = vk::BufferImageCopy::builder()
         .buffer_offset(0)
@@ -321,16 +568,36 @@ pub unsafe fn create_image_view(
     aspects: vk::ImageAspectFlags,
     mip_levels: u32,
 ) -> Result<vk::ImageView> {
+    create_image_view_with_options(
+        device,
+        image,
+        format,
+        aspects,
+        mip_levels,
+        1,
+        vk::ImageViewType::_2D,
+    )
+}
+
+unsafe fn create_image_view_with_options(
+    device: &Device,
+    image: vk::Image,
+    format: vk::Format,
+    aspects: vk::ImageAspectFlags,
+    mip_levels: u32,
+    layer_count: u32,
+    view_type: vk::ImageViewType,
+) -> Result<vk::ImageView> {
     let subresource_range = vk::ImageSubresourceRange::builder()
         .aspect_mask(aspects)
         .base_mip_level(0)
         .level_count(mip_levels)
         .base_array_layer(0)
-        .layer_count(1);
+        .layer_count(layer_count);
 
     let info = vk::ImageViewCreateInfo::builder()
         .image(image)
-        .view_type(vk::ImageViewType::_2D)
+        .view_type(view_type)
         .format(format)
         .subresource_range(subresource_range);
 

@@ -40,7 +40,7 @@ use self::command::{create_command_buffers, create_command_pools, update_command
 use self::device::{create_logical_device, pick_physical_device};
 use self::image::{
     create_color_objects, create_depth_objects, create_texture, create_texture_sampler,
-    create_white_texture,
+    create_white_texture, create_skybox_texture, create_black_skybox_texture,
 };
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::mesh::create_mesh;
@@ -49,15 +49,17 @@ pub use self::model::{SourceMesh, SourceTopology};
 use self::pipeline::{
     create_debug_line_pipeline, create_mesh3d_pipeline, create_render_pass,
     create_transparent3d_pipeline, create_lit3d_pipeline, create_ui2d_pipeline,
+    create_skybox_pipeline,
 };
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
-use self::types::{Mesh, VulkanData};
-pub use self::types::{MeshHandle, PipelineKey, RenderCamera, RenderItem, TextureHandle};
+use self::types::{Mesh, RenderSkybox, VulkanData};
+pub use self::types::{MeshHandle, PipelineKey, RenderCamera, RenderItem, SkyboxTextureHandle, TextureHandle};
 use self::uniform::{
     create_descriptor_pool, create_global_descriptor_set_layout, create_global_descriptor_sets,
     create_material_descriptor_set_layout, create_material_descriptor_sets, 
     create_light_descriptor_set_layout, create_light_descriptor_sets,
+    create_skybox_descriptor_set_layout, create_skybox_descriptor_sets,
     create_uniform_buffers,update_uniform_buffer,
     create_light_uniform_buffers, update_light_uniform_buffer,
 };
@@ -90,6 +92,7 @@ impl VulkanRenderer {
         create_global_descriptor_set_layout(&device, &mut data)?;
         create_material_descriptor_set_layout(&device, &mut data)?;
         create_light_descriptor_set_layout(&device, &mut data)?;
+        create_skybox_descriptor_set_layout(&device, &mut data)?;
         create_pipelines(&device, &mut data)?;
         create_command_pools(&instance, &device, &mut data)?;
         create_color_objects(&instance, &device, &mut data)?;
@@ -98,12 +101,15 @@ impl VulkanRenderer {
         create_texture_sampler(&device, &mut data)?;
         let white_texture = create_white_texture(&instance, &device, &mut data)?;
         data.textures.push(white_texture);
+        let black_skybox_texture = create_black_skybox_texture(&instance, &device, &mut data)?;
+        data.skybox_textures.push(black_skybox_texture);
         create_uniform_buffers(&instance, &device, &mut data)?;
         create_light_uniform_buffers(&instance, &device, &mut data)?;
         create_descriptor_pool(&device, &mut data)?;
         create_global_descriptor_sets(&device, &mut data)?;
         create_material_descriptor_sets(&device, &mut data)?;
         create_light_descriptor_sets(&device, &mut data)?;
+        create_skybox_descriptor_sets(&device,&mut data)?;
         create_command_buffers(&device, &mut data)?;
         create_sync_objects(&device, &mut data)?;
         Ok(Self {
@@ -230,6 +236,7 @@ impl VulkanRenderer {
         self.load_mesh_from_data(mesh_data,VertexLayout::Lit3D)
     }
 
+
     pub unsafe fn load_texture(&mut self, path: &str) -> Result<TextureHandle> {
         let texture = create_texture(&self.instance, &self.device, &mut self.data, path)?;
         let index = self.data.textures.len();
@@ -242,13 +249,88 @@ impl VulkanRenderer {
             self.data.global_descriptor_sets.clear();
             self.data.material_descriptor_sets.clear();
             self.data.light_descriptor_sets.clear();
+            self.data.skybox_descriptor_sets.clear();
             create_descriptor_pool(&self.device, &mut self.data)?;
             create_global_descriptor_sets(&self.device, &mut self.data)?;
             create_material_descriptor_sets(&self.device, &mut self.data)?;
             create_light_descriptor_sets(&self.device, &mut self.data)?;
+            create_skybox_descriptor_sets(&self.device, &mut self.data)?;
         }
 
         Ok(TextureHandle(index))
+    }
+
+    pub unsafe fn load_skybox_texture(
+        &mut self,
+        paths: [&str; 6],
+    ) -> Result<SkyboxTextureHandle> {
+        let texture = create_skybox_texture(
+            &self.instance,
+            &self.device,
+            &mut self.data,
+            paths,
+        )?;
+
+        let index = self.data.skybox_textures.len();
+        self.data.skybox_textures.push(texture);
+
+        if !self.data.descriptor_pool.is_null() && !self.data.uniform_buffers.is_empty() {
+            self.device.destroy_descriptor_pool(self.data.descriptor_pool, None);
+
+            self.data.global_descriptor_sets.clear();
+            self.data.material_descriptor_sets.clear();
+            self.data.light_descriptor_sets.clear();
+            self.data.skybox_descriptor_sets.clear();
+
+            create_descriptor_pool(&self.device, &mut self.data)?;
+            create_global_descriptor_sets(&self.device, &mut self.data)?;
+            create_material_descriptor_sets(&self.device, &mut self.data)?;
+            create_light_descriptor_sets(&self.device, &mut self.data)?;
+            create_skybox_descriptor_sets(&self.device, &mut self.data)?;
+        }
+
+        Ok(SkyboxTextureHandle(index))
+    }
+
+    pub unsafe fn set_skybox(
+        &mut self,
+        mesh: MeshHandle,
+        texture: SkyboxTextureHandle,
+    ) -> Result<()> {
+        if mesh.vertex_layout != VertexLayout::Skybox {
+            return Err(anyhow!("Skybox mesh must use VertexLayout::Skybox."));
+        }
+
+        if self.data.skybox_textures.get(texture.0).is_none() {
+            return Err(anyhow!("Skybox texture index out of range: {}", texture.0));
+        }
+
+        self.data.skybox = Some(RenderSkybox {
+            mesh,
+            texture,
+            is_visible: true,
+        });
+
+        if !self.data.descriptor_pool.is_null() && !self.data.uniform_buffers.is_empty() {
+            self.device.device_wait_idle()?;
+            self.device
+                .destroy_descriptor_pool(self.data.descriptor_pool, None);
+            self.data.global_descriptor_sets.clear();
+            self.data.material_descriptor_sets.clear();
+            self.data.light_descriptor_sets.clear();
+            self.data.skybox_descriptor_sets.clear();
+            create_descriptor_pool(&self.device, &mut self.data)?;
+            create_global_descriptor_sets(&self.device, &mut self.data)?;
+            create_material_descriptor_sets(&self.device, &mut self.data)?;
+            create_light_descriptor_sets(&self.device, &mut self.data)?;
+            create_skybox_descriptor_sets(&self.device, &mut self.data)?;
+        }
+
+        Ok(())
+    }
+
+    pub fn clear_skybox(&mut self) {
+        self.data.skybox = None;
     }
 
     // load mesh for simple polygon i.e. triangle, rectangle ..
@@ -383,6 +465,7 @@ impl VulkanRenderer {
         create_global_descriptor_sets(&self.device, &mut self.data)?;
         create_material_descriptor_sets(&self.device, &mut self.data)?;
         create_light_descriptor_sets(&self.device, &mut self.data)?;
+        create_skybox_descriptor_sets(&self.device, &mut self.data)?;
         create_command_buffers(&self.device, &mut self.data)?;
         create_render_finished_semaphores(&self.device, &mut self.data)?;
         self.data.images_in_flight = vec![vk::Fence::null(); self.data.swapchain_images.len()];
@@ -406,6 +489,11 @@ impl VulkanRenderer {
             self.device.destroy_image(texture.image, None);
             self.device.free_memory(texture.image_memory, None);
         });
+        self.data.skybox_textures.drain(..).for_each(|texture| {
+            self.device.destroy_image_view(texture.image_view, None);
+            self.device.destroy_image(texture.image, None);
+            self.device.free_memory(texture.image_memory, None);
+        });
 
         self.device
             .destroy_descriptor_set_layout(self.data.material_descriptor_set_layout, None);
@@ -413,6 +501,8 @@ impl VulkanRenderer {
             .destroy_descriptor_set_layout(self.data.light_descriptor_set_layout, None);
         self.device
             .destroy_descriptor_set_layout(self.data.global_descriptor_set_layout, None);
+        self.device
+            .destroy_descriptor_set_layout(self.data.skybox_descriptor_set_layout,None);
 
         self.data
             .in_flight_fences
@@ -460,6 +550,7 @@ impl VulkanRenderer {
         self.data.global_descriptor_sets.clear();
         self.data.material_descriptor_sets.clear();
         self.data.light_descriptor_sets.clear();
+        self.data.skybox_descriptor_sets.clear();
         self.data
             .light_uniform_buffers
             .drain(..)
@@ -503,6 +594,7 @@ unsafe fn create_pipelines(device: &Device, data: &mut VulkanData) -> Result<()>
     create_transparent3d_pipeline(device, data)?;
     create_lit3d_pipeline(device,data)?;
     create_ui2d_pipeline(device,data)?;
+    create_skybox_pipeline(device,data)?;
 
     Ok(())
 }

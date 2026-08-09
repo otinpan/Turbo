@@ -30,9 +30,11 @@ pub struct VulkanData {
     pub global_descriptor_set_layout: vk::DescriptorSetLayout,
     pub material_descriptor_set_layout: vk::DescriptorSetLayout,
     pub light_descriptor_set_layout: vk::DescriptorSetLayout,
+    pub skybox_descriptor_set_layout: vk::DescriptorSetLayout,
     pub global_descriptor_sets: Vec<vk::DescriptorSet>,
     pub material_descriptor_sets: Vec<vk::DescriptorSet>,
     pub light_descriptor_sets: Vec<vk::DescriptorSet>,
+    pub skybox_descriptor_sets: Vec<vk::DescriptorSet>,
     pub descriptor_pool: vk::DescriptorPool,
     // Framebuffers
     pub framebuffers: Vec<vk::Framebuffer>,
@@ -45,6 +47,7 @@ pub struct VulkanData {
     // Mesh/Object data for the next renderer step.
     pub meshes: Vec<Mesh>,
     pub render_objects: Vec<RenderItem>,
+    pub skybox: Option<RenderSkybox>,
     // Buffers
     pub uniform_buffers: Vec<vk::Buffer>,
     pub uniform_buffers_memory: Vec<vk::DeviceMemory>,
@@ -61,6 +64,7 @@ pub struct VulkanData {
     pub images_in_flight: Vec<vk::Fence>,
     // Texture Image
     pub textures: Vec<Texture>,
+    pub skybox_textures: Vec<Texture>,
     pub texture_sampler: vk::Sampler,
     // Depth
     pub depth_image: vk::Image,
@@ -110,6 +114,9 @@ pub struct Texture {
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct TextureHandle(pub usize);
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct SkyboxTextureHandle(pub usize);
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum PipelineKey {
     Mesh3D,
@@ -117,6 +124,7 @@ pub enum PipelineKey {
     Transparent3D,
     Lit3D,
     Ui2D,
+    Skybox,
 }
 
 impl PipelineKey {
@@ -127,6 +135,7 @@ impl PipelineKey {
             PipelineKey::DebugLine3D => VertexLayout::DebugLine3D,
             PipelineKey::Lit3D => VertexLayout::Lit3D,
             PipelineKey::Ui2D => VertexLayout::Ui2D,
+            PipelineKey::Skybox => VertexLayout::Skybox,
         }
     }
 }
@@ -160,6 +169,13 @@ pub struct RenderItem {
     pub use_texture: bool,
     pub texture_index: TextureHandle, // use Texture from VulkanData::textures
     pub pipeline_key: PipelineKey,
+    pub is_visible: bool,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct RenderSkybox {
+    pub mesh: MeshHandle,
+    pub texture: SkyboxTextureHandle,
     pub is_visible: bool,
 }
 

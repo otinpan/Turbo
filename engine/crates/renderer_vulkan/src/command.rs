@@ -1,6 +1,6 @@
 use super::VulkanRenderer;
 use super::device::QueueFamilyIndices;
-use super::types::{PipelineKey, VulkanData};
+use super::types::{PipelineKey, RenderSkybox, VulkanData};
 use anyhow::Result;
 use cgmath::{Deg, vec3};
 use vulkanalia::prelude::v1_0::*;
@@ -120,11 +120,23 @@ pub unsafe fn update_command_buffer(
         vk::SubpassContents::SECONDARY_COMMAND_BUFFERS,
     );
 
+    let mut secondary_command_buffers = Vec::new();
+
+    if let Some(skybox) = renderer.data.skybox {
+        if skybox.is_visible && renderer.data.skybox_descriptor_sets.len() > image_index {
+            secondary_command_buffers.push(update_skybox_command_buffer(
+                renderer,
+                image_index,
+                skybox,
+            )?);
+        }
+    }
+
     let visible_indices = sorted_render_indices(&renderer.data);
-    let secondary_command_buffers = visible_indices
+    secondary_command_buffers.extend(visible_indices
         .into_iter()
         .map(|i| update_secondary_command_buffer(renderer, image_index, i))
-        .collect::<Result<Vec<_>, _>>()?;
+        .collect::<Result<Vec<_>, _>>()?);
 
     if !secondary_command_buffers.is_empty() {
         renderer
@@ -136,6 +148,90 @@ pub unsafe fn update_command_buffer(
     renderer.device.end_command_buffer(command_buffer)?;
 
     Ok(())
+}
+
+unsafe fn update_skybox_command_buffer(
+    renderer: &mut VulkanRenderer,
+    image_index: usize,
+    skybox: RenderSkybox,
+) -> Result<vk::CommandBuffer> {
+    renderer
+        .data
+        .secondary_command_buffers
+        .resize_with(image_index + 1, Vec::new);
+
+    let command_buffer = {
+        let command_buffers = &mut renderer.data.secondary_command_buffers[image_index];
+
+        while command_buffers.is_empty() {
+            let allocate_info = vk::CommandBufferAllocateInfo::builder()
+                .command_pool(renderer.data.command_pools[image_index])
+                .level(vk::CommandBufferLevel::SECONDARY)
+                .command_buffer_count(1);
+
+            let command_buffer = renderer.device.allocate_command_buffers(&allocate_info)?[0];
+            command_buffers.push(command_buffer);
+        }
+
+        command_buffers[0]
+    };
+
+    let pipeline = renderer.data.pipeline(PipelineKey::Skybox);
+    let mesh = &renderer.data.meshes[skybox.mesh.index];
+
+    let inheritance_info = vk::CommandBufferInheritanceInfo::builder()
+        .render_pass(renderer.data.render_pass)
+        .subpass(0)
+        .framebuffer(renderer.data.framebuffers[image_index]);
+
+    let info = vk::CommandBufferBeginInfo::builder()
+        .flags(vk::CommandBufferUsageFlags::RENDER_PASS_CONTINUE)
+        .inheritance_info(&inheritance_info);
+
+    renderer
+        .device
+        .begin_command_buffer(command_buffer, &info)?;
+
+    if mesh.vertex_layout != pipeline.vertex_layout {
+        renderer.device.end_command_buffer(command_buffer)?;
+        return Ok(command_buffer);
+    }
+
+    renderer.device.cmd_bind_pipeline(
+        command_buffer,
+        vk::PipelineBindPoint::GRAPHICS,
+        pipeline.pipeline,
+    );
+    renderer
+        .device
+        .cmd_bind_vertex_buffers(command_buffer, 0, &[mesh.vertex_buffer], &[0]);
+    renderer.device.cmd_bind_index_buffer(
+        command_buffer,
+        mesh.index_buffer,
+        0,
+        vk::IndexType::UINT32,
+    );
+
+    let global_set = renderer.data.global_descriptor_sets[image_index];
+    let skybox_set = renderer.data.skybox_descriptor_sets[image_index];
+    let sets = [global_set, skybox_set];
+
+    renderer.device.cmd_bind_descriptor_sets(
+        command_buffer,
+        vk::PipelineBindPoint::GRAPHICS,
+        pipeline.layout,
+        0,
+        &sets,
+        &[],
+    );
+
+    renderer
+        .device
+        .cmd_draw_indexed(command_buffer, mesh.index_count, 1, 0, 0, 0);
+
+    renderer.device.end_command_buffer(command_buffer)?;
+
+    Ok(command_buffer)
 }
 
 // sort in o
@@ -150,6 +246,7 @@ fn sorted_render_indices(data: &VulkanData) -> Vec<usize> {
         }
 
         match object.pipeline_key {
+            PipelineKey::Skybox => continue,
             PipelineKey::Transparent3D => transparent_indices.push(index),
             PipelineKey::Ui2D => ui_indices.push(index),
             _ => opaque_indices.push(index),
@@ -169,9 +266,10 @@ fn sorted_render_indices(data: &VulkanData) -> Vec<usize> {
             .unwrap_or(std::cmp::Ordering::Equal)
     });
 
-    opaque_indices.extend(transparent_indices);
-    opaque_indices.extend(ui_indices);
-    opaque_indices
+    let mut sorted_indices = opaque_indices;
+    sorted_indices.extend(transparent_indices);
+    sorted_indices.extend(ui_indices);
+    sorted_indices
 }
 
 fn distance_squared(a: cgmath::Vector3<f32>, b: cgmath::Vector3<f32>) -> f32 {
@@ -194,7 +292,9 @@ unsafe fn update_secondary_command_buffer(
     let command_buffer = {
         let command_buffers = &mut renderer.data.secondary_command_buffers[image_index];
 
-        while model_index >= command_buffers.len() {
+        let command_slot = model_index + 1;
+
+        while command_slot >= command_buffers.len() {
             let allocate_info = vk::CommandBufferAllocateInfo::builder()
                 .command_pool(renderer.data.command_pools[image_index])
                 .level(vk::CommandBufferLevel::SECONDARY)
@@ -204,11 +304,15 @@ unsafe fn update_secondary_command_buffer(
             command_buffers.push(command_buffer);
         }
 
-        command_buffers[model_index]
+        command_buffers[command_slot]
     };
 
     //  Model
     let object = &renderer.data.render_objects[model_index];
+    if object.pipeline_key == PipelineKey::Skybox {
+        return Ok(command_buffer);
+    }
+
     let pipeline = renderer.data.pipeline(object.pipeline_key);
     let mesh = &renderer.data.meshes[object.mesh_index.index];
 
@@ -420,6 +524,10 @@ unsafe fn update_secondary_command_buffer(
                 16,
                 material_bytes,
             );
+        }
+        PipelineKey::Skybox => {
+            renderer.device.end_command_buffer(command_buffer)?;
+            return Ok(command_buffer);
         }
     }
 

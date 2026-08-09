@@ -6,7 +6,7 @@ use std::io::BufReader;
 
 use super::vertex::{
     Ui2DVertex, DebugLineVertex, Mesh3DVertex, Lit3DVertex, 
-    SourceVertex,
+    SourceVertex, SkyboxVertex,
 };
 
 #[derive(Clone, Debug)]
@@ -52,6 +52,13 @@ impl SourceMesh {
     pub fn to_ui2d_data(&self) -> MeshData<Ui2DVertex>{
         MeshData{
             vertices: self.vertices.iter().map(Ui2DVertex::from).collect(),
+            indices: self.indices.clone()
+        }
+    }
+
+    pub fn to_skybox_data(&self) -> MeshData<SkyboxVertex>{
+        MeshData { 
+            vertices: self.vertices.iter().map(SkyboxVertex::from).collect(),
             indices: self.indices.clone()
         }
     }

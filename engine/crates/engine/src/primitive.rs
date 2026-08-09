@@ -146,6 +146,24 @@ pub unsafe fn create_primitive_ui2d(
     Ok(PrimitiveMesh{handle, primitive_type,vertex_layout: VertexLayout::Ui2D})
 }
 
+pub unsafe fn create_primitive_skybox(
+    renderer: &mut VulkanRenderer,
+    shape: PrimitiveShape,
+) -> Result<PrimitiveMesh> {
+    let primitive_type = shape.primitive_type();
+    let source = build_primitive_source(shape);
+    let mesh_data = source.to_skybox_data();
+
+    let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Skybox)?;
+
+    Ok(PrimitiveMesh {
+        handle,
+        primitive_type,
+        vertex_layout: VertexLayout::Skybox,
+    })
+}
+
+
 pub unsafe fn create_primitive_with_layout(
     renderer: &mut VulkanRenderer,
     shape: PrimitiveShape,
@@ -156,6 +174,7 @@ pub unsafe fn create_primitive_with_layout(
         VertexLayout::DebugLine3D => create_primitive_debug_line(renderer, shape),
         VertexLayout::Lit3D => create_primitive_lit3d(renderer,shape),
         VertexLayout::Ui2D => create_primitive_ui2d(renderer,shape),
+        VertexLayout::Skybox => create_primitive_skybox(renderer, shape),
     }
 }
 
@@ -787,6 +806,11 @@ pub unsafe fn update_primitive_mesh(
             mesh.handle,
             source.to_ui2d_data(),
             VertexLayout::Ui2D,
+        ),
+        VertexLayout::Skybox => renderer.update_mesh_from_data(
+            mesh.handle,
+            source.to_skybox_data(),
+            VertexLayout::Skybox,
         )
     }
 }

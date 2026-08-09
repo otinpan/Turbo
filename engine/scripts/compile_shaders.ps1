@@ -45,4 +45,12 @@ glslc `
 glslc `
     (Join-Path $ShaderDir "ui2d.frag") `
     -o (Join-Path $OutDir "ui2d_frag.spv")
+
+glslc `
+    (Join-Path $ShaderDir "skybox.vert") `
+    -o (Join-Path $OutDir "skybox_vert.spv")
+
+glslc `
+    (Join-Path $ShaderDir "skybox.frag") `
+    -o (Join-Path $OutDir "skybox_frag.spv")
 Write-Host "Shaders compiled to $OutDir"

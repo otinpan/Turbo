@@ -204,3 +204,51 @@ The reason that `Material` has `PipelineKey` is single vertex layout will match 
 VertexLayout: Mesh3D
 -> PipelineLayout: Mesh3D, Lit3D, Skybox ...
 ```
+
+### Skybox
+When you use skybox, you have to create `MeshHandle`, `SkyboxTextureHandle` and `SkyboxRenderer`.
+
+1. create `MeshHandle` using `create_skybox_mesh`
+2. load square texture (height=width) and create `SkyboxTextureHandle`
+3. sync `SkyboxRenderer` in renderer with `set_skybox`
+
+```rust
+unsafe fn create_skybox_mesh(renderer: &mut VulkanRenderer) -> Result<MeshHandle>
+```
+
+```rust
+unsafe fn load_skybox_textures(renderer: &mut VulkanRenderer) -> Result<HashMap<String,SkyboxTextureHandle>>
+```
+
+```rust
+pub unsafe fn set_skybox(&mut self, texture: SkyboxTextureHandle) -> Result<()> {
+    let mesh = self
+        .skybox_mesh
+        .ok_or_else(|| anyhow!("Skybox mesh has not been created."))?;
+
+    self.renderer.set_skybox(mesh, texture)
+}
+```
+
+renderer
+```rust
+pub unsafe fn set_skybox(
+    &mut self,
+    mesh: MeshHandle,
+    texture: SkyboxTextureHandle,
+) -> Result<()> {
+    if mesh.vertex_layout != VertexLayout::Skybox {
+        return Err(anyhow!("Skybox mesh must use VertexLayout::Skybox."));
+    }
+
+    if self.data.skybox_textures.get(texture.0).is_none() {
+        return Err(anyhow!("Skybox texture index out of range: {}", texture.0));
+    }
+
+    self.data.skybox = Some(RenderSkybox {
+        mesh,
+        texture,
+        is_visible: true,
+    });
+    ...
+```

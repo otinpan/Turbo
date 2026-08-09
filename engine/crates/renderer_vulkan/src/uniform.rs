@@ -93,12 +93,38 @@ pub unsafe fn create_light_descriptor_set_layout(
     Ok(())
 }
 
+pub unsafe fn create_skybox_descriptor_set_layout(
+    device: &Device,
+    data: &mut VulkanData,
+) -> Result<()>{
+    let skybox_binding=vk::DescriptorSetLayoutBinding::builder()
+        .binding(0)
+        .descriptor_type(vk::DescriptorType::COMBINED_IMAGE_SAMPLER)
+        .descriptor_count(1)
+        .stage_flags(vk::ShaderStageFlags::FRAGMENT);
+
+    let bindings=&[skybox_binding];
+    let info=vk::DescriptorSetLayoutCreateInfo::builder().bindings(bindings);
+
+    data.skybox_descriptor_set_layout=device.create_descriptor_set_layout(&info,None)?;
+
+    Ok(())
+}
+
 
 // create pool to record descriptor_set
 pub unsafe fn create_descriptor_pool(device: &Device, data: &mut VulkanData) -> Result<()> {
     let uniform_descriptor_count = data.swapchain_images.len() * 2;
+    let skybox_descriptor_count = if data.skybox_textures.is_empty() {
+        0
+    } else {
+        data.swapchain_images.len()
+    };
     let max_sets =
-        data.swapchain_images.len() + data.textures.len() + data.swapchain_images.len();
+        data.swapchain_images.len()
+            + data.textures.len()
+            + data.swapchain_images.len()
+            + skybox_descriptor_count;
 
     let ubo_size = vk::DescriptorPoolSize::builder()
         .type_(vk::DescriptorType::UNIFORM_BUFFER)
@@ -106,7 +132,7 @@ pub unsafe fn create_descriptor_pool(device: &Device, data: &mut VulkanData) -> 
 
     let sampler_size = vk::DescriptorPoolSize::builder()
         .type_(vk::DescriptorType::COMBINED_IMAGE_SAMPLER)
-        .descriptor_count(data.textures.len() as u32);
+        .descriptor_count((data.textures.len() + skybox_descriptor_count) as u32);
 
     let pool_sizes = &[ubo_size, sampler_size];
     let info = vk::DescriptorPoolCreateInfo::builder()
@@ -212,6 +238,45 @@ pub unsafe fn create_light_descriptor_sets(device: &Device, data: &mut VulkanDat
 
     Ok(())
 }
+
+pub unsafe fn create_skybox_descriptor_sets(device: &Device, data: &mut VulkanData) -> Result<()>{
+    data.skybox_descriptor_sets.clear();
+
+    if data.skybox_textures.is_empty() {
+        return Ok(());
+    }
+
+    let layouts = vec![data.skybox_descriptor_set_layout;data.swapchain_images.len()];
+
+    let info = vk::DescriptorSetAllocateInfo::builder()
+        .descriptor_pool(data.descriptor_pool)
+        .set_layouts(&layouts);
+
+    data.skybox_descriptor_sets = device.allocate_descriptor_sets(&info)?;
+
+    for i in 0..data.swapchain_images.len(){
+        let skybox_texture_index = data.skybox.map(|skybox| skybox.texture.0).unwrap_or(0);
+        let skybox_texture = data.skybox_textures[skybox_texture_index];
+        let image_info = vk::DescriptorImageInfo::builder()
+            .image_layout(vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL)
+            .image_view(skybox_texture.image_view)
+            .sampler(data.texture_sampler);
+
+        let image_infos = &[image_info];
+
+        let sampler_write = vk::WriteDescriptorSet::builder()
+            .dst_set(data.skybox_descriptor_sets[i])
+            .dst_binding(0)
+            .descriptor_type(vk::DescriptorType::COMBINED_IMAGE_SAMPLER)
+            .image_info(image_infos);
+
+        device.update_descriptor_sets(&[sampler_write], &[] as &[vk::CopyDescriptorSet]);
+    }
+
+    Ok(())
+}
+
+
 
 pub unsafe fn create_uniform_buffers(
     instance: &Instance,
