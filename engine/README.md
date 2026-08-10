@@ -60,9 +60,14 @@
   - ShadowMap: 色を出さずに、depthだけを描画
   - 描画関数を使いやすく抽象化
 * ECS化
-  - WorldObjectをcomponent storageに移行
-  - Transform / MeshRenderer / CameraComponent
-  - RenderItem抽出をECS query化
+  - ComponentPoolの作成
+	- worldにComponentPoolを持たせ、WorldObjectを削除
+	- system作成
+		- app.rs: update_camera, prepare_renderer
+		- world.rs: update
+		- -> src/system/camera.rs, rotate.rs, rander.rs
+	- Registry作成
+		- has ComponentPools
 * オブジェクトAPI
   - spawn_model
   - spawn_cube

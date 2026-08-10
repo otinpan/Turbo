@@ -22,7 +22,7 @@ use crate::primitive::{
     update_primitive_mesh,
 };
 
-use super::CameraComponent;
+use super::Camera;
 use super::EntityId;
 use super::Input;
 use super::Material;
@@ -75,7 +75,7 @@ impl App {
                 ..Default::default()
             },
             None,
-            Some(CameraComponent {
+            Some(Camera {
                 target: vec3(0.0, 0.0, 0.0),
                 fov_y: 45.0,
                 near: 0.1,
@@ -459,7 +459,7 @@ impl App {
 
     fn process_input(&mut self) -> Result<()> {
         if self.input.key_pressed(KeyCode::ArrowLeft) {
-            let id = self.world.objects().last().map(|object| object.id);
+            let id = self.world.entities().last().copied();
 
             if let Some(id) = id {
                 self.world.despawn(id);
@@ -475,16 +475,16 @@ impl App {
                 viking_room_debug_line,
                 viking_room_lit3d,
             ];
-            let index =
-                self.world
-                    .objects()
-                    .iter()
-                    .filter(|object| {
-                        object.mesh_renderer.as_ref().is_some_and(|mesh_renderer| {
-                            viking_meshes.contains(&mesh_renderer.mesh)
-                        })
-                    })
-                    .count();
+            let index = self
+                .world
+                .entities()
+                .iter()
+                .filter(|entity| {
+                    self.world
+                        .mesh_renderer(**entity)
+                        .is_some_and(|mesh_renderer| viking_meshes.contains(&mesh_renderer.mesh))
+                })
+                .count();
 
             if self.positions.len() > index {
                 let variants = [
@@ -765,15 +765,11 @@ impl App {
         let mouse_sensitivity = 0.003;
         let max_pitch = std::f32::consts::FRAC_PI_2 - 0.01;
 
-        let Some(camera_id) = self.world.active_camera().map(|object| object.id) else {
+        let Some(camera_id) = self.world.active_camera_entity() else {
             return;
         };
 
-        let Some(camera_object) = self.world.get_mut(camera_id) else {
-            return;
-        };
-
-        let Some(camera) = camera_object.camera.as_mut() else {
+        let Some(camera) = self.world.camera_mut(camera_id) else {
             return;
         };
 
@@ -793,26 +789,33 @@ impl App {
         let left = vec3(-direction.y, direction.x, 0.0).normalize();
         let up = vec3(0.0, 0.0, 1.0);
 
+        let Some(transform) = self.world.transform_mut(camera_id) else {
+            return;
+        };
+
         if self.input.key_down(KeyCode::KeyW) {
-            camera_object.transform.position += direction * move_speed * delta;
+            transform.position += direction * move_speed * delta;
         }
         if self.input.key_down(KeyCode::KeyS) {
-            camera_object.transform.position -= direction * move_speed * delta;
+            transform.position -= direction * move_speed * delta;
         }
         if self.input.key_down(KeyCode::KeyA) {
-            camera_object.transform.position += left * move_speed * delta;
+            transform.position += left * move_speed * delta;
         }
         if self.input.key_down(KeyCode::KeyD) {
-            camera_object.transform.position -= left * move_speed * delta;
+            transform.position -= left * move_speed * delta;
         }
         if self.input.key_down(KeyCode::ArrowUp) {
-            camera_object.transform.position += up * move_speed * delta;
+            transform.position += up * move_speed * delta;
         }
         if self.input.key_down(KeyCode::ArrowDown) {
-            camera_object.transform.position -= up * move_speed * delta;
+            transform.position -= up * move_speed * delta;
         }
 
-        camera.target = camera_object.transform.position + direction;
+        let target = transform.position + direction;
+        if let Some(camera) = self.world.camera_mut(camera_id) {
+            camera.target = target;
+        }
     }
 
     pub unsafe fn destroy(&mut self) {
@@ -822,31 +825,35 @@ impl App {
     fn prepare_renderer(&mut self) {
         let render_items = self
             .world
-            .objects()
-            .iter()
-            .filter_map(|object| {
-                let mesh_renderer = object.mesh_renderer.as_ref()?;
+            .renderables()
+            .map(|renderable| {
+                let mesh_renderer = renderable.mesh_renderer;
 
-                Some(RenderItem {
+                RenderItem {
                     mesh_index: mesh_renderer.mesh,
-                    transform: object.transform.clone(),
+                    transform: renderable.transform.clone(),
                     alpha: mesh_renderer.material.alpha,
                     material_color: mesh_renderer.material.color,
                     use_texture: mesh_renderer.material.use_texture,
                     texture_index: mesh_renderer.material.texture,
                     pipeline_key: mesh_renderer.material.pipeline_key,
-                    is_visible: object.get_visible(),
-                })
+                    is_visible: renderable
+                        .visibility
+                        .is_none_or(|visibility| visibility.is_visible),
+                }
             })
             .collect();
 
         self.renderer.set_render_items(render_items);
 
         // send camera to vulkan
-        if let Some(camera_object) = self.world.active_camera() {
-            if let Some(camera) = camera_object.camera.as_ref() {
+        if let Some(camera_id) = self.world.active_camera_entity() {
+            if let (Some(camera), Some(transform)) = (
+                self.world.camera(camera_id),
+                self.world.transform(camera_id),
+            ) {
                 self.renderer.set_camera(RenderCamera {
-                    position: camera_object.transform.position,
+                    position: transform.position,
                     target: camera.target,
                     up: vec3(0.0, 0.0, 1.0),
                     fov_y: camera.fov_y,
@@ -1340,7 +1347,7 @@ mod tests {
             world.spawn(
                 Transform::default(),
                 None,
-                Some(CameraComponent {
+                Some(Camera {
                     target: vec3(0.0, 0.0, 0.0),
                     fov_y: 45.0,
                     near: 0.1,
@@ -1373,7 +1380,7 @@ mod tests {
             .unwrap(),
         ];
 
-        assert_eq!(world.objects().len(), ids.len());
-        assert!(ids.iter().all(|id| world.get(*id).is_some()));
+        assert_eq!(world.entity_count(), ids.len());
+        assert!(ids.iter().all(|id| world.contains(*id)));
     }
 }

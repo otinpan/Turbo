@@ -15,8 +15,8 @@ mod time;
 mod world;
 
 pub use app::App;
-pub use component::{CameraComponent, Material, MeshRenderer};
-pub use ecs::EntityId;
+pub use component::{Camera, CameraComponent, Material, MeshRenderer, Rotator, Visibility};
+pub use ecs::{ComponentPool, EntityId};
 pub use input::Input;
 pub use time::Time;
-pub use world::{World, WorldObject};
+pub use world::World;
