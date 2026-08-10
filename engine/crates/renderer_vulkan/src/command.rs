@@ -133,10 +133,12 @@ pub unsafe fn update_command_buffer(
     }
 
     let visible_indices = sorted_render_indices(&renderer.data);
-    secondary_command_buffers.extend(visible_indices
-        .into_iter()
-        .map(|i| update_secondary_command_buffer(renderer, image_index, i))
-        .collect::<Result<Vec<_>, _>>()?);
+    secondary_command_buffers.extend(
+        visible_indices
+            .into_iter()
+            .map(|i| update_secondary_command_buffer(renderer, image_index, i))
+            .collect::<Result<Vec<_>, _>>()?,
+    );
 
     if !secondary_command_buffers.is_empty() {
         renderer
@@ -424,10 +426,10 @@ unsafe fn update_secondary_command_buffer(
                 model_bytes,
             );
         }
-        PipelineKey::Transparent3D =>{
-            let global_set=renderer.data.global_descriptor_sets[image_index];
-            let material_set=renderer.data.material_descriptor_sets[object.texture_index.0];
-            let sets=[global_set,material_set];
+        PipelineKey::Transparent3D => {
+            let global_set = renderer.data.global_descriptor_sets[image_index];
+            let material_set = renderer.data.material_descriptor_sets[object.texture_index.0];
+            let sets = [global_set, material_set];
 
             renderer.device.cmd_bind_descriptor_sets(
                 command_buffer,
@@ -453,10 +455,10 @@ unsafe fn update_secondary_command_buffer(
                 material_bytes,
             );
         }
-        PipelineKey::Lit3D =>{
+        PipelineKey::Lit3D => {
             let global_set = renderer.data.global_descriptor_sets[image_index];
             let material_set = renderer.data.material_descriptor_sets[object.texture_index.0];
-            let light_set=renderer.data.light_descriptor_sets[image_index];
+            let light_set = renderer.data.light_descriptor_sets[image_index];
 
             let sets = [global_set, material_set, light_set];
 
@@ -484,9 +486,9 @@ unsafe fn update_secondary_command_buffer(
                 material_bytes,
             );
         }
-        PipelineKey::Ui2D =>{
-            let material_set=renderer.data.material_descriptor_sets[object.texture_index.0];
-            let sets=[material_set];
+        PipelineKey::Ui2D => {
+            let material_set = renderer.data.material_descriptor_sets[object.texture_index.0];
+            let sets = [material_set];
             let ui_transform = Ui2DTransformPushConstants {
                 transform: [
                     object.transform.position.y,

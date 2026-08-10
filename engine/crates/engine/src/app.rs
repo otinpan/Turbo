@@ -11,21 +11,19 @@ use winit::keyboard::KeyCode;
 use winit::window::Window;
 
 pub const DEFAULT_TEXTURE: TextureHandle = TextureHandle(0);
-pub const DEFAULT_SKYBOX_TEXTURE: SkyboxTextureHandle=SkyboxTextureHandle(0);
+pub const DEFAULT_SKYBOX_TEXTURE: SkyboxTextureHandle = SkyboxTextureHandle(0);
 
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveShape, PrimitiveType, 
-    build_primitive_source,
-    create_primitive_debug_line, create_primitive_mesh3d, create_primitive_lit3d, create_primitive_ui2d,
-    spawn_circle_with_material, spawn_cube_with_material, spawn_line_with_material, 
-    spawn_polygon_with_material, spawn_rectangle_with_material, 
-    spawn_sphere_with_material, spawn_triangle_with_material, 
-    update_primitive_mesh, spawn_primitive_from_mesh, 
+    PrimitiveMesh, PrimitiveShape, PrimitiveType, build_primitive_source,
+    create_primitive_debug_line, create_primitive_lit3d, create_primitive_mesh3d,
+    create_primitive_ui2d, spawn_circle_with_material, spawn_cube_with_material,
+    spawn_line_with_material, spawn_polygon_with_material, spawn_primitive_from_mesh,
+    spawn_rectangle_with_material, spawn_sphere_with_material, spawn_triangle_with_material,
+    update_primitive_mesh,
 };
 
-
-use super::EntityId;
 use super::CameraComponent;
+use super::EntityId;
 use super::Input;
 use super::Material;
 use super::MeshRenderer;
@@ -60,8 +58,8 @@ impl App {
         let models = load_models(&mut renderer)?;
         let primitive_meshes = create_primitive_meshes(&mut renderer)?;
         let textures = load_textures(&mut renderer)?;
-        let skybox_mesh = Some(create_skybox_mesh(&mut renderer,20.0)?);
-        let skybox_textures=load_skybox_textures(&mut renderer)?;
+        let skybox_mesh = Some(create_skybox_mesh(&mut renderer, 20.0)?);
+        let skybox_textures = load_skybox_textures(&mut renderer)?;
 
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
@@ -110,9 +108,17 @@ impl App {
             app.set_skybox(app.use_skybox_texture("ghost"))?;
             // create primitive ////////////////////////////
             unsafe {
-                let face_texture=app.textures.get("face").copied().unwrap_or(DEFAULT_TEXTURE);
-                let ghost_texture=app.textures.get("ghost").copied().unwrap_or(DEFAULT_TEXTURE);
-                let escapee_texture=app.textures.get("escapee").copied().unwrap_or(DEFAULT_TEXTURE);
+                let face_texture = app.textures.get("face").copied().unwrap_or(DEFAULT_TEXTURE);
+                let ghost_texture = app
+                    .textures
+                    .get("ghost")
+                    .copied()
+                    .unwrap_or(DEFAULT_TEXTURE);
+                let escapee_texture = app
+                    .textures
+                    .get("escapee")
+                    .copied()
+                    .unwrap_or(DEFAULT_TEXTURE);
                 let triangle_id0 = app.spawn_triangle_3d(
                     vec3(5.0, -0.2, -0.5),
                     vec3(5.0, 0.5, 0.2),
@@ -131,7 +137,7 @@ impl App {
                     None,
                     PipelineKey::Transparent3D,
                 )?;
-                let triangle_id2=app.spawn_triangle_3d(
+                let triangle_id2 = app.spawn_triangle_3d(
                     vec3(-10.0, -0.2, -0.5),
                     vec3(-10.0, 0.5, 0.2),
                     vec3(-10.0, 0.0, 0.5),
@@ -139,9 +145,8 @@ impl App {
                     0.5,
                     None,
                     PipelineKey::DebugLine3D,
-                    
                 )?;
-                let triangle_id3=app.spawn_triangle_3d(
+                let triangle_id3 = app.spawn_triangle_3d(
                     vec3(-5.0, -0.2, -0.5),
                     vec3(-5.0, 0.5, 0.2),
                     vec3(-5.0, 0.0, 0.5),
@@ -150,13 +155,13 @@ impl App {
                     Some(face_texture),
                     PipelineKey::Lit3D,
                 )?;
-                let triangle_ui2d=app.spawn_triangle_2d(
-                    vec2(-0.6,0.5),
-                    vec2(-0.7,0.7),
-                    vec2(-0.8,0.5),
-                    vec3(0.0,1.0,1.0),
+                let triangle_ui2d = app.spawn_triangle_2d(
+                    vec2(-0.6, 0.5),
+                    vec2(-0.7, 0.7),
+                    vec2(-0.8, 0.5),
+                    vec3(0.0, 1.0, 1.0),
                     0.4,
-                    Some(face_texture)
+                    Some(face_texture),
                 )?;
 
                 let rectangle_id0 = app.spawn_rectangle_3d(
@@ -355,7 +360,7 @@ impl App {
                         vec2(0.3, 0.2),
                         vec2(0.0, 1.0),
                         vec2(-0.1, 1.2),
-                    ], 
+                    ],
                     vec3(0.0,1.0,0.0),
                     1.0,
                     Some(face_texture),
@@ -470,17 +475,16 @@ impl App {
                 viking_room_debug_line,
                 viking_room_lit3d,
             ];
-            let index = self
-                .world
-                .objects()
-                .iter()
-                .filter(|object| {
-                    object
-                        .mesh_renderer
-                        .as_ref()
-                        .is_some_and(|mesh_renderer| viking_meshes.contains(&mesh_renderer.mesh))
-                })
-                .count();
+            let index =
+                self.world
+                    .objects()
+                    .iter()
+                    .filter(|object| {
+                        object.mesh_renderer.as_ref().is_some_and(|mesh_renderer| {
+                            viking_meshes.contains(&mesh_renderer.mesh)
+                        })
+                    })
+                    .count();
 
             if self.positions.len() > index {
                 let variants = [
@@ -499,8 +503,8 @@ impl App {
                         texture: viking_texture,
                         pipeline_key,
                     },
-                ){
-                    Ok(mesh_renderer) =>{
+                ) {
+                    Ok(mesh_renderer) => {
                         let id = self.world.spawn(
                             Transform {
                                 position: self.positions[index],
@@ -511,11 +515,10 @@ impl App {
                             vec3(20.0, 0.0, 0.0),
                         );
                     }
-                    Err(e) =>{
+                    Err(e) => {
                         log::error!("Failed to spawn triangle primitive: {e:?}");
                     }
                 };
-
             }
         }
 
@@ -545,7 +548,7 @@ impl App {
 
         if self.input.key_pressed(KeyCode::KeyR) {
             let position = self.mouse_position_on_spawn_plane();
-            let face_texture=self.use_texture("face");
+            let face_texture = self.use_texture("face");
             if let Some(mesh) = self.primitive_handle(PrimitiveType::Rectangle) {
                 if let Err(e) = spawn_primitive_from_mesh(
                     &mut self.world,
@@ -689,20 +692,20 @@ impl App {
                     )?;
                 }
             }
-            if let Some(mesh) = self.primitive_mesh(PrimitiveType::Rectangle){
-                unsafe{
+            if let Some(mesh) = self.primitive_mesh(PrimitiveType::Rectangle) {
+                unsafe {
                     update_primitive_mesh(
                         &mut self.renderer,
                         mesh,
-                        PrimitiveShape::Rectangle { 
-                            points:[
-                                vec3(0.0, -0.2,0.2),
-                                vec3(0.0, -0.2,-0.2),
-                                vec3(0.0, 0.2,-0.2),
-                                vec3(0.0,0.2,0.2)
-                            ], 
-        
-                            color: vec3(1.0,1.0,1.0)
+                        PrimitiveShape::Rectangle {
+                            points: [
+                                vec3(0.0, -0.2, 0.2),
+                                vec3(0.0, -0.2, -0.2),
+                                vec3(0.0, 0.2, -0.2),
+                                vec3(0.0, 0.2, 0.2),
+                            ],
+
+                            color: vec3(1.0, 1.0, 1.0),
                         },
                     )?;
                 }
@@ -748,10 +751,12 @@ impl App {
             .ok_or_else(|| anyhow!("Model not found: {name}"))
     }
 
-    fn use_skybox_texture(&self, name: &str) -> SkyboxTextureHandle{
-        self.skybox_textures.get(name).copied().unwrap_or(DEFAULT_SKYBOX_TEXTURE)
+    fn use_skybox_texture(&self, name: &str) -> SkyboxTextureHandle {
+        self.skybox_textures
+            .get(name)
+            .copied()
+            .unwrap_or(DEFAULT_SKYBOX_TEXTURE)
     }
-
 
     // TODO: later move to systems/camera.rs
     fn update_camera(&mut self) {
@@ -901,16 +906,16 @@ impl App {
         color: Vec3,
         alpha: f32,
         texture: Option<TextureHandle>,
-    ) -> Result<EntityId>{
+    ) -> Result<EntityId> {
         let material = Self::material(color, alpha, texture, PipelineKey::Ui2D);
         spawn_triangle_with_material(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
-            vec3(0.0,p0.x,p0.y),
-            vec3(0.0,p1.x,p1.y),
-            vec3(0.0,p2.x,p2.y),
-            material
+            vec3(0.0, p0.x, p0.y),
+            vec3(0.0, p1.x, p1.y),
+            vec3(0.0, p2.x, p2.y),
+            material,
         )
     }
 
@@ -928,14 +933,14 @@ impl App {
         let material = Self::material(color, alpha, texture, pipeline_key);
 
         spawn_rectangle_with_material(
-           &mut self.world,
-           &mut self.renderer,
-           &mut self.primitive_meshes,
-           pos,
-           width,
-           height,
-           rotation,
-           material,
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.primitive_meshes,
+            pos,
+            width,
+            height,
+            rotation,
+            material,
         )
     }
 
@@ -948,18 +953,18 @@ impl App {
         color: Vec3,
         alpha: f32,
         texture: Option<TextureHandle>,
-    ) -> Result<EntityId>{
+    ) -> Result<EntityId> {
         let material = Self::material(color, alpha, texture, PipelineKey::Ui2D);
 
         spawn_rectangle_with_material(
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
-            vec3(0.0,pos.x,pos.y),
+            vec3(0.0, pos.x, pos.y),
             width,
             height,
             vec3(rotation, 0.0, 0.0),
-            material
+            material,
         )
     }
 
@@ -1021,7 +1026,7 @@ impl App {
             &mut self.world,
             &mut self.renderer,
             &mut self.primitive_meshes,
-            vec3(0.0,pos.x,pos.y),
+            vec3(0.0, pos.x, pos.y),
             radius,
             segments,
             material,
@@ -1053,10 +1058,7 @@ impl App {
         texture: Option<TextureHandle>,
     ) -> Result<EntityId> {
         let material = Self::material(color, alpha, texture, PipelineKey::Ui2D);
-        let points = points
-            .into_iter()
-            .map(|p| vec3(0.0, p.x, p.y))
-            .collect();
+        let points = points.into_iter().map(|p| vec3(0.0, p.x, p.y)).collect();
 
         spawn_polygon_with_material(
             &mut self.world,
@@ -1076,7 +1078,7 @@ impl App {
         color: Vec3,
         alpha: f32,
         texture: Option<TextureHandle>,
-        pipeline_key: PipelineKey
+        pipeline_key: PipelineKey,
     ) -> Result<EntityId> {
         let material = Self::material(color, alpha, texture, pipeline_key);
         spawn_sphere_with_material(
@@ -1094,7 +1096,7 @@ impl App {
     pub unsafe fn spawn_line_3d(
         &mut self,
         pos0: Vec3,
-        pos1: Vec3, 
+        pos1: Vec3,
         color: Vec3,
         alpha: f32,
     ) -> Result<EntityId> {
@@ -1109,7 +1111,6 @@ impl App {
         )
     }
 
-
     pub unsafe fn spawn_line_2d(
         &mut self,
         pos0: Vec2,
@@ -1117,14 +1118,14 @@ impl App {
         color: Vec3,
         width: f32,
         alpha: f32,
-    ) -> Result<EntityId>{
+    ) -> Result<EntityId> {
         let material = Self::material(color, alpha, None, PipelineKey::Ui2D);
-        let from=vec3(0.0,pos0.x,pos0.y);
-        let to=vec3(0.0,pos1.x,pos1.y);
-        let center=(from+to)/2.0;
+        let from = vec3(0.0, pos0.x, pos0.y);
+        let to = vec3(0.0, pos1.x, pos1.y);
+        let center = (from + to) / 2.0;
         let delta = to - from;
         let length = (delta.y * delta.y + delta.z * delta.z).sqrt();
-        let rotation=vec3((-delta.y).atan2(delta.z).to_degrees(), 0.0, 0.0);
+        let rotation = vec3((-delta.y).atan2(delta.z).to_degrees(), 0.0, 0.0);
         spawn_rectangle_with_material(
             &mut self.world,
             &mut self.renderer,
@@ -1144,7 +1145,6 @@ impl App {
 
         self.renderer.set_skybox(mesh, texture)
     }
-
 }
 
 unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, MeshHandle>> {
@@ -1188,39 +1188,37 @@ unsafe fn load_textures(renderer: &mut VulkanRenderer) -> Result<HashMap<String,
     Ok(textures)
 }
 
-unsafe fn load_skybox_textures(renderer: &mut VulkanRenderer) -> Result<HashMap<String,SkyboxTextureHandle>>{
-    let mut textures=HashMap::new();
+unsafe fn load_skybox_textures(
+    renderer: &mut VulkanRenderer,
+) -> Result<HashMap<String, SkyboxTextureHandle>> {
+    let mut textures = HashMap::new();
     textures.insert(
         "escapee".to_string(),
-        renderer.load_skybox_texture(
-            [
-                "assets/textures/escapee.png",
-                "assets/textures/escapee.png",
-                "assets/textures/escapee.png",
-                "assets/textures/escapee.png",
-                "assets/textures/escapee.png",
-                "assets/textures/escapee.png",
-            ]
-        )?,
+        renderer.load_skybox_texture([
+            "assets/textures/escapee.png",
+            "assets/textures/escapee.png",
+            "assets/textures/escapee.png",
+            "assets/textures/escapee.png",
+            "assets/textures/escapee.png",
+            "assets/textures/escapee.png",
+        ])?,
     );
     textures.insert(
         "ghost".to_string(),
-        renderer.load_skybox_texture(
-            [
-                "assets/textures/ghost.png",
-                "assets/textures/ghost.png",
-                "assets/textures/ghost.png",
-                "assets/textures/ghost.png",
-                "assets/textures/ghost.png",
-                "assets/textures/ghost.png",
-            ]
-        )?,
+        renderer.load_skybox_texture([
+            "assets/textures/ghost.png",
+            "assets/textures/ghost.png",
+            "assets/textures/ghost.png",
+            "assets/textures/ghost.png",
+            "assets/textures/ghost.png",
+            "assets/textures/ghost.png",
+        ])?,
     );
 
     Ok(textures)
 }
 
-unsafe fn create_skybox_mesh(renderer: &mut VulkanRenderer,size: f32) -> Result<MeshHandle> {
+unsafe fn create_skybox_mesh(renderer: &mut VulkanRenderer, size: f32) -> Result<MeshHandle> {
     let h = size;
     let source = build_primitive_source(PrimitiveShape::Cube {
         points: [

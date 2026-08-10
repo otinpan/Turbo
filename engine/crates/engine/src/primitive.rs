@@ -123,27 +123,35 @@ pub unsafe fn create_primitive_debug_line(
 pub unsafe fn create_primitive_lit3d(
     renderer: &mut VulkanRenderer,
     shape: PrimitiveShape,
-) -> Result<PrimitiveMesh>{
-    let primitive_type=shape.primitive_type();
-    let source=build_primitive_source(shape);
-    let mesh_data=source.to_lit3d_data();
+) -> Result<PrimitiveMesh> {
+    let primitive_type = shape.primitive_type();
+    let source = build_primitive_source(shape);
+    let mesh_data = source.to_lit3d_data();
 
-    let handle=renderer.load_mesh_from_data(mesh_data,VertexLayout::Lit3D)?;
+    let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Lit3D)?;
 
-    Ok(PrimitiveMesh { handle, primitive_type, vertex_layout: VertexLayout::Lit3D })
+    Ok(PrimitiveMesh {
+        handle,
+        primitive_type,
+        vertex_layout: VertexLayout::Lit3D,
+    })
 }
 
 pub unsafe fn create_primitive_ui2d(
     renderer: &mut VulkanRenderer,
     shape: PrimitiveShape,
-) -> Result<PrimitiveMesh>{
-    let primitive_type=shape.primitive_type();
-    let source=build_primitive_source(shape);
-    let mesh_data=source.to_ui2d_data();
+) -> Result<PrimitiveMesh> {
+    let primitive_type = shape.primitive_type();
+    let source = build_primitive_source(shape);
+    let mesh_data = source.to_ui2d_data();
 
-    let handle=renderer.load_mesh_from_data(mesh_data,VertexLayout::Ui2D)?;
+    let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Ui2D)?;
 
-    Ok(PrimitiveMesh{handle, primitive_type,vertex_layout: VertexLayout::Ui2D})
+    Ok(PrimitiveMesh {
+        handle,
+        primitive_type,
+        vertex_layout: VertexLayout::Ui2D,
+    })
 }
 
 pub unsafe fn create_primitive_skybox(
@@ -163,7 +171,6 @@ pub unsafe fn create_primitive_skybox(
     })
 }
 
-
 pub unsafe fn create_primitive_with_layout(
     renderer: &mut VulkanRenderer,
     shape: PrimitiveShape,
@@ -172,8 +179,8 @@ pub unsafe fn create_primitive_with_layout(
     match vertex_layout {
         VertexLayout::Mesh3D => create_primitive_mesh3d(renderer, shape),
         VertexLayout::DebugLine3D => create_primitive_debug_line(renderer, shape),
-        VertexLayout::Lit3D => create_primitive_lit3d(renderer,shape),
-        VertexLayout::Ui2D => create_primitive_ui2d(renderer,shape),
+        VertexLayout::Lit3D => create_primitive_lit3d(renderer, shape),
+        VertexLayout::Ui2D => create_primitive_ui2d(renderer, shape),
         VertexLayout::Skybox => create_primitive_skybox(renderer, shape),
     }
 }
@@ -251,10 +258,30 @@ pub fn build_cube_source(points: [Vec3; 8], color: Vec3) -> SourceMesh {
         let base = vertices.len() as u32;
         let normal = face_normal(points[face[0]], points[face[1]], points[face[2]]);
 
-        vertices.push(SourceVertex::new(points[face[0]], color, vec2(0.0, 0.0), normal));
-        vertices.push(SourceVertex::new(points[face[1]], color, vec2(1.0, 0.0), normal));
-        vertices.push(SourceVertex::new(points[face[2]], color, vec2(1.0, 1.0), normal));
-        vertices.push(SourceVertex::new(points[face[3]], color, vec2(0.0, 1.0), normal));
+        vertices.push(SourceVertex::new(
+            points[face[0]],
+            color,
+            vec2(0.0, 0.0),
+            normal,
+        ));
+        vertices.push(SourceVertex::new(
+            points[face[1]],
+            color,
+            vec2(1.0, 0.0),
+            normal,
+        ));
+        vertices.push(SourceVertex::new(
+            points[face[2]],
+            color,
+            vec2(1.0, 1.0),
+            normal,
+        ));
+        vertices.push(SourceVertex::new(
+            points[face[3]],
+            color,
+            vec2(0.0, 1.0),
+            normal,
+        ));
 
         indices.extend_from_slice(&[base, base + 1, base + 2, base + 2, base + 3, base]);
     }
@@ -285,7 +312,12 @@ pub fn build_circle_source(radius: f32, segments: u32, color: Vec3) -> SourceMes
         let u = angle.cos() * 0.5 + 0.5;
         let v = angle.sin() * 0.5 + 0.5;
 
-        vertices.push(SourceVertex::new(vec3(0.0, y, z), color, vec2(u, v), normal));
+        vertices.push(SourceVertex::new(
+            vec3(0.0, y, z),
+            color,
+            vec2(u, v),
+            normal,
+        ));
     }
 
     for i in 0..segments {
@@ -562,16 +594,11 @@ unsafe fn spawn_shape_with_material(
     transform: Transform,
     material: Material,
 ) -> Result<EntityId> {
-    let vertex_layout=material.pipeline_key.required_vertex_layout();
+    let vertex_layout = material.pipeline_key.required_vertex_layout();
     let primitive_mesh = create_primitive_with_layout(renderer, shape, vertex_layout)?;
     meshes.push(primitive_mesh);
 
-    spawn_primitive_from_mesh(
-        world,
-        primitive_mesh.handle,
-        material,
-        transform,
-    )
+    spawn_primitive_from_mesh(world, primitive_mesh.handle, material, transform)
 }
 
 // create new object ////////////////////////////////////////
@@ -627,7 +654,6 @@ pub unsafe fn spawn_rectangle_with_material(
     };
     spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
 }
-
 
 pub unsafe fn spawn_cube_with_material(
     world: &mut World,
@@ -686,7 +712,6 @@ pub unsafe fn spawn_circle_with_material(
     spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
 }
 
-
 pub unsafe fn spawn_polygon_with_material(
     world: &mut World,
     renderer: &mut VulkanRenderer,
@@ -713,7 +738,6 @@ pub unsafe fn spawn_polygon_with_material(
 
     spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
 }
-
 
 pub unsafe fn spawn_sphere_with_material(
     world: &mut World,
@@ -759,14 +783,7 @@ pub unsafe fn spawn_line_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(
-        world,
-        renderer,
-        meshes,
-        shape,
-        transform,
-        material,
-    )
+    spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
 }
 
 // update mesh ///////////////////////////////////////////////////////////
@@ -797,21 +814,17 @@ pub unsafe fn update_primitive_mesh(
             source.to_debugline_data(),
             VertexLayout::DebugLine3D,
         ),
-        VertexLayout::Lit3D => renderer.update_mesh_from_data(
-            mesh.handle,
-            source.to_lit3d_data(),
-            VertexLayout::Lit3D,
-        ),
-        VertexLayout::Ui2D => renderer.update_mesh_from_data(
-            mesh.handle,
-            source.to_ui2d_data(),
-            VertexLayout::Ui2D,
-        ),
+        VertexLayout::Lit3D => {
+            renderer.update_mesh_from_data(mesh.handle, source.to_lit3d_data(), VertexLayout::Lit3D)
+        }
+        VertexLayout::Ui2D => {
+            renderer.update_mesh_from_data(mesh.handle, source.to_ui2d_data(), VertexLayout::Ui2D)
+        }
         VertexLayout::Skybox => renderer.update_mesh_from_data(
             mesh.handle,
             source.to_skybox_data(),
             VertexLayout::Skybox,
-        )
+        ),
     }
 }
 // test ///////////////////////////////////////////////////////////////////////
@@ -1072,7 +1085,5 @@ mod tests {
     }
 
     #[test]
-    fn check_face_nomal(){
-        
-    }
+    fn check_face_nomal() {}
 }

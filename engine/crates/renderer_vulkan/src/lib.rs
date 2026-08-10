@@ -34,34 +34,33 @@ use vulkanalia::vk::KhrSwapchainExtensionDeviceCommands;
 use vulkanalia::window as vk_window;
 use winit::window::Window;
 
-
 use self::buffer::{copy_buffer, create_buffer};
 use self::command::{create_command_buffers, create_command_pools, update_command_buffer};
 use self::device::{create_logical_device, pick_physical_device};
 use self::image::{
-    create_color_objects, create_depth_objects, create_texture, create_texture_sampler,
-    create_white_texture, create_skybox_texture, create_black_skybox_texture,
+    create_black_skybox_texture, create_color_objects, create_depth_objects, create_skybox_texture,
+    create_texture, create_texture_sampler, create_white_texture,
 };
 use self::instance::{VALIDATION_ENABLED, create_entry, create_instance};
 use self::mesh::create_mesh;
 use self::model::{MeshData, load_model_source};
 pub use self::model::{SourceMesh, SourceTopology};
 use self::pipeline::{
-    create_debug_line_pipeline, create_mesh3d_pipeline, create_render_pass,
-    create_transparent3d_pipeline, create_lit3d_pipeline, create_ui2d_pipeline,
-    create_skybox_pipeline,
+    create_debug_line_pipeline, create_lit3d_pipeline, create_mesh3d_pipeline, create_render_pass,
+    create_skybox_pipeline, create_transparent3d_pipeline, create_ui2d_pipeline,
 };
 use self::swapchain::{create_framebuffers, create_swapchain, create_swapchain_image_views};
 use self::sync::{create_render_finished_semaphores, create_sync_objects};
 use self::types::{Mesh, RenderSkybox, VulkanData};
-pub use self::types::{MeshHandle, PipelineKey, RenderCamera, RenderItem, SkyboxTextureHandle, TextureHandle};
+pub use self::types::{
+    MeshHandle, PipelineKey, RenderCamera, RenderItem, SkyboxTextureHandle, TextureHandle,
+};
 use self::uniform::{
     create_descriptor_pool, create_global_descriptor_set_layout, create_global_descriptor_sets,
-    create_material_descriptor_set_layout, create_material_descriptor_sets, 
-    create_light_descriptor_set_layout, create_light_descriptor_sets,
-    create_skybox_descriptor_set_layout, create_skybox_descriptor_sets,
-    create_uniform_buffers,update_uniform_buffer,
-    create_light_uniform_buffers, update_light_uniform_buffer,
+    create_light_descriptor_set_layout, create_light_descriptor_sets, create_light_uniform_buffers,
+    create_material_descriptor_set_layout, create_material_descriptor_sets,
+    create_skybox_descriptor_set_layout, create_skybox_descriptor_sets, create_uniform_buffers,
+    update_light_uniform_buffer, update_uniform_buffer,
 };
 pub use self::vertex::{DebugLineVertex, Mesh3DVertex, SourceVertex, VertexLayout};
 
@@ -109,7 +108,7 @@ impl VulkanRenderer {
         create_global_descriptor_sets(&device, &mut data)?;
         create_material_descriptor_sets(&device, &mut data)?;
         create_light_descriptor_sets(&device, &mut data)?;
-        create_skybox_descriptor_sets(&device,&mut data)?;
+        create_skybox_descriptor_sets(&device, &mut data)?;
         create_command_buffers(&device, &mut data)?;
         create_sync_objects(&device, &mut data)?;
         Ok(Self {
@@ -160,7 +159,7 @@ impl VulkanRenderer {
         // uniform buffer <-> descriptor set <-> pipeline layout <-> pipeline <-> shader
         update_command_buffer(self, image_index)?;
         update_uniform_buffer(self, image_index)?;
-        update_light_uniform_buffer(self,image_index)?;
+        update_light_uniform_buffer(self, image_index)?;
 
         // 6. wait image_available_semaphores
         let wait_semaphores = &[self.data.image_available_semaphores[self.frame]];
@@ -229,13 +228,12 @@ impl VulkanRenderer {
         self.load_mesh_from_data(mesh_data, VertexLayout::DebugLine3D)
     }
 
-    pub unsafe fn load_lit3d_from_model(&mut self, path: &str) -> Result<MeshHandle>{
-        let source=load_model_source(path)?;
-        let mesh_data=source.to_lit3d_data();
+    pub unsafe fn load_lit3d_from_model(&mut self, path: &str) -> Result<MeshHandle> {
+        let source = load_model_source(path)?;
+        let mesh_data = source.to_lit3d_data();
 
-        self.load_mesh_from_data(mesh_data,VertexLayout::Lit3D)
+        self.load_mesh_from_data(mesh_data, VertexLayout::Lit3D)
     }
-
 
     pub unsafe fn load_texture(&mut self, path: &str) -> Result<TextureHandle> {
         let texture = create_texture(&self.instance, &self.device, &mut self.data, path)?;
@@ -260,22 +258,15 @@ impl VulkanRenderer {
         Ok(TextureHandle(index))
     }
 
-    pub unsafe fn load_skybox_texture(
-        &mut self,
-        paths: [&str; 6],
-    ) -> Result<SkyboxTextureHandle> {
-        let texture = create_skybox_texture(
-            &self.instance,
-            &self.device,
-            &mut self.data,
-            paths,
-        )?;
+    pub unsafe fn load_skybox_texture(&mut self, paths: [&str; 6]) -> Result<SkyboxTextureHandle> {
+        let texture = create_skybox_texture(&self.instance, &self.device, &mut self.data, paths)?;
 
         let index = self.data.skybox_textures.len();
         self.data.skybox_textures.push(texture);
 
         if !self.data.descriptor_pool.is_null() && !self.data.uniform_buffers.is_empty() {
-            self.device.destroy_descriptor_pool(self.data.descriptor_pool, None);
+            self.device
+                .destroy_descriptor_pool(self.data.descriptor_pool, None);
 
             self.data.global_descriptor_sets.clear();
             self.data.material_descriptor_sets.clear();
@@ -502,7 +493,7 @@ impl VulkanRenderer {
         self.device
             .destroy_descriptor_set_layout(self.data.global_descriptor_set_layout, None);
         self.device
-            .destroy_descriptor_set_layout(self.data.skybox_descriptor_set_layout,None);
+            .destroy_descriptor_set_layout(self.data.skybox_descriptor_set_layout, None);
 
         self.data
             .in_flight_fences
@@ -592,9 +583,9 @@ unsafe fn create_pipelines(device: &Device, data: &mut VulkanData) -> Result<()>
     create_mesh3d_pipeline(device, data)?;
     create_debug_line_pipeline(device, data)?;
     create_transparent3d_pipeline(device, data)?;
-    create_lit3d_pipeline(device,data)?;
-    create_ui2d_pipeline(device,data)?;
-    create_skybox_pipeline(device,data)?;
+    create_lit3d_pipeline(device, data)?;
+    create_ui2d_pipeline(device, data)?;
+    create_skybox_pipeline(device, data)?;
 
     Ok(())
 }

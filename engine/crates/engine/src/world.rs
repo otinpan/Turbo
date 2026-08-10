@@ -3,9 +3,8 @@ use turbo_math::Transform;
 pub type Vec3 = cgmath::Vector3<f32>;
 
 use super::CameraComponent;
-use super::MeshRenderer;
 use super::EntityId;
-
+use super::MeshRenderer;
 
 // World Object ////////////////////////////////////
 #[derive(Clone, Debug)]
@@ -31,7 +30,7 @@ impl WorldObject {
 // World ///////////////////////////////////////////
 #[derive(Clone, Debug)]
 pub struct World {
-    next_entity_id: u64,
+    next_entity_id: usize,
     objects: Vec<WorldObject>,
 }
 

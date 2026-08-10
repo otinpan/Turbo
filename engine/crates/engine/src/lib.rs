@@ -14,10 +14,9 @@ mod primitive;
 mod time;
 mod world;
 
-
 pub use app::App;
 pub use component::{CameraComponent, Material, MeshRenderer};
+pub use ecs::EntityId;
 pub use input::Input;
 pub use time::Time;
 pub use world::{World, WorldObject};
-pub use ecs::{EntityId};

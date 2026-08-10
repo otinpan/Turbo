@@ -6,6 +6,8 @@
     clippy::unnecessary_wraps
 )]
 
+mod component_pool;
 mod entity;
 
-pub use entity::{EntityId};
+pub use component_pool::ComponentPool;
+pub use entity::EntityId;

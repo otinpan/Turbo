@@ -49,7 +49,7 @@ pub unsafe fn create_skybox_texture(
     device: &Device,
     data: &mut VulkanData,
     paths: [&str; 6],
-) -> Result<Texture>{
+) -> Result<Texture> {
     let mut pixels = Vec::new();
     let mut width = 0;
     let mut height = 0;
@@ -432,15 +432,7 @@ unsafe fn transition_image_layout(
     new_layout: vk::ImageLayout,
     mip_levels: u32,
 ) -> Result<()> {
-    transition_image_layout_layers(
-        device,
-        data,
-        image,
-        old_layout,
-        new_layout,
-        mip_levels,
-        1,
-    )
+    transition_image_layout_layers(device, data, image, old_layout, new_layout, mip_levels, 1)
 }
 
 unsafe fn transition_image_layout_layers(

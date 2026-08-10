@@ -5,8 +5,7 @@ use std::fs::File;
 use std::io::BufReader;
 
 use super::vertex::{
-    Ui2DVertex, DebugLineVertex, Mesh3DVertex, Lit3DVertex, 
-    SourceVertex, SkyboxVertex,
+    DebugLineVertex, Lit3DVertex, Mesh3DVertex, SkyboxVertex, SourceVertex, Ui2DVertex,
 };
 
 #[derive(Clone, Debug)]
@@ -42,24 +41,24 @@ impl SourceMesh {
         }
     }
 
-    pub fn to_lit3d_data(&self) -> MeshData<Lit3DVertex>{
-        MeshData { 
+    pub fn to_lit3d_data(&self) -> MeshData<Lit3DVertex> {
+        MeshData {
             vertices: self.vertices.iter().map(Lit3DVertex::from).collect(),
-            indices: self.indices.clone()
+            indices: self.indices.clone(),
         }
     }
 
-    pub fn to_ui2d_data(&self) -> MeshData<Ui2DVertex>{
-        MeshData{
+    pub fn to_ui2d_data(&self) -> MeshData<Ui2DVertex> {
+        MeshData {
             vertices: self.vertices.iter().map(Ui2DVertex::from).collect(),
-            indices: self.indices.clone()
+            indices: self.indices.clone(),
         }
     }
 
-    pub fn to_skybox_data(&self) -> MeshData<SkyboxVertex>{
-        MeshData { 
+    pub fn to_skybox_data(&self) -> MeshData<SkyboxVertex> {
+        MeshData {
             vertices: self.vertices.iter().map(SkyboxVertex::from).collect(),
-            indices: self.indices.clone()
+            indices: self.indices.clone(),
         }
     }
 }
@@ -83,7 +82,6 @@ pub struct MeshData<V> {
     pub vertices: Vec<V>,
     pub indices: Vec<u32>,
 }
-
 
 pub fn load_model_source(file_path: &str) -> Result<SourceMesh> {
     let mut reader = BufReader::new(File::open(file_path)?);

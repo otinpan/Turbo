@@ -1,6 +1,6 @@
 use anyhow::Result;
-use cgmath::{Deg, point3};
 use cgmath::InnerSpace;
+use cgmath::{Deg, point3};
 use std::mem::size_of;
 use std::ptr::copy_nonoverlapping as memcpy;
 use vulkanalia::prelude::v1_0::*;
@@ -11,8 +11,8 @@ use super::types::VulkanData;
 
 type Mat4 = cgmath::Matrix4<f32>;
 
-pub const MAX_POINT_LIGHTS: usize=8;
-pub const MAX_SPOT_LIGHTS: usize=8;
+pub const MAX_POINT_LIGHTS: usize = 8;
+pub const MAX_SPOT_LIGHTS: usize = 8;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -78,17 +78,17 @@ pub unsafe fn create_material_descriptor_set_layout(
 pub unsafe fn create_light_descriptor_set_layout(
     device: &Device,
     data: &mut VulkanData,
-) -> Result<()>{
-    let light_binding=vk::DescriptorSetLayoutBinding::builder()
+) -> Result<()> {
+    let light_binding = vk::DescriptorSetLayoutBinding::builder()
         .binding(0)
         .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
         .descriptor_count(1)
         .stage_flags(vk::ShaderStageFlags::FRAGMENT);
 
-    let bindings=&[light_binding];
-    let info=vk::DescriptorSetLayoutCreateInfo::builder().bindings(bindings);
+    let bindings = &[light_binding];
+    let info = vk::DescriptorSetLayoutCreateInfo::builder().bindings(bindings);
 
-    data.light_descriptor_set_layout=device.create_descriptor_set_layout(&info,None)?;
+    data.light_descriptor_set_layout = device.create_descriptor_set_layout(&info, None)?;
 
     Ok(())
 }
@@ -96,21 +96,20 @@ pub unsafe fn create_light_descriptor_set_layout(
 pub unsafe fn create_skybox_descriptor_set_layout(
     device: &Device,
     data: &mut VulkanData,
-) -> Result<()>{
-    let skybox_binding=vk::DescriptorSetLayoutBinding::builder()
+) -> Result<()> {
+    let skybox_binding = vk::DescriptorSetLayoutBinding::builder()
         .binding(0)
         .descriptor_type(vk::DescriptorType::COMBINED_IMAGE_SAMPLER)
         .descriptor_count(1)
         .stage_flags(vk::ShaderStageFlags::FRAGMENT);
 
-    let bindings=&[skybox_binding];
-    let info=vk::DescriptorSetLayoutCreateInfo::builder().bindings(bindings);
+    let bindings = &[skybox_binding];
+    let info = vk::DescriptorSetLayoutCreateInfo::builder().bindings(bindings);
 
-    data.skybox_descriptor_set_layout=device.create_descriptor_set_layout(&info,None)?;
+    data.skybox_descriptor_set_layout = device.create_descriptor_set_layout(&info, None)?;
 
     Ok(())
 }
-
 
 // create pool to record descriptor_set
 pub unsafe fn create_descriptor_pool(device: &Device, data: &mut VulkanData) -> Result<()> {
@@ -120,11 +119,10 @@ pub unsafe fn create_descriptor_pool(device: &Device, data: &mut VulkanData) -> 
     } else {
         data.swapchain_images.len()
     };
-    let max_sets =
-        data.swapchain_images.len()
-            + data.textures.len()
-            + data.swapchain_images.len()
-            + skybox_descriptor_count;
+    let max_sets = data.swapchain_images.len()
+        + data.textures.len()
+        + data.swapchain_images.len()
+        + skybox_descriptor_count;
 
     let ubo_size = vk::DescriptorPoolSize::builder()
         .type_(vk::DescriptorType::UNIFORM_BUFFER)
@@ -209,8 +207,7 @@ pub unsafe fn create_material_descriptor_sets(
     Ok(())
 }
 
-
-pub unsafe fn create_light_descriptor_sets(device: &Device, data: &mut VulkanData) -> Result<()>{
+pub unsafe fn create_light_descriptor_sets(device: &Device, data: &mut VulkanData) -> Result<()> {
     let layouts = vec![data.light_descriptor_set_layout; data.swapchain_images.len()];
 
     let info = vk::DescriptorSetAllocateInfo::builder()
@@ -239,14 +236,14 @@ pub unsafe fn create_light_descriptor_sets(device: &Device, data: &mut VulkanDat
     Ok(())
 }
 
-pub unsafe fn create_skybox_descriptor_sets(device: &Device, data: &mut VulkanData) -> Result<()>{
+pub unsafe fn create_skybox_descriptor_sets(device: &Device, data: &mut VulkanData) -> Result<()> {
     data.skybox_descriptor_sets.clear();
 
     if data.skybox_textures.is_empty() {
         return Ok(());
     }
 
-    let layouts = vec![data.skybox_descriptor_set_layout;data.swapchain_images.len()];
+    let layouts = vec![data.skybox_descriptor_set_layout; data.swapchain_images.len()];
 
     let info = vk::DescriptorSetAllocateInfo::builder()
         .descriptor_pool(data.descriptor_pool)
@@ -254,7 +251,7 @@ pub unsafe fn create_skybox_descriptor_sets(device: &Device, data: &mut VulkanDa
 
     data.skybox_descriptor_sets = device.allocate_descriptor_sets(&info)?;
 
-    for i in 0..data.swapchain_images.len(){
+    for i in 0..data.swapchain_images.len() {
         let skybox_texture_index = data.skybox.map(|skybox| skybox.texture.0).unwrap_or(0);
         let skybox_texture = data.skybox_textures[skybox_texture_index];
         let image_info = vk::DescriptorImageInfo::builder()
@@ -275,8 +272,6 @@ pub unsafe fn create_skybox_descriptor_sets(device: &Device, data: &mut VulkanDa
 
     Ok(())
 }
-
-
 
 pub unsafe fn create_uniform_buffers(
     instance: &Instance,
@@ -335,11 +330,7 @@ pub unsafe fn update_uniform_buffer(
             camera.far,
         );
 
-
-    let ubo = UniformBufferObject {
-        view,
-        proj,
-    };
+    let ubo = UniformBufferObject { view, proj };
 
     // map gpu memory
     let memory = renderer.device.map_memory(
@@ -359,17 +350,16 @@ pub unsafe fn update_uniform_buffer(
     Ok(())
 }
 
-
 pub unsafe fn create_light_uniform_buffers(
     instance: &Instance,
     device: &Device,
     data: &mut VulkanData,
-) -> Result<()>{
+) -> Result<()> {
     data.light_uniform_buffers.clear();
     data.light_uniform_buffers_memory.clear();
 
-    for _ in 0..data.swapchain_images.len(){
-        let (light_uniform_buffer, light_uniform_buffer_memory)=create_buffer(
+    for _ in 0..data.swapchain_images.len() {
+        let (light_uniform_buffer, light_uniform_buffer_memory) = create_buffer(
             instance,
             device,
             data,
@@ -379,7 +369,8 @@ pub unsafe fn create_light_uniform_buffers(
         )?;
 
         data.light_uniform_buffers.push(light_uniform_buffer);
-        data.light_uniform_buffers_memory.push(light_uniform_buffer_memory);
+        data.light_uniform_buffers_memory
+            .push(light_uniform_buffer_memory);
     }
 
     Ok(())
@@ -388,7 +379,7 @@ pub unsafe fn create_light_uniform_buffers(
 pub unsafe fn update_light_uniform_buffer(
     renderer: &mut VulkanRenderer,
     image_index: usize,
-) -> Result<()>{
+) -> Result<()> {
     let mut point_light_positions = [[0.0; 4]; MAX_POINT_LIGHTS];
     let mut point_light_colors = [[0.0; 4]; MAX_POINT_LIGHTS];
     let mut spot_light_positions = [[0.0; 4]; MAX_SPOT_LIGHTS];
@@ -405,8 +396,7 @@ pub unsafe fn update_light_uniform_buffer(
     point_light_positions[2] = [-5.0, -2.0, 1.5, 5.0];
     point_light_colors[2] = [1.0, 0.35, 0.45, 1.5];
 
-
-    let spot_light_pos=renderer.data.camera.position;
+    let spot_light_pos = renderer.data.camera.position;
     let forward = renderer.data.camera.target - renderer.data.camera.position;
     let spot_light_dir = if forward.magnitude2() > f32::EPSILON {
         forward.normalize()
@@ -414,19 +404,9 @@ pub unsafe fn update_light_uniform_buffer(
         cgmath::vec3(1.0, 0.0, 0.0)
     };
 
-    spot_light_positions[0]=[
-        spot_light_pos.x,
-        spot_light_pos.y,
-        spot_light_pos.z,
-        12.0,
-    ];
+    spot_light_positions[0] = [spot_light_pos.x, spot_light_pos.y, spot_light_pos.z, 12.0];
 
-    spot_light_directions[0]=[
-        spot_light_dir.x,
-        spot_light_dir.y,
-        spot_light_dir.z,
-        0.0,
-    ];
+    spot_light_directions[0] = [spot_light_dir.x, spot_light_dir.y, spot_light_dir.z, 0.0];
     spot_light_colors[0] = [1.0, 1.0, 0.85, 3.0];
     spot_light_cone_params[0] = [
         15.0_f32.to_radians().cos(), //inner
@@ -435,10 +415,10 @@ pub unsafe fn update_light_uniform_buffer(
         0.0,
     ];
 
-    let light=LightUniformBufferObject{
-        direction: [-0.8,-1.0,-1.0,0.0],
-        color: [0.5,0.5,0.5,1.0],
-        ambient: [0.10,0.10,0.10,1.0],
+    let light = LightUniformBufferObject {
+        direction: [-0.8, -1.0, -1.0, 0.0],
+        color: [0.5, 0.5, 0.5, 1.0],
+        ambient: [0.10, 0.10, 0.10, 1.0],
         light_params: [1.0, 3.0, 0.0, 0.0],
         point_light_positions,
         point_light_colors,
@@ -448,14 +428,14 @@ pub unsafe fn update_light_uniform_buffer(
         spot_light_cone_params,
     };
 
-    let memory=renderer.device.map_memory(
+    let memory = renderer.device.map_memory(
         renderer.data.light_uniform_buffers_memory[image_index],
         0,
         size_of::<LightUniformBufferObject>() as u64,
         vk::MemoryMapFlags::empty(),
     )?;
 
-    memcpy(&light,memory.cast(),1);
+    memcpy(&light, memory.cast(), 1);
 
     renderer
         .device

@@ -1,8 +1,8 @@
 use anyhow::Result;
-use vulkanalia::vk::ColorBlendEquationEXT;
 use std::hash::{Hash, Hasher};
 use std::ptr::copy_nonoverlapping as memcpy;
 use vulkanalia::prelude::v1_0::*;
+use vulkanalia::vk::ColorBlendEquationEXT;
 
 use std::mem::size_of;
 
@@ -146,7 +146,6 @@ impl DebugLineVertex {
     }
 }
 
-
 impl PartialEq for SourceVertex {
     fn eq(&self, other: &Self) -> bool {
         self.pos == other.pos
@@ -217,17 +216,17 @@ pub unsafe fn create_vertex_buffer<V>(
 }
 
 #[repr(C)]
-#[derive(Copy,Clone,Debug)]
-pub struct Lit3DVertex{
+#[derive(Copy, Clone, Debug)]
+pub struct Lit3DVertex {
     pub pos: Vec3,
     pub color: Vec3,
     pub tex_coord: Vec2,
     pub normal: Vec3,
 }
 
-impl From<&SourceVertex> for Lit3DVertex{
-    fn from(v: &SourceVertex) -> Self{
-        Self{
+impl From<&SourceVertex> for Lit3DVertex {
+    fn from(v: &SourceVertex) -> Self {
+        Self {
             pos: v.pos,
             color: v.color,
             tex_coord: v.tex_coord,
@@ -236,13 +235,17 @@ impl From<&SourceVertex> for Lit3DVertex{
     }
 }
 
-
-impl Lit3DVertex{
-    pub const fn new(pos: Vec3, color: Vec3, tex_coord: Vec2, normal: Vec3) -> Self{
-        Self { pos, color, tex_coord, normal }
+impl Lit3DVertex {
+    pub const fn new(pos: Vec3, color: Vec3, tex_coord: Vec2, normal: Vec3) -> Self {
+        Self {
+            pos,
+            color,
+            tex_coord,
+            normal,
+        }
     }
 
-    pub fn binding_description() -> vk::VertexInputBindingDescription{
+    pub fn binding_description() -> vk::VertexInputBindingDescription {
         vk::VertexInputBindingDescription::builder()
             .binding(0)
             .stride(size_of::<Lit3DVertex>() as u32)
@@ -250,64 +253,67 @@ impl Lit3DVertex{
             .build()
     }
 
-    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 4]{
-        let pos=vk::VertexInputAttributeDescription::builder()
+    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 4] {
+        let pos = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(0)
             .format(vk::Format::R32G32B32_SFLOAT)
             .offset(0)
             .build();
 
-        let color=vk::VertexInputAttributeDescription::builder()
+        let color = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(1)
             .format(vk::Format::R32G32B32_SFLOAT)
             .offset(size_of::<Vec3>() as u32)
             .build();
 
-        let tex_coord=vk::VertexInputAttributeDescription::builder()
+        let tex_coord = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(2)
             .format(vk::Format::R32G32_SFLOAT)
-            .offset((size_of::<Vec3>()+size_of::<Vec3>()) as u32)
+            .offset((size_of::<Vec3>() + size_of::<Vec3>()) as u32)
             .build();
 
-        let normal=vk::VertexInputAttributeDescription::builder()
+        let normal = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(3)
             .format(vk::Format::R32G32B32_SFLOAT)
-            .offset((size_of::<Vec3>()+size_of::<Vec3>()+size_of::<Vec2>()) as u32)
+            .offset((size_of::<Vec3>() + size_of::<Vec3>() + size_of::<Vec2>()) as u32)
             .build();
 
-        [pos,color,tex_coord,normal]
+        [pos, color, tex_coord, normal]
     }
 }
 
-
 #[repr(C)]
-#[derive(Copy,Clone,Debug)]
-pub struct Ui2DVertex{
+#[derive(Copy, Clone, Debug)]
+pub struct Ui2DVertex {
     pub pos: Vec2,
     pub color: Vec3,
     pub tex_coord: Vec2,
 }
 
-impl From<&SourceVertex> for Ui2DVertex{
-    fn from(v: &SourceVertex) -> Self{
-        Self { 
-            pos: cgmath::vec2(v.pos.y,v.pos.z),
+impl From<&SourceVertex> for Ui2DVertex {
+    fn from(v: &SourceVertex) -> Self {
+        Self {
+            pos: cgmath::vec2(v.pos.y, v.pos.z),
             color: v.color,
-            tex_coord: v.tex_coord
+            tex_coord: v.tex_coord,
         }
     }
 }
 
-impl Ui2DVertex{
-    pub const fn new(pos: Vec2,color: Vec3, tex_coord: Vec2) -> Self{
-        Self { pos, color, tex_coord }
+impl Ui2DVertex {
+    pub const fn new(pos: Vec2, color: Vec3, tex_coord: Vec2) -> Self {
+        Self {
+            pos,
+            color,
+            tex_coord,
+        }
     }
 
-    pub fn binding_description() -> vk::VertexInputBindingDescription{
+    pub fn binding_description() -> vk::VertexInputBindingDescription {
         vk::VertexInputBindingDescription::builder()
             .binding(0)
             .stride(size_of::<Ui2DVertex>() as u32)
@@ -315,54 +321,50 @@ impl Ui2DVertex{
             .build()
     }
 
-    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 3]{
-        let pos=vk::VertexInputAttributeDescription::builder()
+    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 3] {
+        let pos = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(0)
             .format(vk::Format::R32G32_SFLOAT)
             .offset(0)
             .build();
 
-        let color=vk::VertexInputAttributeDescription::builder()
+        let color = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(1)
             .format(vk::Format::R32G32B32_SFLOAT)
             .offset(size_of::<Vec2>() as u32)
             .build();
 
-        let tex_coord=vk::VertexInputAttributeDescription::builder()
+        let tex_coord = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(2)
             .format(vk::Format::R32G32_SFLOAT)
-            .offset((size_of::<Vec2>() +size_of::<Vec3>()) as u32)
+            .offset((size_of::<Vec2>() + size_of::<Vec3>()) as u32)
             .build();
 
-        [pos,color,tex_coord]
+        [pos, color, tex_coord]
     }
 }
 
-
 #[repr(C)]
-#[derive(Copy,Clone,Debug)]
-pub struct SkyboxVertex{
+#[derive(Copy, Clone, Debug)]
+pub struct SkyboxVertex {
     pub pos: Vec3,
 }
 
-impl From<&SourceVertex> for SkyboxVertex{
-    fn from(v: &SourceVertex) -> Self{
-        Self { 
-            pos: v.pos,
-        }
+impl From<&SourceVertex> for SkyboxVertex {
+    fn from(v: &SourceVertex) -> Self {
+        Self { pos: v.pos }
     }
 }
 
-
-impl SkyboxVertex{
-    pub const fn new(pos: Vec3) -> Self{
+impl SkyboxVertex {
+    pub const fn new(pos: Vec3) -> Self {
         Self { pos }
     }
 
-    pub fn binding_description() -> vk::VertexInputBindingDescription{
+    pub fn binding_description() -> vk::VertexInputBindingDescription {
         vk::VertexInputBindingDescription::builder()
             .binding(0)
             .stride(size_of::<SkyboxVertex>() as u32)
@@ -370,14 +372,13 @@ impl SkyboxVertex{
             .build()
     }
 
-    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 1]{
-        let pos=vk::VertexInputAttributeDescription::builder()
+    pub fn attribute_descriptions() -> [vk::VertexInputAttributeDescription; 1] {
+        let pos = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(0)
             .format(vk::Format::R32G32B32_SFLOAT)
             .offset(0)
             .build();
-
 
         [pos]
     }

@@ -9,8 +9,7 @@ use vulkanalia::prelude::v1_0::*;
 use super::image::get_depth_format;
 use super::types::{GraphicsPipeline, PipelineKey, VulkanData};
 use super::vertex::{
-    SkyboxVertex,Ui2DVertex, DebugLineVertex,
-    Lit3DVertex, Mesh3DVertex, VertexLayout
+    DebugLineVertex, Lit3DVertex, Mesh3DVertex, SkyboxVertex, Ui2DVertex, VertexLayout,
 };
 
 // A graphics pipeline describes how vertices and fragments
@@ -284,7 +283,7 @@ pub unsafe fn create_debug_line_pipeline(device: &Device, data: &mut VulkanData)
     Ok(())
 }
 
-pub unsafe fn create_transparent3d_pipeline(device: &Device, data: &mut VulkanData) -> Result<()>{
+pub unsafe fn create_transparent3d_pipeline(device: &Device, data: &mut VulkanData) -> Result<()> {
     // Stages
     let vert = include_bytes!("../../../shaders/compiled/transparent3d_vert.spv");
     let frag = include_bytes!("../../../shaders/compiled/transparent3d_frag.spv");
@@ -432,7 +431,7 @@ pub unsafe fn create_transparent3d_pipeline(device: &Device, data: &mut VulkanDa
     Ok(())
 }
 
-pub unsafe fn create_lit3d_pipeline(device: &Device, data: &mut VulkanData) ->Result<()>{
+pub unsafe fn create_lit3d_pipeline(device: &Device, data: &mut VulkanData) -> Result<()> {
     // Stages
     let vert = include_bytes!("../../../shaders/compiled/lit3d_vert.spv");
     let frag = include_bytes!("../../../shaders/compiled/lit3d_frag.spv");
@@ -581,8 +580,7 @@ pub unsafe fn create_lit3d_pipeline(device: &Device, data: &mut VulkanData) ->Re
     Ok(())
 }
 
-
-pub unsafe fn create_ui2d_pipeline(device: &Device, data: &mut VulkanData) -> Result<()>{
+pub unsafe fn create_ui2d_pipeline(device: &Device, data: &mut VulkanData) -> Result<()> {
     // Stages
     let vert = include_bytes!("../../../shaders/compiled/ui2d_vert.spv");
     let frag = include_bytes!("../../../shaders/compiled/ui2d_frag.spv");
@@ -729,7 +727,7 @@ pub unsafe fn create_ui2d_pipeline(device: &Device, data: &mut VulkanData) -> Re
     Ok(())
 }
 
-pub unsafe fn create_skybox_pipeline(device: &Device, data: &mut VulkanData) -> Result<()>{
+pub unsafe fn create_skybox_pipeline(device: &Device, data: &mut VulkanData) -> Result<()> {
     // Stages
     let vert = include_bytes!("../../../shaders/compiled/skybox_vert.spv");
     let frag = include_bytes!("../../../shaders/compiled/skybox_frag.spv");
@@ -821,14 +819,12 @@ pub unsafe fn create_skybox_pipeline(device: &Device, data: &mut VulkanData) -> 
         .attachments(attachments)
         .blend_constants([0.0, 0.0, 0.0, 0.0]);
 
-
     // Layout
     let set_layouts = &[
         data.global_descriptor_set_layout,
         data.skybox_descriptor_set_layout,
     ];
-    let layout_info = vk::PipelineLayoutCreateInfo::builder()
-        .set_layouts(set_layouts);
+    let layout_info = vk::PipelineLayoutCreateInfo::builder().set_layouts(set_layouts);
     let pipeline_layout = device.create_pipeline_layout(&layout_info, None)?;
 
     // Create
@@ -874,9 +870,6 @@ unsafe fn create_shader_module(device: &Device, bytecode: &[u8]) -> Result<vk::S
         .code_size(bytecode.code_size());
     Ok(device.create_shader_module(&info, None)?)
 }
-
-
-
 
 // A render pass describes the rendering operations and the attachments that will be used
 pub unsafe fn create_render_pass(

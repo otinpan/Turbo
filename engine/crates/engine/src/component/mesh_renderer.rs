@@ -2,7 +2,6 @@ use super::Material;
 use anyhow::{Result, bail};
 use renderer_vulkan::MeshHandle;
 
-
 #[derive(Clone, Debug)]
 pub struct MeshRenderer {
     pub mesh: MeshHandle,
