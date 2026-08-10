@@ -23,8 +23,8 @@ use crate::primitive::{
     update_primitive_mesh, spawn_primitive_from_mesh, 
 };
 
-use crate::world::EntityId;
 
+use super::EntityId;
 use super::CameraComponent;
 use super::Input;
 use super::Material;

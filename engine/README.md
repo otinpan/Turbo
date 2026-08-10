@@ -56,9 +56,40 @@
       - ~~PointLightの追加 (位置)~~
       - ~~SpotLightの追加 (位置+方向)~~
   - ~~Ui2D: 2DのUIや画像を画面に貼り付ける~~
-  - Skybox: 空や背景描画
+  - ~~Skybox: 空や背景描画~~
   - ShadowMap: 色を出さずに、depthだけを描画
   - 描画関数を使いやすく抽象化
+* ECS化
+  - WorldObjectをcomponent storageに移行
+  - Transform / MeshRenderer / CameraComponent
+  - RenderItem抽出をECS query化
+* オブジェクトAPI
+  - spawn_model
+  - spawn_cube
+  - despawn
+  - get/set transform
+  - tag/name検索
+* シーン管理
+  - Scene trait
+  - current_scene
+  - change_scene
+  - sceneごとの初期化/update
+* 当たり判定
+  - BoxCollider
+  - SphereCollider
+  - intersects
+  - query_collisions
+
+* 簡易物理
+  - Velocity
+  - Gravity
+  - KinematicBody
+  - move_and_slide / move_and_collide
+
+* フォント/UI
+  - draw_text
+  - debug text
+  - simple HUD
 
 
 create_primitivesでcreate_primitive_debug_lineでprimitiveを作った後に、spawnでmesh3dのことをするとクラッシュする
@@ -92,6 +123,214 @@ error
 log::debug!("camera = {:?}, camera");
 ```
 はreleaseではコンパイルされない
+
+## ECS
+```cpp
+// エントリポイント
+int main() {
+	// ECSのレジストリを作成
+	Registry registry;
+
+	// 新しいエンティティを作成し、位置と速度のコンポーネントを追加
+	Entity player = registry.create();
+	registry.addComponent(player, Position{ 0, 0 });
+	registry.addComponent(player, Velocity{ 1, 0.5f });
+
+	// 位置と速度を持つエンティティの位置を更新
+	MovementSystem(registry);
+
+	// 更新後の位置を表示
+	auto& pos = registry.getComponent<Position>(player);
+	std::cout << pos.x << ", " << pos.y << "\n";
+}
+```
+### Registry
+`Registry`は`Entity`と`Component`を登録・登録  
+しかしこのままだと、`addComponent`するたびにメモリを確保し、`forEach`ではIdの全てを走査する。これは効率が悪い。そのため、`SparseSet`という各コンポーネントが登録されているIdと`component`のindexとの対応表を持つようにする。
+```cpp
+//-------------------------------------------------------------------------
+//! @class  Registry
+//! @brief  ECS のレジストリクラス。エンティティの管理とコンポーネントの格納を行う。
+//-------------------------------------------------------------------------
+class Registry {
+public:
+	//-------------------------------------------------------------------------
+	//! @brief 新しいエンティティを作成する。エンティティIDは単純にインクリメントされる。
+	//-------------------------------------------------------------------------
+	Entity create() {
+		return nextEntityId++;
+	}
+
+	//-------------------------------------------------------------------------
+	//! @brief  エンティティにコンポーネントを追加する。必要に応じてストレージを拡張する。
+	//! @tparam T 追加するコンポーネントの型
+	//! @param  e 対象のエンティティID
+	//! @param  component 追加するコンポーネントのインスタンス
+	//-------------------------------------------------------------------------
+	template<typename T>
+	void addComponent(Entity e, T component) {
+		// コンポーネントストレージを取得または作成
+		std::vector<std::optional<T>>& storage = getOrCreateStorage<T>();
+		// エンティティIDに対応する位置にコンポーネントを配置。必要ならストレージを拡張。
+		if (e >= storage.size()) {
+			// ストレージをエンティティIDに合わせて拡張
+			storage.resize(e + 1);
+		}
+		// コンポーネントを配置
+		storage[e] = component;
+	}
+
+	//-------------------------------------------------------------------------
+	//! @brief	エンティティが特定のコンポーネントを持っているか確認する。
+	//! @tparam T 確認するコンポーネントの型
+	//! @param	e [in] 対象のエンティティID
+	//! @return エンティティがコンポーネントを持っていれば true、そうでなければ false
+	//-------------------------------------------------------------------------
+	template<typename T>
+	bool hasComponent(Entity e) const {
+		// コンポーネントストレージを取得
+		std::vector<std::optional<T>>* storage = tryGetStorage<T>();
+		// ストレージが存在し、エンティティIDが範囲内で、かつその位置にコンポーネントが存在するか確認
+		return storage && e < storage->size() && (*storage)[e].has_value();
+	}
+
+	//-------------------------------------------------------------------------
+	//! @brief	エンティティの特定のコンポーネントを取得する。存在しない場合は例外を投げる。
+	//! @tparam T 取得するコンポーネントの型
+	//! @param	e [in] 対象のエンティティID
+	//! @return エンティティが持つコンポーネントの参照
+	//-------------------------------------------------------------------------
+	template<typename T>
+	T& getComponent(Entity e) {
+		// コンポーネントストレージを取得
+		std::vector<std::optional<T>>& storage = getOrCreateStorage<T>();
+		// エンティティIDが範囲内で、かつその位置にコンポーネントが存在するか確認
+		return *storage[e];
+	}
+
+	//-------------------------------------------------------------------------
+	//! @brief	エンティティの特定のコンポーネントを取得する。存在しない場合は例外を投げる。
+	//! @tparam	T 取得するコンポーネントの型
+	//! @return エンティティが持つコンポーネントの参照
+	//-------------------------------------------------------------------------
+	template<typename T>
+	std::vector<std::optional<T>>* tryGetStorage() {
+		// コンポーネントストレージを型で検索
+		auto it = components.find(typeid(T));
+		// ストレージが存在しない場合は nullptr を返す
+		if (it == components.end()) return nullptr;
+		// ストレージが存在する場合は型をキャストして返す
+		return &std::any_cast<std::vector<std::optional<T>>&>(it->second);
+	}
+
+	//-------------------------------------------------------------------------
+	//! @brief	エンティティの特定のコンポーネントを取得する。存在しない場合は例外を投げる。
+	//! @tparam T 取得するコンポーネントの型
+	//! @return エンティティが持つコンポーネントの参照
+	//-------------------------------------------------------------------------
+	template<typename T>
+	const std::vector<std::optional<T>>* tryGetStorage() const {
+		// コンポーネントストレージを型で検索
+		auto it = components.find(typeid(T));
+		// ストレージが存在しない場合は nullptr を返す
+		if (it == components.end()) return nullptr;
+		// ストレージが存在する場合は型をキャストして返す
+		return &std::any_cast<const std::vector<std::optional<T>>&>(it->second);
+	}
+
+	//-------------------------------------------------------------------------
+	//! @brief	エンティティの特定のコンポーネントストレージを取得する。存在しない場合は新たに作成する。
+	//! @tparam T 取得または作成するコンポーネントの型
+	//! @return エンティティが持つコンポーネントの参照
+	//-------------------------------------------------------------------------
+	template<typename T>
+	std::vector<std::optional<T>>& getOrCreateStorage() {
+		// コンポーネントストレージを取得
+		std::vector<std::optional<T>>* ptr = tryGetStorage<T>();
+		// ストレージが存在しない場合は新たに作成してマップに追加
+		if (!ptr) {
+			// 新しいストレージを作成してマップに追加
+			components[typeid(T)] = std::vector<std::optional<T>>();
+			// 作成したストレージを再度取得
+			ptr = tryGetStorage<T>();
+		}
+		// ストレージを返す
+		return *ptr;
+	}
+
+	//-------------------------------------------------------------------------
+	//! @brief  指定したコンポーネントをすべて持つエンティティに対して処理を行う
+	//! @tparam Components 対象となるコンポーネント型
+	//! @tparam Func       実行する関数（ラムダ）
+	//-------------------------------------------------------------------------
+	template<typename... Components, typename Func>
+	void forEach(Func&& func) {
+		// 1. 各コンポーネントのストレージをまとめて取得
+		auto storages = std::tuple{ tryGetStorage<Components>()... };
+
+		// 2. どれか一つでもストレージが存在しなければ終了
+		bool allStoragesExist = std::apply([](auto... ptrs) {
+			return ((ptrs != nullptr) && ...);
+			}, storages);
+		if (!allStoragesExist) return;
+
+		// 3. 最小サイズを求める
+		size_t count = std::apply([](auto... ptrs) {
+			return std::min({ ptrs->size()... });
+			}, storages);
+
+		// 4. 各エンティティを走査
+		for (size_t e = 0; e < count; ++e) {
+
+			// 4-1. 全コンポーネントが存在するかチェック
+			bool allExist = std::apply([&](auto... ptrs) {
+				return (((*ptrs)[e].has_value()) && ...);
+				}, storages);
+			if (!allExist) continue;
+
+			// 4-2. 参照を取り出して関数に渡す
+			std::apply([&](auto... ptrs) {
+				func((*(*ptrs)[e])...);
+				}, storages);
+		}
+	}
+
+
+private:
+	Entity nextEntityId = 0;									// 次に割り当てるエンティティID
+	std::unordered_map<std::type_index, std::any> components;	// コンポーネントストレージを型ごとに管理するマップ	
+};
+```
+
+### Entity
+ただのID
+```cpp
+Entity player = registry.create();
+registry.addComponent(player, Position{ 0, 0 });
+registry.addComponent(player, Velocity{ 1, 0.5f });
+```
+
+### Component
+Entityに性質や状態を与えるためのデータのかたまり
+
+### System
+Componentの振る舞い
+```cpp
+//-------------------------------------------------------------------------
+//! @brief 位置と速度を持つエンティティの位置を更新するシステム
+//! @param registry ECSのレジストリ
+//! @note  位置と速度の両方を持つエンティティのみが対象となる
+//-------------------------------------------------------------------------
+void MovementSystem(Registry& registry) {
+	// 位置と速度を持つエンティティに対して、位置を速度分だけ更新する処理を行う
+	registry.forEach<Position, Velocity>([](Position& p, Velocity& v) {
+		p.x += v.vx;	// 位置を速度分だけ更新
+		p.y += v.vy;	// 位置を速度分だけ更新
+		});
+}
+```
+
+
 
 ## コアシステム
 * ~~アサーション~~

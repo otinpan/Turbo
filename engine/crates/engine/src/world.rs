@@ -4,15 +4,8 @@ pub type Vec3 = cgmath::Vector3<f32>;
 
 use super::CameraComponent;
 use super::MeshRenderer;
+use super::EntityId;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct EntityId(u64);
-
-impl EntityId {
-    pub const fn value(self) -> u64 {
-        self.0
-    }
-}
 
 // World Object ////////////////////////////////////
 #[derive(Clone, Debug)]
