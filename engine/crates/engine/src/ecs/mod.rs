@@ -8,6 +8,8 @@
 
 mod component_pool;
 mod entity;
+mod registry;
 
 pub use component_pool::ComponentPool;
 pub use entity::EntityId;
+pub use registry::Registry;

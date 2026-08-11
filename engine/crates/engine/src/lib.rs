@@ -17,7 +17,7 @@ mod system;
 
 pub use app::App;
 pub use component::{Camera, CameraComponent, Material, MeshRenderer, Rotator, Visibility};
-pub use ecs::{ComponentPool, EntityId};
+pub use ecs::{ComponentPool, EntityId, Registry};
 pub use input::Input;
 pub use time::Time;
 pub use world::World;

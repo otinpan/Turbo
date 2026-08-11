@@ -1,7 +1,7 @@
 use anyhow::{Result, anyhow};
 use cgmath::{vec2, vec3};
 use renderer_vulkan::{
-    MeshHandle, PipelineKey, RenderCamera, RenderItem, SkyboxTextureHandle, TextureHandle,
+    MeshHandle, PipelineKey, SkyboxTextureHandle, TextureHandle,
     VertexLayout, VulkanRenderer,
 };
 use std::collections::HashMap;
@@ -432,7 +432,7 @@ impl App {
                 )?;
             }
         }
-        app.render_system.update(&mut app.world,&mut app.renderer)?;
+        app.render_system.update(&mut app.world.registry,&mut app.renderer)?;
 
         Ok(app)
     }
@@ -457,18 +457,18 @@ impl App {
 
     fn update_system(&mut self) -> Result<()> {
         let delta_time = self.time.delta_seconds();
-        self.rotator_system.update(&mut self.world, delta_time)?;
+        self.rotator_system.update(&mut self.world.registry, delta_time)?;
         self.camera_system
-            .update(&mut self.world, &self.input, delta_time)?;
+            .update(&mut self.world.registry, &self.input, delta_time)?;
         self.render_system
-            .update(&mut self.world, &mut self.renderer)?;
+            .update(&mut self.world.registry, &mut self.renderer)?;
 
         Ok(())
     }
 
     fn process_input(&mut self) -> Result<()> {
         if self.input.key_pressed(KeyCode::ArrowLeft) {
-            let id = self.world.entities().last().copied();
+            let id = self.world.registry.entities().last().copied();
 
             if let Some(id) = id {
                 self.world.despawn(id);
@@ -486,10 +486,12 @@ impl App {
             ];
             let index = self
                 .world
+                .registry
                 .entities()
                 .iter()
                 .filter(|entity| {
                     self.world
+                        .registry
                         .mesh_renderer(**entity)
                         .is_some_and(|mesh_renderer| viking_meshes.contains(&mesh_renderer.mesh))
                 })
@@ -1288,7 +1290,7 @@ mod tests {
             .unwrap(),
         ];
 
-        assert_eq!(world.entity_count(), ids.len());
-        assert!(ids.iter().all(|id| world.contains(*id)));
+        assert_eq!(world.registry.entity_count(), ids.len());
+        assert!(ids.iter().all(|id| world.registry.contains(*id)));
     }
 }

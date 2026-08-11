@@ -1,13 +1,13 @@
 use anyhow::{Result};
 use cgmath::{vec3};
-use crate::{World};
+use crate::{Registry};
 use renderer_vulkan::{RenderItem,RenderCamera,VulkanRenderer};
 
 pub struct RenderSystem;
 
 impl RenderSystem{
-    pub fn update(&mut self, world: &mut World, renderer: &mut VulkanRenderer) -> Result<()>{
-        let render_items: Vec<RenderItem>=world
+    pub fn update(&mut self, registry: &mut Registry, renderer: &mut VulkanRenderer) -> Result<()>{
+        let render_items: Vec<RenderItem>=registry
             .renderables()
             .map(|renderable|{
                 let mesh_renderer=renderable.mesh_renderer;
@@ -28,10 +28,10 @@ impl RenderSystem{
 
         renderer.set_render_items(render_items);
 
-        if let Some(camera_entity)=world.active_camera_entity(){
+        if let Some(camera_entity)=registry.active_camera_entity(){
             if let (Some(camera),Some(transform))=(
-                world.camera(camera_entity),
-                world.transform(camera_entity),
+                registry.camera(camera_entity),
+                registry.transform(camera_entity),
             ){
                 renderer.set_camera(
                     RenderCamera{

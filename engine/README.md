@@ -60,13 +60,13 @@
   - ShadowMap: 色を出さずに、depthだけを描画
   - 描画関数を使いやすく抽象化
 * ECS化
-  - ComponentPoolの作成
-	- worldにComponentPoolを持たせ、WorldObjectを削除
-	- system作成
+  - ~~ComponentPoolの作成~~
+	- ~~worldにComponentPoolを持たせ、WorldObjectを削除~~
+	- ~~system作成~~
 		- app.rs: update_camera, prepare_renderer
 		- world.rs: update
 		- -> src/system/camera.rs, rotate.rs, rander.rs
-	- Registry作成
+	- ~~Registry作成~~
 		- has ComponentPools
 ```rust
 for (Entity entity : world.View<Position, Velocity>())
@@ -84,6 +84,10 @@ for (Entity entity : world.View<Position, Velocity>())
   - despawn
   - get/set transform
   - tag/name検索
+* MeshAsset管理
+	- 現状はEntityがdespawnされてもloadされたmeshは残り続ける
+	- Entityごとにmeshを持たせる場合はメモリリークになる
+	- 参照カウンタ的なものでdespawn時に自動的にdestroyする
 * シーン管理
   - Scene trait
   - current_scene
