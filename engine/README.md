@@ -68,6 +68,16 @@
 		- -> src/system/camera.rs, rotate.rs, rander.rs
 	- Registry作成
 		- has ComponentPools
+```rust
+for (Entity entity : world.View<Position, Velocity>())
+{
+    auto& position = world.Get<Position>(entity);
+    auto& velocity = world.Get<Velocity>(entity);
+
+    position.x += velocity.x * dt;
+    position.y += velocity.y * dt;
+}
+```
 * オブジェクトAPI
   - spawn_model
   - spawn_cube

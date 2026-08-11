@@ -1,8 +1,10 @@
-use anyhow::Result;
 use cgmath::vec3;
 use turbo_math::Transform;
 
-use super::{Camera, ComponentPool, EntityId, Material, MeshRenderer, Rotator, Visibility};
+use super::{
+    Camera, ComponentPool, EntityId, Material, 
+    MeshRenderer, Rotator, Visibility,
+};
 
 pub type Vec3 = cgmath::Vector3<f32>;
 
@@ -27,12 +29,14 @@ pub struct World {
     next_entity_id: usize,
     entities: Vec<EntityId>,
 
+    // component
     transform: ComponentPool<Transform>,
     camera: ComponentPool<Camera>,
     material: ComponentPool<Material>,
     mesh_renderer: ComponentPool<MeshRenderer>,
     rotator: ComponentPool<Rotator>,
     visibility: ComponentPool<Visibility>,
+
 }
 
 impl World {
@@ -185,15 +189,6 @@ impl World {
         self.camera.iter().next().map(|(entity, _)| entity)
     }
 
-    pub fn update(&mut self, delta_time: f32) -> Result<()> {
-        for (entity, rotator) in self.rotator.iter() {
-            if let Some(transform) = self.transform.get_mut(entity) {
-                transform.rotate(rotator.speed * delta_time);
-            }
-        }
-
-        Ok(())
-    }
 }
 
 impl Default for World {
@@ -399,24 +394,4 @@ mod tests {
         assert_eq!(renderables[0].entity, renderable);
     }
 
-    #[test]
-    fn update_rotates_entities_with_rotator() {
-        let mut world = World::default();
-        let entity = world.spawn(
-            Transform::default(),
-            Some(MeshRenderer {
-                mesh: mesh_handle(0),
-                material: Material::default(),
-            }),
-            None,
-            vec3(40.0, 0.0, 0.0),
-        );
-
-        world.update(0.5).unwrap();
-
-        assert_eq!(
-            world.transform(entity).unwrap().rotation,
-            vec3(20.0, 0.0, 0.0)
-        );
-    }
 }

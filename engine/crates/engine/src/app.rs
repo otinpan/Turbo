@@ -22,13 +22,9 @@ use crate::primitive::{
     update_primitive_mesh,
 };
 
-use super::Camera;
-use super::EntityId;
-use super::Input;
-use super::Material;
-use super::MeshRenderer;
-use super::Time;
-use super::World;
+use super::{
+    Camera, CameraSystem, EntityId, Input, Material, MeshRenderer, RotatorSystem, Time, World,
+};
 
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Vec2 = cgmath::Vector2<f32>;
@@ -47,6 +43,10 @@ pub struct App {
     skybox_textures: HashMap<String, SkyboxTextureHandle>,
 
     positions: Vec<Vec3>,
+
+    // system
+    pub rotator_system: RotatorSystem,
+    pub camera_system: CameraSystem,
 }
 
 impl App {
@@ -101,6 +101,8 @@ impl App {
             skybox_mesh,
             skybox_textures,
             positions,
+            rotator_system: RotatorSystem,
+            camera_system: CameraSystem,
         };
 
         #[cfg(debug_assertions)]
@@ -443,18 +445,21 @@ impl App {
     pub fn update(&mut self) -> Result<()> {
         self.time.update();
 
-        // TODO: later move to systems/rotator.rs
         self.process_input()?;
-        self.update_world()?;
-        self.update_camera();
+        self.update_system()?;
 
         self.prepare_renderer();
         self.input.clear_transitions();
         Ok(())
     }
 
-    fn update_world(&mut self) -> Result<()> {
-        self.world.update(self.time.delta_seconds())
+    fn update_system(&mut self) -> Result<()> {
+        let delta_time = self.time.delta_seconds();
+        self.rotator_system.update(&mut self.world, delta_time)?;
+        self.camera_system
+            .update(&mut self.world, &self.input, delta_time)?;
+
+        Ok(())
     }
 
     fn process_input(&mut self) -> Result<()> {
@@ -756,66 +761,6 @@ impl App {
             .get(name)
             .copied()
             .unwrap_or(DEFAULT_SKYBOX_TEXTURE)
-    }
-
-    // TODO: later move to systems/camera.rs
-    fn update_camera(&mut self) {
-        let delta = self.time.delta_seconds();
-        let move_speed = 3.0;
-        let mouse_sensitivity = 0.003;
-        let max_pitch = std::f32::consts::FRAC_PI_2 - 0.01;
-
-        let Some(camera_id) = self.world.active_camera_entity() else {
-            return;
-        };
-
-        let Some(camera) = self.world.camera_mut(camera_id) else {
-            return;
-        };
-
-        let mouse_delta = self.input.mouse_delta();
-        if self.input.mouse_button_down(MouseButton::Right) {
-            camera.yaw -= mouse_delta.x * mouse_sensitivity;
-            camera.pitch -= mouse_delta.y * mouse_sensitivity;
-            camera.pitch = camera.pitch.clamp(-max_pitch, max_pitch);
-        }
-
-        let direction = vec3(
-            camera.yaw.cos() * camera.pitch.cos(),
-            camera.yaw.sin() * camera.pitch.cos(),
-            camera.pitch.sin(),
-        )
-        .normalize();
-        let left = vec3(-direction.y, direction.x, 0.0).normalize();
-        let up = vec3(0.0, 0.0, 1.0);
-
-        let Some(transform) = self.world.transform_mut(camera_id) else {
-            return;
-        };
-
-        if self.input.key_down(KeyCode::KeyW) {
-            transform.position += direction * move_speed * delta;
-        }
-        if self.input.key_down(KeyCode::KeyS) {
-            transform.position -= direction * move_speed * delta;
-        }
-        if self.input.key_down(KeyCode::KeyA) {
-            transform.position += left * move_speed * delta;
-        }
-        if self.input.key_down(KeyCode::KeyD) {
-            transform.position -= left * move_speed * delta;
-        }
-        if self.input.key_down(KeyCode::ArrowUp) {
-            transform.position += up * move_speed * delta;
-        }
-        if self.input.key_down(KeyCode::ArrowDown) {
-            transform.position -= up * move_speed * delta;
-        }
-
-        let target = transform.position + direction;
-        if let Some(camera) = self.world.camera_mut(camera_id) {
-            camera.target = target;
-        }
     }
 
     pub unsafe fn destroy(&mut self) {
