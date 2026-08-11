@@ -1,12 +1,12 @@
 use anyhow::{Result, anyhow};
-use cgmath::{InnerSpace, vec2, vec3};
+use cgmath::{vec2, vec3};
 use renderer_vulkan::{
     MeshHandle, PipelineKey, RenderCamera, RenderItem, SkyboxTextureHandle, TextureHandle,
     VertexLayout, VulkanRenderer,
 };
 use std::collections::HashMap;
 use turbo_math::Transform;
-use winit::event::{MouseButton, WindowEvent};
+use winit::event::{WindowEvent};
 use winit::keyboard::KeyCode;
 use winit::window::Window;
 
@@ -23,7 +23,8 @@ use crate::primitive::{
 };
 
 use super::{
-    Camera, CameraSystem, EntityId, Input, Material, MeshRenderer, RotatorSystem, Time, World,
+    Camera, CameraSystem, EntityId, Input, Material, MeshRenderer, 
+    RotatorSystem, Time, World, RenderSystem,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -47,6 +48,7 @@ pub struct App {
     // system
     pub rotator_system: RotatorSystem,
     pub camera_system: CameraSystem,
+    pub render_system: RenderSystem,
 }
 
 impl App {
@@ -103,6 +105,7 @@ impl App {
             positions,
             rotator_system: RotatorSystem,
             camera_system: CameraSystem,
+            render_system: RenderSystem,
         };
 
         #[cfg(debug_assertions)]
@@ -429,7 +432,7 @@ impl App {
                 )?;
             }
         }
-        app.prepare_renderer();
+        app.render_system.update(&mut app.world,&mut app.renderer)?;
 
         Ok(app)
     }
@@ -448,7 +451,6 @@ impl App {
         self.process_input()?;
         self.update_system()?;
 
-        self.prepare_renderer();
         self.input.clear_transitions();
         Ok(())
     }
@@ -458,6 +460,8 @@ impl App {
         self.rotator_system.update(&mut self.world, delta_time)?;
         self.camera_system
             .update(&mut self.world, &self.input, delta_time)?;
+        self.render_system
+            .update(&mut self.world, &mut self.renderer)?;
 
         Ok(())
     }
@@ -767,47 +771,6 @@ impl App {
         self.renderer.destroy();
     }
 
-    fn prepare_renderer(&mut self) {
-        let render_items = self
-            .world
-            .renderables()
-            .map(|renderable| {
-                let mesh_renderer = renderable.mesh_renderer;
-
-                RenderItem {
-                    mesh_index: mesh_renderer.mesh,
-                    transform: renderable.transform.clone(),
-                    alpha: mesh_renderer.material.alpha,
-                    material_color: mesh_renderer.material.color,
-                    use_texture: mesh_renderer.material.use_texture,
-                    texture_index: mesh_renderer.material.texture,
-                    pipeline_key: mesh_renderer.material.pipeline_key,
-                    is_visible: renderable
-                        .visibility
-                        .is_none_or(|visibility| visibility.is_visible),
-                }
-            })
-            .collect();
-
-        self.renderer.set_render_items(render_items);
-
-        // send camera to vulkan
-        if let Some(camera_id) = self.world.active_camera_entity() {
-            if let (Some(camera), Some(transform)) = (
-                self.world.camera(camera_id),
-                self.world.transform(camera_id),
-            ) {
-                self.renderer.set_camera(RenderCamera {
-                    position: transform.position,
-                    target: camera.target,
-                    up: vec3(0.0, 0.0, 1.0),
-                    fov_y: camera.fov_y,
-                    near: camera.near,
-                    far: camera.far,
-                });
-            }
-        }
-    }
 
     // spawn primitive shape ////////////////////////////
     fn material(

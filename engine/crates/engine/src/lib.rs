@@ -21,4 +21,4 @@ pub use ecs::{ComponentPool, EntityId};
 pub use input::Input;
 pub use time::Time;
 pub use world::World;
-pub use system::{CameraSystem, RotatorSystem};
+pub use system::{CameraSystem, RotatorSystem, RenderSystem};
