@@ -492,7 +492,7 @@ impl App {
                 .filter(|entity| {
                     self.world
                         .registry
-                        .mesh_renderer(**entity)
+                        .get_component::<MeshRenderer>(**entity)
                         .is_some_and(|mesh_renderer| viking_meshes.contains(&mesh_renderer.mesh))
                 })
                 .count();

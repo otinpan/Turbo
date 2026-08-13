@@ -1,4 +1,5 @@
 use turbo_math::Transform;
+use std::any::TypeId;
 
 use super::{
     ComponentPool, EntityId,
@@ -11,7 +12,8 @@ use crate::component::{
 
 pub type Vec3 = cgmath::Vector3<f32>;
 
-pub trait RegistryComponent: Sized {
+
+pub trait RegistryComponent: Sized{
     fn pool(registry: &Registry) -> &ComponentPool<Self>;
     fn pool_mut(registry: &mut Registry) -> &mut ComponentPool<Self>;
 }
@@ -104,46 +106,81 @@ impl Registry{
         T::pool(self).contains(entity)
     }
 
-    // Shortcuts ///////////////////////////////////////////////////
-    pub fn transform(&self, entity: EntityId) -> Option<&Transform> {
-        self.transform.get(entity)
+    // query ////////
+    pub fn query2<'a, A, B>(&'a self,) -> impl Iterator<Item = (EntityId, &'a A, &'a B)> + 'a
+    where
+        A: RegistryComponent + 'a,
+        B: RegistryComponent + 'a,
+    {
+        A::pool(self)
+            .iter()
+            .filter_map(move |(entity, a)| {
+                let b = B::pool(self).get(entity)?;
+                Some((entity, a, b))
+            })
     }
 
-    pub fn transform_mut(&mut self, entity: EntityId) -> Option<&mut Transform> {
-        self.transform.get_mut(entity)
+    // UNSAFE: if not using unsafe, returned entity can not use mutable and imutable
+    // because, entity will use registry as mutable and immutable!
+    // Returns entities with A and B, borrowing A mutably and B immutably.
+    pub fn query2_mut<A, B>(&mut self) -> impl Iterator<Item = (EntityId, &mut A, &B)>
+    where
+        A: RegistryComponent + 'static,
+        B: RegistryComponent + 'static,
+    {
+        // not to create &mut Component and &Component
+        assert_ne!(
+            TypeId::of::<A>(),
+            TypeId::of::<B>(),
+            "query2_mut_mut cannot borrow the same component type mutably twice"
+        );
+
+        let registry = self as *mut Registry;
+
+        // use raw pointer (*registry) to use registry as immutable and mutable 
+        let a_pool = A::pool_mut(unsafe { &mut *registry }) as *mut ComponentPool<A>;
+        let b_pool = B::pool(unsafe { &*registry }) as *const ComponentPool<B>;
+
+        // UNSAFE: use raw pointer dereference (*b_pool)
+        unsafe {
+            (*a_pool)
+                .iter_mut()
+                .filter_map(move |(entity, a)| {
+                    let b = (*b_pool).get(entity)?;
+                    Some((entity, a, b))
+                })
+        }
+    }
+    pub fn query2_mut_mut<A, B>(&mut self) -> impl Iterator<Item = (EntityId, &mut A, &mut B)>
+    where
+        A: RegistryComponent + 'static,
+        B: RegistryComponent + 'static,
+    {
+        // not to create &mut Component and &Component
+        assert_ne!(
+            TypeId::of::<A>(),
+            TypeId::of::<B>(),
+            "query2_mut cannot borrow the same component type as both mutable and immutable"
+        );
+
+        let registry = self as *mut Registry;
+
+        // use raw pointer (*registry) to use registry as immutable and mutable 
+        let a_pool = A::pool_mut(unsafe { &mut *registry }) as *mut ComponentPool<A>;
+        let b_pool = B::pool_mut(unsafe { &mut *registry }) as *mut ComponentPool<B>;
+
+        // UNSAFE: use raw pointer dereference (*b_pool)
+        unsafe {
+            (*a_pool)
+                .iter_mut()
+                .filter_map(move |(entity, a)| {
+                    let b = (*b_pool).get_mut(entity)?;
+                    Some((entity, a, b))
+                })
+        }
     }
 
-    pub fn mesh_renderer(&self, entity: EntityId) -> Option<&MeshRenderer> {
-        self.mesh_renderer.get(entity)
-    }
 
-    pub fn mesh_renderer_mut(&mut self, entity: EntityId) -> Option<&mut MeshRenderer> {
-        self.mesh_renderer.get_mut(entity)
-    }
-
-    pub fn camera(&self, entity: EntityId) -> Option<&Camera> {
-        self.camera.get(entity)
-    }
-
-    pub fn camera_mut(&mut self, entity: EntityId) -> Option<&mut Camera> {
-        self.camera.get_mut(entity)
-    }
-
-    pub fn visibility(&self, entity: EntityId) -> Option<&Visibility> {
-        self.visibility.get(entity)
-    }
-
-    pub fn visibility_mut(&mut self, entity: EntityId) -> Option<&mut Visibility> {
-        self.visibility.get_mut(entity)
-    }
-
-    pub fn rotator(&self, entity: EntityId) -> Option<&Rotator> {
-        self.rotator.get(entity)
-    }
-
-    pub fn rotator_mut(&mut self, entity: EntityId) -> Option<&mut Rotator> {
-        self.rotator.get_mut(entity)
-    }
 
     // Queries /////////////////////////////////////////////////////
     pub fn entities(&self) -> &[EntityId] {
@@ -297,43 +334,6 @@ mod tests {
     }
 
     #[test]
-    fn shortcuts_return_components_for_entity() {
-        let mut registry = Registry::default();
-        let mesh = mesh_handle(7);
-        let transform = Transform {
-            position: vec3(0.0, 1.0, 1.0),
-            rotation: vec3(-1.0, 2.0, 3.0),
-            scale: vec3(1.0, 2.0, 3.0),
-        };
-
-        let entity = spawn_renderable(&mut registry, mesh, transform.clone());
-
-        assert_eq!(registry.mesh_renderer(entity).unwrap().mesh, mesh);
-        assert_eq!(
-            registry.transform(entity).unwrap().position,
-            transform.position
-        );
-        assert_eq!(
-            registry.transform(entity).unwrap().rotation,
-            transform.rotation
-        );
-        assert_eq!(registry.transform(entity).unwrap().scale, transform.scale);
-    }
-
-    #[test]
-    fn transform_mut_can_change_transform() {
-        let mut registry = Registry::default();
-        let entity = spawn_renderable(&mut registry, mesh_handle(0), Transform::default());
-
-        registry.transform_mut(entity).unwrap().position = vec3(1.0, 2.0, 3.0);
-
-        assert_eq!(
-            registry.transform(entity).unwrap().position,
-            vec3(1.0, 2.0, 3.0)
-        );
-    }
-
-    #[test]
     fn despawn_removes_entity_and_components() {
         let mut registry = Registry::default();
         let first = spawn_renderable(&mut registry, mesh_handle(0), Transform::default());
@@ -344,8 +344,8 @@ mod tests {
         assert_eq!(registry.entity_count(), 1);
         assert!(!registry.contains(first));
         assert!(registry.contains(second));
-        assert!(registry.transform(first).is_none());
-        assert!(registry.mesh_renderer(first).is_none());
+        assert!(registry.get_component::<Transform>(first).is_none());
+        assert!(registry.get_component::<MeshRenderer>(first).is_none());
     }
 
     #[test]
@@ -385,6 +385,35 @@ mod tests {
 
         assert_eq!(renderables.len(), 1);
         assert_eq!(renderables[0].entity, renderable);
+    }
+
+    #[test]
+    fn query2_mut_iterates_entities_with_both_components() {
+        let mut registry = Registry::default();
+        let matching = spawn_renderable(&mut registry, mesh_handle(0), Transform::default());
+        let transform_only = registry.create();
+        registry.add_component(transform_only, Transform::default());
+
+        let entities = registry
+            .query2_mut::<Transform, Rotator>()
+            .map(|(entity, transform, rotator)| {
+                transform.rotate(rotator.speed);
+                entity
+            })
+            .collect::<Vec<_>>();
+
+        assert_eq!(entities, vec![matching]);
+        assert_eq!(
+            registry.get_component::<Transform>(matching).unwrap().rotation,
+            vec3(20.0, 0.0, 0.0)
+        );
+        assert_eq!(
+            registry
+                .get_component::<Transform>(transform_only)
+                .unwrap()
+                .rotation,
+            vec3(0.0, 0.0, 0.0)
+        );
     }
 
 }

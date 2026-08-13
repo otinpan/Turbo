@@ -1,21 +1,14 @@
 use anyhow::Result;
+use turbo_math::Transform;
 
-use crate::Registry;
+use crate::{Registry, Rotator};
 
 #[derive(Clone, Debug)]
 pub struct RotatorSystem;
 
 impl RotatorSystem {
     pub fn update(&mut self, registry: &mut Registry, delta_time: f32) -> Result<()> {
-        for entity in registry.entities().to_vec() {
-            let Some(rotator) = registry.rotator(entity).cloned() else {
-                continue;
-            };
-
-            let Some(transform) = registry.transform_mut(entity) else {
-                continue;
-            };
-
+        for (_, transform, rotator) in registry.query2_mut::<Transform, Rotator>() {
             transform.rotate(rotator.speed * delta_time);
         }
 
