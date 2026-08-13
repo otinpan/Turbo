@@ -10,7 +10,12 @@ use crate::{Camera, Input, Registry};
 pub struct CameraSystem;
 
 impl CameraSystem {
-    pub fn update(&mut self, registry: &mut Registry, input: &Input, delta_time: f32) -> Result<()> {
+    pub fn update(
+        &mut self,
+        registry: &mut Registry,
+        input: &Input,
+        delta_time: f32,
+    ) -> Result<()> {
         let move_speed = 3.0;
         let mouse_sensitivity = 0.003;
         let max_pitch = std::f32::consts::FRAC_PI_2 - 0.01;

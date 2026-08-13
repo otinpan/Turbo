@@ -1,23 +1,16 @@
-use turbo_math::Transform;
 use std::any::TypeId;
+use turbo_math::Transform;
 
-use super::{
-    ComponentPool, EntityId,
-};
+use super::{ComponentPool, EntityId};
 
-use crate::component::{
-    Camera, Material, MeshRenderer, Rotator, Visibility,
-};
-
+use crate::component::{Camera, Material, MeshRenderer, Rotator, Visibility};
 
 pub type Vec3 = cgmath::Vector3<f32>;
 
-
-pub trait RegistryComponent: Sized{
+pub trait RegistryComponent: Sized {
     fn pool(registry: &Registry) -> &ComponentPool<Self>;
     fn pool_mut(registry: &mut Registry) -> &mut ComponentPool<Self>;
 }
-
 
 // components for rendering
 #[derive(Clone, Debug)]
@@ -29,7 +22,7 @@ pub struct RenderableRef<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub struct Registry{
+pub struct Registry {
     next_entity_id: usize,
     entities: Vec<EntityId>,
 
@@ -42,10 +35,10 @@ pub struct Registry{
     visibility: ComponentPool<Visibility>,
 }
 
-impl Registry{
-    pub fn create(&mut self) -> EntityId{
-        let entity=EntityId(self.next_entity_id);
-        self.next_entity_id+=1;
+impl Registry {
+    pub fn create(&mut self) -> EntityId {
+        let entity = EntityId(self.next_entity_id);
+        self.next_entity_id += 1;
         self.entities.push(entity);
         entity
     }
@@ -56,7 +49,6 @@ impl Registry{
     pub fn entity_count(&self) -> usize {
         self.entities.len()
     }
-
 
     // Component access ////////////////////////////////////////////
     pub fn add_component<T: RegistryComponent>(&mut self, entity: EntityId, component: T) -> bool {
@@ -107,17 +99,15 @@ impl Registry{
     }
 
     // query ////////
-    pub fn query2<'a, A, B>(&'a self,) -> impl Iterator<Item = (EntityId, &'a A, &'a B)> + 'a
+    pub fn query2<'a, A, B>(&'a self) -> impl Iterator<Item = (EntityId, &'a A, &'a B)> + 'a
     where
         A: RegistryComponent + 'a,
         B: RegistryComponent + 'a,
     {
-        A::pool(self)
-            .iter()
-            .filter_map(move |(entity, a)| {
-                let b = B::pool(self).get(entity)?;
-                Some((entity, a, b))
-            })
+        A::pool(self).iter().filter_map(move |(entity, a)| {
+            let b = B::pool(self).get(entity)?;
+            Some((entity, a, b))
+        })
     }
 
     // UNSAFE: if not using unsafe, returned entity can not use mutable and imutable
@@ -137,18 +127,16 @@ impl Registry{
 
         let registry = self as *mut Registry;
 
-        // use raw pointer (*registry) to use registry as immutable and mutable 
+        // use raw pointer (*registry) to use registry as immutable and mutable
         let a_pool = A::pool_mut(unsafe { &mut *registry }) as *mut ComponentPool<A>;
         let b_pool = B::pool(unsafe { &*registry }) as *const ComponentPool<B>;
 
         // UNSAFE: use raw pointer dereference (*b_pool)
         unsafe {
-            (*a_pool)
-                .iter_mut()
-                .filter_map(move |(entity, a)| {
-                    let b = (*b_pool).get(entity)?;
-                    Some((entity, a, b))
-                })
+            (*a_pool).iter_mut().filter_map(move |(entity, a)| {
+                let b = (*b_pool).get(entity)?;
+                Some((entity, a, b))
+            })
         }
     }
     pub fn query2_mut_mut<A, B>(&mut self) -> impl Iterator<Item = (EntityId, &mut A, &mut B)>
@@ -165,22 +153,18 @@ impl Registry{
 
         let registry = self as *mut Registry;
 
-        // use raw pointer (*registry) to use registry as immutable and mutable 
+        // use raw pointer (*registry) to use registry as immutable and mutable
         let a_pool = A::pool_mut(unsafe { &mut *registry }) as *mut ComponentPool<A>;
         let b_pool = B::pool_mut(unsafe { &mut *registry }) as *mut ComponentPool<B>;
 
         // UNSAFE: use raw pointer dereference (*b_pool)
         unsafe {
-            (*a_pool)
-                .iter_mut()
-                .filter_map(move |(entity, a)| {
-                    let b = (*b_pool).get_mut(entity)?;
-                    Some((entity, a, b))
-                })
+            (*a_pool).iter_mut().filter_map(move |(entity, a)| {
+                let b = (*b_pool).get_mut(entity)?;
+                Some((entity, a, b))
+            })
         }
     }
-
-
 
     // Queries /////////////////////////////////////////////////////
     pub fn entities(&self) -> &[EntityId] {
@@ -203,11 +187,10 @@ impl Registry{
     pub fn active_camera_entity(&self) -> Option<EntityId> {
         self.camera.iter().next().map(|(entity, _)| entity)
     }
-
 }
 
-impl Default for Registry{
-    fn default() -> Self{
+impl Default for Registry {
+    fn default() -> Self {
         Self {
             next_entity_id: 0,
             entities: Vec::new(),
@@ -369,7 +352,10 @@ mod tests {
             }
         ));
         assert!(registry.has_component::<Rotator>(entity));
-        assert_eq!(registry.get_component::<Rotator>(entity).unwrap().speed.x, 1.0);
+        assert_eq!(
+            registry.get_component::<Rotator>(entity).unwrap().speed.x,
+            1.0
+        );
         assert!(registry.remove_component::<Rotator>(entity).is_some());
         assert!(!registry.has_component::<Rotator>(entity));
     }
@@ -404,7 +390,10 @@ mod tests {
 
         assert_eq!(entities, vec![matching]);
         assert_eq!(
-            registry.get_component::<Transform>(matching).unwrap().rotation,
+            registry
+                .get_component::<Transform>(matching)
+                .unwrap()
+                .rotation,
             vec3(20.0, 0.0, 0.0)
         );
         assert_eq!(
@@ -415,5 +404,4 @@ mod tests {
             vec3(0.0, 0.0, 0.0)
         );
     }
-
 }
