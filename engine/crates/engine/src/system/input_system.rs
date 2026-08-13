@@ -4,6 +4,7 @@ use winit::keyboard::KeyCode;
 use crate::Input;
 use crate::primitive::PrimitiveType;
 
+#[derive(Clone, Debug)]
 pub struct InputSystem {
     pub key_bindings: Vec<KeyBinding>,
 }

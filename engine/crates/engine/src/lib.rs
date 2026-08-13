@@ -21,6 +21,7 @@ pub use ecs::{ComponentPool, EntityId, Registry};
 pub use input::Input;
 pub use system::{
     CameraSystem, InputCommand, InputSystem, InputTrigger, KeyBinding, RenderSystem, RotatorSystem,
+    Scheduler,
 };
 pub use time::Time;
 pub use world::World;

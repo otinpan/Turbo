@@ -22,8 +22,8 @@ use crate::primitive::{
 };
 
 use super::{
-    Camera, CameraSystem, EntityId, Input, InputCommand, InputSystem, InputTrigger, Material,
-    MeshRenderer, RenderSystem, RotatorSystem, Time, World,
+    Camera, EntityId, Input, InputCommand, InputSystem, InputTrigger, Material, MeshRenderer,
+    Scheduler, Time, World,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -45,10 +45,7 @@ pub struct App {
     positions: Vec<Vec3>,
 
     // system
-    pub rotator_system: RotatorSystem,
-    pub camera_system: CameraSystem,
-    pub render_system: RenderSystem,
-    pub input_system: InputSystem,
+    scheduler: Scheduler,
 }
 
 impl App {
@@ -104,10 +101,10 @@ impl App {
             skybox_mesh,
             skybox_textures,
             positions,
-            rotator_system: RotatorSystem,
-            camera_system: CameraSystem,
-            render_system: RenderSystem,
-            input_system,
+            scheduler: Scheduler {
+                input_system,
+                ..Default::default()
+            },
         };
 
         #[cfg(debug_assertions)]
@@ -434,7 +431,8 @@ impl App {
                 )?;
             }
         }
-        app.render_system
+        app.scheduler
+            .render_system
             .update(&mut app.world.registry, &mut app.renderer)?;
 
         Ok(app)
@@ -460,18 +458,18 @@ impl App {
 
     fn update_system(&mut self) -> Result<()> {
         let delta_time = self.time.delta_seconds();
-        self.rotator_system
-            .update(&mut self.world.registry, delta_time)?;
-        self.camera_system
-            .update(&mut self.world.registry, &self.input, delta_time)?;
-        self.render_system
-            .update(&mut self.world.registry, &mut self.renderer)?;
+        self.scheduler.update(
+            &mut self.world.registry,
+            &mut self.renderer,
+            &self.input,
+            delta_time,
+        )?;
 
         Ok(())
     }
 
     fn process_input(&mut self) -> Result<()> {
-        let commands = self.input_system.update(&self.input);
+        let commands = self.scheduler.input_commands(&self.input);
 
         for command in commands {
             self.execute_input_command(command)?;

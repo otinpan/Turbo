@@ -68,11 +68,10 @@
 		- -> src/system/camera.rs, rotate.rs, rander.rs
 	- ~~Registry作成~~
 		- has ComponentPools
-1. App::process_input を InputSystem / SpawnSystem 的に分ける
-2. World は spawn/despawn と Registry の保持に絞る
-3. System を Schedule / SystemManager にまとめる
-4. query3 や optional component query が必要になったら追加
-5. Registry を固定型のまま進めるか、TypeIdベースにするか判断
+	- ~~App::process_input -> InputSystem / SpawnSystem ~~
+	- System を Schedule / SystemManager にまとめる
+	- query3 や optional component query が必要になったら追加
+	- Registry を固定型のまま進めるか、TypeIdベースにするか判断
 * オブジェクトAPI
   - spawn_model
   - spawn_cube

@@ -5,6 +5,7 @@ use turbo_math::Transform;
 
 use crate::{Camera, MeshRenderer, Registry, Visibility};
 
+#[derive(Clone, Debug)]
 pub struct RenderSystem;
 
 impl RenderSystem {
