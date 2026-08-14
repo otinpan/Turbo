@@ -1,5 +1,48 @@
 # DIRECTIONS
-## Flow
+## ECS
+### Create Entity
+When you want to create entity, you use `world.spawn()`.
+```rust
+pub fn spawn(
+    &mut self,
+    transform: Transform,
+    mesh_renderer: Option<MeshRenderer>,
+    camera: Option<Camera>,
+    rotate_speed: Vec3,
+) -> EntityId {
+    let entity = self.registry.create();
+
+    self.registry.add_component(entity, transform);
+    self.registry.add_component(entity, Visibility::default());
+    ...
+```
+`spawn()` create Entity and attach specified component.
+
+### Create System
+System is classified
+* InputSystem: detecting input, this create InputCommand queue.
+* CommandSystem: this handle input event from InputCommand queue.
+* UpdateSystem: Update all system, that mean update Entity
+* RenderSystem: Rendering
+
+when you register system to `Scheduler`, you have to create struct and use trait designated like `UpdateSystem`.
+```rust
+impl UpdateSystem for RotatorSystem {
+    fn update(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
+        for (_, transform, rotator) in context.registry.query2_mut::<Transform, Rotator>() {
+            transform.rotate(rotator.speed * context.delta_time);
+        }
+
+        Ok(())
+    }
+}
+```
+then add to scheduler.
+```rust
+scheduler.add_update_system(Box::new(RotatorSystem));
+```
+
+## RENDERING
 handle
 ```rust
 pub struct MeshHandle{

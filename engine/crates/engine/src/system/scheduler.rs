@@ -3,35 +3,42 @@ use renderer_vulkan::VulkanRenderer;
 
 use super::{
     CameraSystem, CommandContext, CommandSystem, InputCommand, InputSystem, RenderSystem,
-    RotatorSystem,
+    RotatorSystem, UpdateContext, UpdateSystem,
 };
 
 use crate::{Input, Registry};
 
-#[derive(Clone, Debug)]
 pub struct Scheduler {
     pub command_system: CommandSystem,
     pub input_system: InputSystem,
-    pub camera_system: CameraSystem,
     pub render_system: RenderSystem,
-    pub rotator_system: RotatorSystem,
+    update_systems: Vec<Box<dyn UpdateSystem>>,
 }
 
 impl Scheduler {
+    pub fn with_input_system(input_system: InputSystem) -> Self {
+        Self {
+            input_system,
+            ..Default::default()
+        }
+    }
+
     pub fn new(
         command_system: CommandSystem,
         input_system: InputSystem,
-        camera_system: CameraSystem,
         render_system: RenderSystem,
-        rotator_system: RotatorSystem,
+        update_systems: Vec<Box<dyn UpdateSystem>>,
     ) -> Self {
         Self {
             command_system,
             input_system,
-            camera_system,
             render_system,
-            rotator_system,
+            update_systems,
         }
+    }
+
+    pub fn add_update_system(&mut self, update_system: Box<dyn UpdateSystem>) {
+        self.update_systems.push(update_system);
     }
 
     pub fn run_input_stage(&self, input: &Input) -> Vec<InputCommand> {
@@ -42,14 +49,10 @@ impl Scheduler {
         self.command_system.update(context)
     }
 
-    pub fn run_update_stage(
-        &mut self,
-        registry: &mut Registry,
-        input: &Input,
-        delta_time: f32,
-    ) -> Result<()> {
-        self.rotator_system.update(registry, delta_time)?;
-        self.camera_system.update(registry, input, delta_time)?;
+    pub fn run_update_stage(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
+        for system in &mut self.update_systems {
+            system.update(context)?
+        }
         Ok(())
     }
 
@@ -57,10 +60,9 @@ impl Scheduler {
         &mut self,
         registry: &mut Registry,
         renderer: &mut VulkanRenderer,
-    ) -> Result<()>{
-        self.render_system.update(registry,renderer)
+    ) -> Result<()> {
+        self.render_system.update(registry, renderer)
     }
-
 }
 
 impl Default for Scheduler {
@@ -68,9 +70,8 @@ impl Default for Scheduler {
         Self {
             command_system: CommandSystem,
             input_system: InputSystem::new(),
-            camera_system: CameraSystem,
             render_system: RenderSystem,
-            rotator_system: RotatorSystem,
+            update_systems: vec![Box::new(RotatorSystem), Box::new(CameraSystem)],
         }
     }
 }

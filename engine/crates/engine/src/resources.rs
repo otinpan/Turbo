@@ -1,9 +1,9 @@
-use std::collections::{HashMap};
-use cgmath::{Vector3};
-use crate::{PrimitiveMesh};
-use renderer_vulkan::{MeshHandle,TextureHandle,SkyboxTextureHandle};
+use crate::PrimitiveMesh;
+use cgmath::Vector3;
+use renderer_vulkan::{MeshHandle, SkyboxTextureHandle, TextureHandle};
+use std::collections::HashMap;
 
-pub type Vec3=Vector3<f32>;
+pub type Vec3 = Vector3<f32>;
 
 pub struct Resources {
     pub models: HashMap<String, MeshHandle>,
@@ -13,14 +13,20 @@ pub struct Resources {
     pub skybox_textures: HashMap<String, SkyboxTextureHandle>,
 }
 
-impl Resources{
+impl Resources {
     pub fn new(
-        models: HashMap<String,MeshHandle>,
-        textures: HashMap<String,TextureHandle>,
+        models: HashMap<String, MeshHandle>,
+        textures: HashMap<String, TextureHandle>,
         primitive_meshes: Vec<PrimitiveMesh>,
         skybox_mesh: Option<MeshHandle>,
-        skybox_textures: HashMap<String,SkyboxTextureHandle>,
-    ) -> Self{
-        Self { models, textures, primitive_meshes, skybox_mesh, skybox_textures }
+        skybox_textures: HashMap<String, SkyboxTextureHandle>,
+    ) -> Self {
+        Self {
+            models,
+            textures,
+            primitive_meshes,
+            skybox_mesh,
+            skybox_textures,
+        }
     }
 }

@@ -22,7 +22,7 @@ use crate::primitive::{
 
 use super::{
     Camera, CommandContext, EntityId, Input, InputCommand, InputSystem, InputTrigger, Material,
-    Scheduler, Time, World, Resources,
+    Resources, Scheduler, Time, UpdateContext, World, RotatorSystem, CameraSystem,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -84,17 +84,22 @@ impl App {
         let window_size = window.inner_size();
         input.set_window_size(vec2(window_size.width as f32, window_size.height as f32));
 
+        let scheduler=create_scheduler(input_system);
+
         let mut app = Self {
             renderer,
             world,
             input,
             time: Time::default(),
-            resources: Resources { models, textures, primitive_meshes, skybox_mesh, skybox_textures },
-            positions,
-            scheduler: Scheduler {
-                input_system,
-                ..Default::default()
+            resources: Resources {
+                models,
+                textures,
+                primitive_meshes,
+                skybox_mesh,
+                skybox_textures,
             },
+            positions,
+            scheduler,
         };
 
         #[cfg(debug_assertions)]
@@ -102,7 +107,12 @@ impl App {
             app.set_skybox(app.use_skybox_texture("ghost"))?;
             // create primitive ////////////////////////////
             unsafe {
-                let face_texture = app.resources.textures.get("face").copied().unwrap_or(DEFAULT_TEXTURE);
+                let face_texture = app
+                    .resources
+                    .textures
+                    .get("face")
+                    .copied()
+                    .unwrap_or(DEFAULT_TEXTURE);
                 let ghost_texture = app
                     .resources
                     .textures
@@ -440,9 +450,9 @@ impl App {
 
     pub fn update(&mut self) -> Result<()> {
         self.time.update();
-        let delta_time=self.time.delta_seconds();
+        let delta_time = self.time.delta_seconds();
 
-        let mut commands=self.scheduler.run_input_stage(&self.input);
+        let mut commands = self.scheduler.run_input_stage(&self.input);
 
         self.scheduler.run_command_stage(&mut CommandContext {
             commands: &mut commands,
@@ -453,21 +463,18 @@ impl App {
             positions: &self.positions,
         })?;
 
-        self.scheduler.run_update_stage(
-            &mut self.world.registry,
-            &self.input,
+        self.scheduler.run_update_stage(&mut UpdateContext {
+            registry: &mut self.world.registry,
+            input: &self.input,
             delta_time,
-        )?;
+        })?;
 
-        self.scheduler.run_render_stage(
-            &mut self.world.registry,
-            &mut self.renderer,
-        )?;
+        self.scheduler
+            .run_render_stage(&mut self.world.registry, &mut self.renderer)?;
 
         self.input.clear_transitions();
         Ok(())
     }
-
 
     fn create_input_system() -> InputSystem {
         InputSystem::new()
@@ -843,6 +850,13 @@ impl App {
 
         self.renderer.set_skybox(mesh, texture)
     }
+}
+
+fn create_scheduler(input_system: InputSystem) -> Scheduler{
+    let mut scheduler=Scheduler::with_input_system(input_system);
+    scheduler.add_update_system(Box::new(RotatorSystem));
+    scheduler.add_update_system(Box::new(CameraSystem));
+    scheduler
 }
 
 unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, MeshHandle>> {

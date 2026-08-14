@@ -11,20 +11,20 @@ mod component;
 mod ecs;
 mod input;
 mod primitive;
+mod resources;
 mod system;
 mod time;
 mod world;
-mod resources;
 
 pub use app::App;
 pub use component::{Camera, CameraComponent, Material, MeshRenderer, Rotator, Visibility};
 pub use ecs::{ComponentPool, EntityId, Registry};
 pub use input::Input;
 pub use primitive::{PrimitiveMesh, PrimitiveType};
+pub use resources::Resources;
 pub use system::{
     CameraSystem, CommandContext, CommandSystem, InputCommand, InputSystem, InputTrigger,
-    KeyBinding, RenderSystem, RotatorSystem, Scheduler,
+    KeyBinding, RenderSystem, RotatorSystem, Scheduler, UpdateContext, UpdateSystem,
 };
-pub use resources::Resources;
 pub use time::Time;
 pub use world::World;

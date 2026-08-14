@@ -12,6 +12,7 @@ mod input_system;
 mod render_system;
 mod rotator_system;
 mod scheduler;
+mod update_system;
 
 pub use camera_system::CameraSystem;
 pub use command_system::{CommandContext, CommandSystem};
@@ -19,3 +20,4 @@ pub use input_system::{InputCommand, InputSystem, InputTrigger, KeyBinding};
 pub use render_system::RenderSystem;
 pub use rotator_system::RotatorSystem;
 pub use scheduler::Scheduler;
+pub use update_system::{UpdateContext, UpdateSystem};

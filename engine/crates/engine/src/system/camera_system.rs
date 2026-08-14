@@ -4,13 +4,14 @@ use turbo_math::Transform;
 use winit::event::MouseButton;
 use winit::keyboard::KeyCode;
 
+use super::{UpdateContext, UpdateSystem};
 use crate::{Camera, Input, Registry};
 
 #[derive(Clone, Debug)]
 pub struct CameraSystem;
 
 impl CameraSystem {
-    pub fn update(
+    fn update_camera(
         &mut self,
         registry: &mut Registry,
         input: &Input,
@@ -69,5 +70,11 @@ impl CameraSystem {
         }
 
         Ok(())
+    }
+}
+
+impl UpdateSystem for CameraSystem {
+    fn update(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
+        self.update_camera(context.registry, context.input, context.delta_time)
     }
 }

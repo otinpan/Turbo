@@ -1,15 +1,16 @@
 use anyhow::Result;
 use turbo_math::Transform;
 
-use crate::{Registry, Rotator};
+use super::{UpdateContext, UpdateSystem};
+use crate::Rotator;
 
 #[derive(Clone, Debug)]
 pub struct RotatorSystem;
 
-impl RotatorSystem {
-    pub fn update(&mut self, registry: &mut Registry, delta_time: f32) -> Result<()> {
-        for (_, transform, rotator) in registry.query2_mut::<Transform, Rotator>() {
-            transform.rotate(rotator.speed * delta_time);
+impl UpdateSystem for RotatorSystem {
+    fn update(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
+        for (_, transform, rotator) in context.registry.query2_mut::<Transform, Rotator>() {
+            transform.rotate(rotator.speed * context.delta_time);
         }
 
         Ok(())
