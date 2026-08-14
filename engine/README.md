@@ -69,7 +69,10 @@
 	- ~~Registry作成~~
 		- has ComponentPools
 	- ~~App::process_input -> InputSystem / SpawnSystem ~~
-	- System を Schedule / SystemManager にまとめる
+	- ~~System を Scheduleにまとめる~~
+	- Appのcommand処理を分ける
+	- Appが持つmodelsやtexturesをworld.Resourceに移動する
+	- Appからself.world.registry.entities()と直接触るのではなく、world.registry()みたいな関数を作る
 	- query3 や optional component query が必要になったら追加
 	- Registry を固定型のまま進めるか、TypeIdベースにするか判断
 * オブジェクトAPI

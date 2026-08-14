@@ -16,13 +16,12 @@ use crate::primitive::{
     PrimitiveMesh, PrimitiveShape, PrimitiveType, build_primitive_source,
     create_primitive_debug_line, create_primitive_lit3d, create_primitive_mesh3d,
     create_primitive_ui2d, spawn_circle_with_material, spawn_cube_with_material,
-    spawn_line_with_material, spawn_polygon_with_material, spawn_primitive_from_mesh,
-    spawn_rectangle_with_material, spawn_sphere_with_material, spawn_triangle_with_material,
-    update_primitive_mesh,
+    spawn_line_with_material, spawn_polygon_with_material, spawn_rectangle_with_material,
+    spawn_sphere_with_material, spawn_triangle_with_material,
 };
 
 use super::{
-    Camera, EntityId, Input, InputCommand, InputSystem, InputTrigger, Material, MeshRenderer,
+    Camera, CommandContext, EntityId, Input, InputCommand, InputSystem, InputTrigger, Material,
     Scheduler, Time, World,
 };
 
@@ -469,188 +468,19 @@ impl App {
     }
 
     fn process_input(&mut self) -> Result<()> {
-        let commands = self.scheduler.input_commands(&self.input);
+        let mut commands = self.scheduler.input_commands(&self.input);
+        let mut context = CommandContext {
+            commands: &mut commands,
+            world: &mut self.world,
+            renderer: &mut self.renderer,
+            input: &self.input,
+            primitive_meshes: &mut self.primitive_meshes,
+            models: &self.models,
+            textures: &self.textures,
+            positions: &self.positions,
+        };
 
-        for command in commands {
-            self.execute_input_command(command)?;
-        }
-
-        Ok(())
-    }
-
-    fn execute_input_command(&mut self, command: InputCommand) -> Result<()> {
-        match command {
-            InputCommand::DespawnLast => {
-                let id = self.world.registry.entities().last().copied();
-
-                if let Some(id) = id {
-                    self.world.despawn(id);
-                }
-            }
-            InputCommand::SpawnVikingRoom => {
-                self.spawn_viking_room_from_input()?;
-            }
-            InputCommand::SpawnPrimitive {
-                primitive_type,
-                pipeline_key,
-                texture_name,
-            } => {
-                self.spawn_primitive_from_input(primitive_type, pipeline_key, texture_name);
-            }
-            InputCommand::UpdatePrimitiveMeshes => {
-                self.update_primitive_meshes_from_input()?;
-            }
-        }
-
-        Ok(())
-    }
-
-    fn spawn_viking_room_from_input(&mut self) -> Result<()> {
-        let viking_room_mesh3d = self.use_model("viking_room")?;
-        let viking_room_debug_line = self.use_model("viking_room_debug_line")?;
-        let viking_room_lit3d = self.use_model("viking_room_lit3d")?;
-        let viking_texture = self.use_texture("viking_room");
-        let viking_meshes = [
-            viking_room_mesh3d,
-            viking_room_debug_line,
-            viking_room_lit3d,
-        ];
-        let index = self
-            .world
-            .registry
-            .entities()
-            .iter()
-            .filter(|entity| {
-                self.world
-                    .registry
-                    .get_component::<MeshRenderer>(**entity)
-                    .is_some_and(|mesh_renderer| viking_meshes.contains(&mesh_renderer.mesh))
-            })
-            .count();
-
-        if self.positions.len() > index {
-            let variants = [
-                (viking_room_mesh3d, PipelineKey::Mesh3D, 1.0),
-                (viking_room_debug_line, PipelineKey::DebugLine3D, 1.0),
-                (viking_room_mesh3d, PipelineKey::Transparent3D, 0.5),
-                (viking_room_lit3d, PipelineKey::Lit3D, 1.0),
-            ];
-            let (mesh, pipeline_key, alpha) = variants[index];
-            match MeshRenderer::new(
-                mesh,
-                Material {
-                    color: vec3(1.0, 1.0, 1.0),
-                    alpha,
-                    use_texture: true,
-                    texture: viking_texture,
-                    pipeline_key,
-                },
-            ) {
-                Ok(mesh_renderer) => {
-                    self.world.spawn(
-                        Transform {
-                            position: self.positions[index],
-                            ..Default::default()
-                        },
-                        Some(mesh_renderer),
-                        None,
-                        vec3(20.0, 0.0, 0.0),
-                    );
-                }
-                Err(e) => {
-                    log::error!("Failed to spawn triangle primitive: {e:?}");
-                }
-            };
-        }
-
-        Ok(())
-    }
-
-    fn spawn_primitive_from_input(
-        &mut self,
-        primitive_type: PrimitiveType,
-        pipeline_key: PipelineKey,
-        texture_name: Option<&'static str>,
-    ) {
-        let position = self.mouse_position_on_spawn_plane();
-        let texture = texture_name
-            .map(|name| self.use_texture(name))
-            .unwrap_or(DEFAULT_TEXTURE);
-
-        if let Some(mesh) = self.primitive_handle(primitive_type) {
-            if let Err(e) = spawn_primitive_from_mesh(
-                &mut self.world,
-                mesh,
-                Material {
-                    color: vec3(1.0, 1.0, 1.0),
-                    use_texture: true,
-                    texture,
-                    pipeline_key,
-                    ..Default::default()
-                },
-                Transform {
-                    position,
-                    ..Default::default()
-                },
-            ) {
-                log::error!("Failed to spawn {primitive_type:?} primitive: {e:?}");
-            }
-        }
-    }
-
-    fn update_primitive_meshes_from_input(&mut self) -> Result<()> {
-        if let Some(mesh) = self.primitive_mesh(PrimitiveType::Polygon) {
-            unsafe {
-                update_primitive_mesh(
-                    &mut self.renderer,
-                    mesh,
-                    PrimitiveShape::Polygon {
-                        points: vec![
-                            vec3(0.0, -0.7, 0.3),
-                            vec3(0.0, -0.4, 0.2),
-                            vec3(0.0, 0.7, 0.5),
-                            vec3(0.0, 0.2, -0.2),
-                            vec3(0.0, -0.5, -0.45),
-                        ],
-                        color: vec3(1.0, 0.0, 0.0),
-                    },
-                )?;
-            }
-        }
-        if let Some(mesh) = self.primitive_mesh(PrimitiveType::Sphere) {
-            unsafe {
-                update_primitive_mesh(
-                    &mut self.renderer,
-                    mesh,
-                    PrimitiveShape::Sphere {
-                        radius: 2.0,
-                        rings: 20,
-                        segments: 20,
-                        color: vec3(0.0, 1.0, 1.0),
-                    },
-                )?;
-            }
-        }
-        if let Some(mesh) = self.primitive_mesh(PrimitiveType::Rectangle) {
-            unsafe {
-                update_primitive_mesh(
-                    &mut self.renderer,
-                    mesh,
-                    PrimitiveShape::Rectangle {
-                        points: [
-                            vec3(0.0, -0.2, 0.2),
-                            vec3(0.0, -0.2, -0.2),
-                            vec3(0.0, 0.2, -0.2),
-                            vec3(0.0, 0.2, 0.2),
-                        ],
-
-                        color: vec3(1.0, 1.0, 1.0),
-                    },
-                )?;
-            }
-        }
-
-        Ok(())
+        self.scheduler.execute_commands(&mut context)
     }
 
     fn create_input_system() -> InputSystem {
@@ -724,42 +554,6 @@ impl App {
                 InputTrigger::Pressed,
                 InputCommand::UpdatePrimitiveMeshes,
             )
-    }
-
-    fn primitive_handle(&self, primitive_type: PrimitiveType) -> Option<MeshHandle> {
-        self.primitive_mesh(primitive_type).map(|mesh| mesh.handle)
-    }
-
-    fn primitive_mesh(&self, primitive_type: PrimitiveType) -> Option<PrimitiveMesh> {
-        self.primitive_meshes
-            .iter()
-            .find(|mesh| mesh.primitive_type == primitive_type)
-            .copied()
-    }
-
-    fn mouse_position_on_spawn_plane(&self) -> Vec3 {
-        let mouse = self.input.mouse_position();
-        let window_size = self.input.window_size();
-        let width = window_size.x.max(1.0);
-        let height = window_size.y.max(1.0);
-        let aspect = width / height;
-        let world_height = 4.0;
-
-        let x = mouse.x / width - 0.5;
-        let y = 0.5 - mouse.y / height;
-
-        vec3(0.0, x * world_height * aspect, y * world_height)
-    }
-
-    fn use_texture(&self, name: &str) -> TextureHandle {
-        self.textures.get(name).copied().unwrap_or(DEFAULT_TEXTURE)
-    }
-
-    fn use_model(&self, name: &str) -> Result<MeshHandle> {
-        self.models
-            .get(name)
-            .copied()
-            .ok_or_else(|| anyhow!("Model not found: {name}"))
     }
 
     fn use_skybox_texture(&self, name: &str) -> SkyboxTextureHandle {
@@ -1234,6 +1028,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
 mod tests {
     use super::*;
     use crate::KeyBinding;
+    use crate::primitive::spawn_primitive_from_mesh;
     #[test]
     fn created_world_object_count_matches_created_entity_id_count() {
         let mut world = World::default();

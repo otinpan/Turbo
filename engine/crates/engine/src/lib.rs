@@ -19,9 +19,10 @@ pub use app::App;
 pub use component::{Camera, CameraComponent, Material, MeshRenderer, Rotator, Visibility};
 pub use ecs::{ComponentPool, EntityId, Registry};
 pub use input::Input;
+pub use primitive::{PrimitiveMesh, PrimitiveType};
 pub use system::{
-    CameraSystem, InputCommand, InputSystem, InputTrigger, KeyBinding, RenderSystem, RotatorSystem,
-    Scheduler,
+    CameraSystem, CommandContext, CommandSystem, InputCommand, InputSystem, InputTrigger,
+    KeyBinding, RenderSystem, RotatorSystem, Scheduler,
 };
 pub use time::Time;
 pub use world::World;

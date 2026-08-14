@@ -1,12 +1,16 @@
 use anyhow::Result;
 use renderer_vulkan::VulkanRenderer;
 
-use super::{CameraSystem, InputCommand, InputSystem, RenderSystem, RotatorSystem};
+use super::{
+    CameraSystem, CommandContext, CommandSystem, InputCommand, InputSystem, RenderSystem,
+    RotatorSystem,
+};
 
 use crate::{Input, Registry};
 
 #[derive(Clone, Debug)]
 pub struct Scheduler {
+    pub command_system: CommandSystem,
     pub input_system: InputSystem,
     pub camera_system: CameraSystem,
     pub render_system: RenderSystem,
@@ -15,12 +19,14 @@ pub struct Scheduler {
 
 impl Scheduler {
     pub fn new(
+        command_system: CommandSystem,
         input_system: InputSystem,
         camera_system: CameraSystem,
         render_system: RenderSystem,
         rotator_system: RotatorSystem,
     ) -> Self {
         Self {
+            command_system,
             input_system,
             camera_system,
             render_system,
@@ -30,6 +36,10 @@ impl Scheduler {
 
     pub fn input_commands(&self, input: &Input) -> Vec<InputCommand> {
         self.input_system.update(input)
+    }
+
+    pub fn execute_commands(&self, context: &mut CommandContext<'_>) -> Result<()> {
+        self.command_system.update(context)
     }
 
     pub fn update(
@@ -49,6 +59,7 @@ impl Scheduler {
 impl Default for Scheduler {
     fn default() -> Self {
         Self {
+            command_system: CommandSystem,
             input_system: InputSystem::new(),
             camera_system: CameraSystem,
             render_system: RenderSystem,
