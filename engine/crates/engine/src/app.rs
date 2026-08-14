@@ -21,8 +21,9 @@ use crate::primitive::{
 };
 
 use super::{
-    Camera, CommandContext, EntityId, Input, InputCommand, InputSystem, InputTrigger, Material,
-    Resources, Scheduler, Time, UpdateContext, World, RotatorSystem, CameraSystem,
+    Camera, CommandContext, DespawnLastCommand, EntityId, Input, InputTrigger, Material, Resources,
+    Scheduler, SpawnPrimitiveCommand, SpawnVikingRoomCommand, Time, UpdateContext,
+    UpdatePrimitiveMeshesCommand, World, RotatorSystem, CameraSystem,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -80,11 +81,10 @@ impl App {
         );
 
         let mut input = Input::default();
-        let input_system = Self::create_input_system();
         let window_size = window.inner_size();
         input.set_window_size(vec2(window_size.width as f32, window_size.height as f32));
 
-        let scheduler=create_scheduler(input_system);
+        let scheduler = create_scheduler();
 
         let mut app = Self {
             renderer,
@@ -476,77 +476,76 @@ impl App {
         Ok(())
     }
 
-    fn create_input_system() -> InputSystem {
-        InputSystem::new()
-            .bind(
-                KeyCode::ArrowLeft,
-                InputTrigger::Pressed,
-                InputCommand::DespawnLast,
-            )
-            .bind(
-                KeyCode::ArrowRight,
-                InputTrigger::Pressed,
-                InputCommand::SpawnVikingRoom,
-            )
-            .bind(
-                KeyCode::KeyT,
-                InputTrigger::Pressed,
-                InputCommand::SpawnPrimitive {
-                    primitive_type: PrimitiveType::Triangle,
-                    pipeline_key: PipelineKey::Lit3D,
-                    texture_name: Some("face"),
-                },
-            )
-            .bind(
-                KeyCode::KeyR,
-                InputTrigger::Pressed,
-                InputCommand::SpawnPrimitive {
-                    primitive_type: PrimitiveType::Rectangle,
-                    pipeline_key: PipelineKey::Ui2D,
-                    texture_name: Some("face"),
-                },
-            )
-            .bind(
-                KeyCode::KeyC,
-                InputTrigger::Pressed,
-                InputCommand::SpawnPrimitive {
-                    primitive_type: PrimitiveType::Cube,
-                    pipeline_key: PipelineKey::DebugLine3D,
-                    texture_name: None,
-                },
-            )
-            .bind(
-                KeyCode::KeyI,
-                InputTrigger::Pressed,
-                InputCommand::SpawnPrimitive {
-                    primitive_type: PrimitiveType::Circle,
-                    pipeline_key: PipelineKey::Mesh3D,
-                    texture_name: None,
-                },
-            )
-            .bind(
-                KeyCode::KeyP,
-                InputTrigger::Pressed,
-                InputCommand::SpawnPrimitive {
-                    primitive_type: PrimitiveType::Polygon,
-                    pipeline_key: PipelineKey::Mesh3D,
-                    texture_name: None,
-                },
-            )
-            .bind(
-                KeyCode::KeyE,
-                InputTrigger::Pressed,
-                InputCommand::SpawnPrimitive {
-                    primitive_type: PrimitiveType::Sphere,
-                    pipeline_key: PipelineKey::Lit3D,
-                    texture_name: None,
-                },
-            )
-            .bind(
-                KeyCode::KeyU,
-                InputTrigger::Pressed,
-                InputCommand::UpdatePrimitiveMeshes,
-            )
+    fn bind_input_commands(scheduler: &mut Scheduler) {
+        scheduler.bind_key(
+            KeyCode::ArrowLeft,
+            InputTrigger::Pressed,
+            DespawnLastCommand,
+        );
+        scheduler.bind_key(
+            KeyCode::ArrowRight,
+            InputTrigger::Pressed,
+            SpawnVikingRoomCommand,
+        );
+        scheduler.bind_key(
+            KeyCode::KeyT,
+            InputTrigger::Pressed,
+            SpawnPrimitiveCommand {
+                primitive_type: PrimitiveType::Triangle,
+                pipeline_key: PipelineKey::Lit3D,
+                texture_name: Some("face"),
+            },
+        );
+        scheduler.bind_key(
+            KeyCode::KeyR,
+            InputTrigger::Pressed,
+            SpawnPrimitiveCommand {
+                primitive_type: PrimitiveType::Rectangle,
+                pipeline_key: PipelineKey::Ui2D,
+                texture_name: Some("face"),
+            },
+        );
+        scheduler.bind_key(
+            KeyCode::KeyC,
+            InputTrigger::Pressed,
+            SpawnPrimitiveCommand {
+                primitive_type: PrimitiveType::Cube,
+                pipeline_key: PipelineKey::DebugLine3D,
+                texture_name: None,
+            },
+        );
+        scheduler.bind_key(
+            KeyCode::KeyI,
+            InputTrigger::Pressed,
+            SpawnPrimitiveCommand {
+                primitive_type: PrimitiveType::Circle,
+                pipeline_key: PipelineKey::Mesh3D,
+                texture_name: None,
+            },
+        );
+        scheduler.bind_key(
+            KeyCode::KeyP,
+            InputTrigger::Pressed,
+            SpawnPrimitiveCommand {
+                primitive_type: PrimitiveType::Polygon,
+                pipeline_key: PipelineKey::Mesh3D,
+                texture_name: None,
+            },
+        );
+        scheduler.bind_key(
+            KeyCode::KeyE,
+            InputTrigger::Pressed,
+            SpawnPrimitiveCommand {
+                primitive_type: PrimitiveType::Sphere,
+                pipeline_key: PipelineKey::Lit3D,
+                texture_name: None,
+            },
+        );
+        scheduler.bind_key(
+            KeyCode::KeyU,
+            InputTrigger::Pressed,
+            UpdatePrimitiveMeshesCommand,
+        );
     }
 
     fn use_skybox_texture(&self, name: &str) -> SkyboxTextureHandle {
@@ -852,10 +851,14 @@ impl App {
     }
 }
 
-fn create_scheduler(input_system: InputSystem) -> Scheduler{
-    let mut scheduler=Scheduler::with_input_system(input_system);
-    scheduler.add_update_system(Box::new(RotatorSystem));
-    scheduler.add_update_system(Box::new(CameraSystem));
+fn create_scheduler() -> Scheduler {
+    let mut scheduler = Scheduler::default();
+    // input command
+    App::bind_input_commands(&mut scheduler);
+    // update system
+    scheduler.add_update_system("rotator",RotatorSystem);
+    scheduler.add_update_system("camera",CameraSystem);
+
     scheduler
 }
 
@@ -1093,41 +1096,42 @@ mod tests {
 
     #[test]
     fn register_and_reset_input_commands() {
-        let mut input_system = InputSystem::new()
-            .bind(
-                KeyCode::ArrowLeft,
-                InputTrigger::Pressed,
-                InputCommand::DespawnLast,
-            )
-            .bind(
-                KeyCode::ArrowRight,
-                InputTrigger::Pressed,
-                InputCommand::SpawnVikingRoom,
-            )
-            .bind(
-                KeyCode::ArrowRight,
-                InputTrigger::Pressed,
-                InputCommand::SpawnVikingRoom,
-            )
-            .bind(
-                KeyCode::KeyT,
-                InputTrigger::Pressed,
-                InputCommand::SpawnPrimitive {
-                    primitive_type: PrimitiveType::Triangle,
-                    pipeline_key: PipelineKey::Lit3D,
-                    texture_name: Some("face"),
-                },
-            );
+        let mut scheduler = Scheduler::default();
+        scheduler.bind_key(
+            KeyCode::ArrowLeft,
+            InputTrigger::Pressed,
+            DespawnLastCommand,
+        );
+        scheduler.bind_key(
+            KeyCode::ArrowRight,
+            InputTrigger::Pressed,
+            SpawnVikingRoomCommand,
+        );
+        scheduler.bind_key(
+            KeyCode::ArrowRight,
+            InputTrigger::Pressed,
+            SpawnVikingRoomCommand,
+        );
+        scheduler.bind_key(
+            KeyCode::KeyT,
+            InputTrigger::Pressed,
+            SpawnPrimitiveCommand {
+                primitive_type: PrimitiveType::Triangle,
+                pipeline_key: PipelineKey::Lit3D,
+                texture_name: Some("face"),
+            },
+        );
 
         // check not to register same command
-        assert_eq!(input_system.key_bindings.len(), 3);
-        assert!(input_system.key_bindings.contains(&KeyBinding {
+        assert_eq!(scheduler.input_system.key_bindings.len(), 3);
+        assert!(scheduler.input_system.key_bindings.contains(&KeyBinding {
             key: KeyCode::ArrowRight,
             trigger: InputTrigger::Pressed,
-            command: InputCommand::SpawnVikingRoom,
+            command_id: "spawn_viking_room".to_string(),
+            command: std::sync::Arc::new(SpawnVikingRoomCommand),
         }));
 
-        input_system.reset();
-        assert!(input_system.key_bindings.is_empty());
+        scheduler.input_system.reset();
+        assert!(scheduler.input_system.key_bindings.is_empty());
     }
 }

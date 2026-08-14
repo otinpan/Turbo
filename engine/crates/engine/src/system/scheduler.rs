@@ -2,8 +2,8 @@ use anyhow::Result;
 use renderer_vulkan::VulkanRenderer;
 
 use super::{
-    CameraSystem, CommandContext, CommandSystem, InputCommand, InputSystem, RenderSystem,
-    RotatorSystem, UpdateContext, UpdateSystem,
+    CameraSystem, Command, CommandContext, CommandQueue, CommandSystem, InputSystem, InputTrigger,
+    RenderSystem, RotatorSystem, UpdateContext, UpdateSystem, ScheduledUpdateSystem,
 };
 
 use crate::{Input, Registry};
@@ -12,7 +12,7 @@ pub struct Scheduler {
     pub command_system: CommandSystem,
     pub input_system: InputSystem,
     pub render_system: RenderSystem,
-    update_systems: Vec<Box<dyn UpdateSystem>>,
+    update_systems: Vec<ScheduledUpdateSystem>,
 }
 
 impl Scheduler {
@@ -27,7 +27,7 @@ impl Scheduler {
         command_system: CommandSystem,
         input_system: InputSystem,
         render_system: RenderSystem,
-        update_systems: Vec<Box<dyn UpdateSystem>>,
+        update_systems: Vec<ScheduledUpdateSystem>,
     ) -> Self {
         Self {
             command_system,
@@ -37,11 +37,29 @@ impl Scheduler {
         }
     }
 
-    pub fn add_update_system(&mut self, update_system: Box<dyn UpdateSystem>) {
-        self.update_systems.push(update_system);
+    pub fn add_update_system<S>(&mut self, name: &str, system: S)
+    where
+        S: UpdateSystem + 'static,
+    {
+        if self.update_systems.iter().any(|s| s.name == name) {
+            return;
+        }
+
+        self.update_systems.push(ScheduledUpdateSystem {
+            name: name.to_string(),
+            system: Box::new(system),
+            enabled: true,
+        });
     }
 
-    pub fn run_input_stage(&self, input: &Input) -> Vec<InputCommand> {
+    pub fn bind_key<C>(&mut self, key: winit::keyboard::KeyCode, trigger: InputTrigger, command: C)
+    where
+        C: Command + 'static,
+    {
+        self.input_system.bind_in_place(key, trigger, command);
+    }
+
+    pub fn run_input_stage(&self, input: &Input) -> CommandQueue {
         self.input_system.update(input)
     }
 
@@ -50,8 +68,10 @@ impl Scheduler {
     }
 
     pub fn run_update_stage(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
-        for system in &mut self.update_systems {
-            system.update(context)?
+        for scheduled_system in &mut self.update_systems {
+            if scheduled_system.enabled{
+                scheduled_system.system.update(context)?
+            }
         }
         Ok(())
     }
@@ -71,7 +91,7 @@ impl Default for Scheduler {
             command_system: CommandSystem,
             input_system: InputSystem::new(),
             render_system: RenderSystem,
-            update_systems: vec![Box::new(RotatorSystem), Box::new(CameraSystem)],
+            update_systems: Vec::new(),
         }
     }
 }

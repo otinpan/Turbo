@@ -63,21 +63,18 @@
   - ~~ComponentPoolの作成~~
 	- ~~worldにComponentPoolを持たせ、WorldObjectを削除~~
 	- ~~system作成~~
-		- app.rs: update_camera, prepare_renderer
-		- world.rs: update
-		- -> src/system/camera.rs, rotate.rs, rander.rs
+		- ~~app.rs: update_camera, prepare_renderer~~
+		- ~~world.rs: update~~
+		- ~~-> src/system/camera.rs, rotate.rs, rander.rs~~
 	- ~~Registry作成~~
 		- has ComponentPools
 	- ~~App::process_input -> InputSystem / SpawnSystem ~~
 	- ~~System を Scheduleにまとめる~~
-	- Appのcommand処理をcommand_systemに移動する
-	- command入力を含めた処理をすべて同じqueueで管理する
-		- InputStage, CommandStage, UpdateStage, RenderStage
-		- 依存関係
-	- Appが持つmodelsやtexturesをworld.Resourceに移動する
-	- Appからself.world.registry.entities()と直接触るのではなく、world.registry()みたいな関数を作る
+	- ~~Appのcommand処理をcommand_systemに移動する~~
+	- ~~Appが持つmodelsやtexturesをResourceに移動する~~
+	- ~~ユーザがsystemを登録できるようなインターフェースの作成~~
 	- query3 や optional component query が必要になったら追加
-	- Registry を固定型のまま進めるか、TypeIdベースにするか判断
+	- ScheduledUpdateSystemを優先度を扱えるように作成
 * オブジェクトAPI
   - spawn_model
   - spawn_cube

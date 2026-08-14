@@ -39,7 +39,35 @@ impl UpdateSystem for RotatorSystem {
 ```
 then add to scheduler.
 ```rust
-scheduler.add_update_system(Box::new(RotatorSystem));
+scheduler.add_update_system("rotator",Box::new(RotatorSystem));
+```
+### Bind Input Key
+when you bind key and system, you use `scheduler::bind_key()`.
+firstly, you have to create system struct obtaining `Command` trait.
+```rust
+impl Command for DespawnLastCommand {
+    fn id(&self) -> String {
+        "despawn_last".to_string()
+    }
+
+    fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
+        let id = context.world.registry.entities().last().copied();
+
+        if let Some(id) = id {
+            context.world.despawn(id);
+        }
+
+        Ok(())
+    }
+}
+```
+then, you register this system to scheduler.
+```rust
+scheduler.bind_key(
+    KeyCode::ArrowLeft,
+    InputTrigger::Pressed,
+    DespawnLastCommand,
+);
 ```
 
 ## RENDERING
