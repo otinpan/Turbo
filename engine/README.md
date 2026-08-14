@@ -70,7 +70,10 @@
 		- has ComponentPools
 	- ~~App::process_input -> InputSystem / SpawnSystem ~~
 	- ~~System を Scheduleにまとめる~~
-	- Appのcommand処理を分ける
+	- Appのcommand処理をcommand_systemに移動する
+	- command入力を含めた処理をすべて同じqueueで管理する
+		- InputStage, CommandStage, UpdateStage, RenderStage
+		- 依存関係
 	- Appが持つmodelsやtexturesをworld.Resourceに移動する
 	- Appからself.world.registry.entities()と直接触るのではなく、world.registry()みたいな関数を作る
 	- query3 や optional component query が必要になったら追加

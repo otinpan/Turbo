@@ -9,7 +9,7 @@ use crate::app::DEFAULT_TEXTURE;
 use crate::primitive::{
     PrimitiveMesh, PrimitiveShape, PrimitiveType, spawn_primitive_from_mesh, update_primitive_mesh,
 };
-use crate::{Input, Material, MeshRenderer, World};
+use crate::{Resources, Input, Material, MeshRenderer, World};
 
 pub type Vec3 = Vector3<f32>;
 
@@ -18,10 +18,9 @@ pub struct CommandContext<'a> {
     pub world: &'a mut World,
     pub renderer: &'a mut VulkanRenderer,
     pub input: &'a Input,
-    pub primitive_meshes: &'a mut Vec<PrimitiveMesh>,
-    pub models: &'a HashMap<String, MeshHandle>,
-    pub textures: &'a HashMap<String, TextureHandle>,
-    pub positions: &'a [Vec3],
+    pub resources: &'a mut Resources,
+
+    pub positions: &'a Vec<Vec3>,
 }
 
 #[derive(Clone, Debug)]
@@ -71,10 +70,10 @@ impl CommandSystem {
     }
 
     fn spawn_viking_room_from_input(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        let viking_room_mesh3d = Self::use_model(context.models, "viking_room")?;
-        let viking_room_debug_line = Self::use_model(context.models, "viking_room_debug_line")?;
-        let viking_room_lit3d = Self::use_model(context.models, "viking_room_lit3d")?;
-        let viking_texture = Self::use_texture(context.textures, "viking_room");
+        let viking_room_mesh3d = Self::use_model(&context.resources.models, "viking_room")?;
+        let viking_room_debug_line = Self::use_model(&context.resources.models, "viking_room_debug_line")?;
+        let viking_room_lit3d = Self::use_model(&context.resources.models, "viking_room_lit3d")?;
+        let viking_texture = Self::use_texture(&context.resources.textures, "viking_room");
         let viking_meshes = [
             viking_room_mesh3d,
             viking_room_debug_line,
@@ -141,10 +140,10 @@ impl CommandSystem {
     ) {
         let position = Self::mouse_position_on_spawn_plane(context.input);
         let texture = texture_name
-            .map(|name| Self::use_texture(context.textures, name))
+            .map(|name| Self::use_texture(&context.resources.textures, name))
             .unwrap_or(DEFAULT_TEXTURE);
 
-        if let Some(mesh) = Self::primitive_handle(context.primitive_meshes, primitive_type) {
+        if let Some(mesh) = Self::primitive_handle(&context.resources.primitive_meshes, primitive_type) {
             if let Err(e) = spawn_primitive_from_mesh(
                 context.world,
                 mesh,
@@ -166,7 +165,7 @@ impl CommandSystem {
     }
 
     fn update_primitive_meshes_from_input(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        if let Some(mesh) = Self::primitive_mesh(context.primitive_meshes, PrimitiveType::Polygon) {
+        if let Some(mesh) = Self::primitive_mesh(&context.resources.primitive_meshes, PrimitiveType::Polygon) {
             unsafe {
                 update_primitive_mesh(
                     context.renderer,
@@ -184,7 +183,7 @@ impl CommandSystem {
                 )?;
             }
         }
-        if let Some(mesh) = Self::primitive_mesh(context.primitive_meshes, PrimitiveType::Sphere) {
+        if let Some(mesh) = Self::primitive_mesh(&context.resources.primitive_meshes, PrimitiveType::Sphere) {
             unsafe {
                 update_primitive_mesh(
                     context.renderer,
@@ -198,7 +197,7 @@ impl CommandSystem {
                 )?;
             }
         }
-        if let Some(mesh) = Self::primitive_mesh(context.primitive_meshes, PrimitiveType::Rectangle)
+        if let Some(mesh) = Self::primitive_mesh(&context.resources.primitive_meshes, PrimitiveType::Rectangle)
         {
             unsafe {
                 update_primitive_mesh(

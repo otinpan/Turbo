@@ -34,26 +34,33 @@ impl Scheduler {
         }
     }
 
-    pub fn input_commands(&self, input: &Input) -> Vec<InputCommand> {
+    pub fn run_input_stage(&self, input: &Input) -> Vec<InputCommand> {
         self.input_system.update(input)
     }
 
-    pub fn execute_commands(&self, context: &mut CommandContext<'_>) -> Result<()> {
+    pub fn run_command_stage(&self, context: &mut CommandContext<'_>) -> Result<()> {
         self.command_system.update(context)
     }
 
-    pub fn update(
+    pub fn run_update_stage(
         &mut self,
         registry: &mut Registry,
-        renderer: &mut VulkanRenderer,
         input: &Input,
         delta_time: f32,
     ) -> Result<()> {
         self.rotator_system.update(registry, delta_time)?;
         self.camera_system.update(registry, input, delta_time)?;
-        self.render_system.update(registry, renderer)?;
         Ok(())
     }
+
+    pub fn run_render_stage(
+        &mut self,
+        registry: &mut Registry,
+        renderer: &mut VulkanRenderer,
+    ) -> Result<()>{
+        self.render_system.update(registry,renderer)
+    }
+
 }
 
 impl Default for Scheduler {

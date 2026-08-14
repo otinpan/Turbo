@@ -22,7 +22,7 @@ use crate::primitive::{
 
 use super::{
     Camera, CommandContext, EntityId, Input, InputCommand, InputSystem, InputTrigger, Material,
-    Scheduler, Time, World,
+    Scheduler, Time, World, Resources,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -33,18 +33,13 @@ pub struct App {
     pub world: World,
     pub input: Input,
     pub time: Time,
-    // model
-    models: HashMap<String, MeshHandle>,
-    pub primitive_meshes: Vec<PrimitiveMesh>,
-    textures: HashMap<String, TextureHandle>,
-    // skybox
-    pub skybox_mesh: Option<MeshHandle>,
-    skybox_textures: HashMap<String, SkyboxTextureHandle>,
-
-    positions: Vec<Vec3>,
+    // resource
+    resources: Resources,
 
     // system
     scheduler: Scheduler,
+
+    positions: Vec<Vec3>,
 }
 
 impl App {
@@ -94,11 +89,7 @@ impl App {
             world,
             input,
             time: Time::default(),
-            models,
-            primitive_meshes,
-            textures,
-            skybox_mesh,
-            skybox_textures,
+            resources: Resources { models, textures, primitive_meshes, skybox_mesh, skybox_textures },
             positions,
             scheduler: Scheduler {
                 input_system,
@@ -111,13 +102,15 @@ impl App {
             app.set_skybox(app.use_skybox_texture("ghost"))?;
             // create primitive ////////////////////////////
             unsafe {
-                let face_texture = app.textures.get("face").copied().unwrap_or(DEFAULT_TEXTURE);
+                let face_texture = app.resources.textures.get("face").copied().unwrap_or(DEFAULT_TEXTURE);
                 let ghost_texture = app
+                    .resources
                     .textures
                     .get("ghost")
                     .copied()
                     .unwrap_or(DEFAULT_TEXTURE);
                 let escapee_texture = app
+                    .resources
                     .textures
                     .get("escapee")
                     .copied()
@@ -447,41 +440,34 @@ impl App {
 
     pub fn update(&mut self) -> Result<()> {
         self.time.update();
+        let delta_time=self.time.delta_seconds();
 
-        self.process_input()?;
-        self.update_system()?;
+        let mut commands=self.scheduler.run_input_stage(&self.input);
+
+        self.scheduler.run_command_stage(&mut CommandContext {
+            commands: &mut commands,
+            world: &mut self.world,
+            renderer: &mut self.renderer,
+            input: &self.input,
+            resources: &mut self.resources,
+            positions: &self.positions,
+        })?;
+
+        self.scheduler.run_update_stage(
+            &mut self.world.registry,
+            &self.input,
+            delta_time,
+        )?;
+
+        self.scheduler.run_render_stage(
+            &mut self.world.registry,
+            &mut self.renderer,
+        )?;
 
         self.input.clear_transitions();
         Ok(())
     }
 
-    fn update_system(&mut self) -> Result<()> {
-        let delta_time = self.time.delta_seconds();
-        self.scheduler.update(
-            &mut self.world.registry,
-            &mut self.renderer,
-            &self.input,
-            delta_time,
-        )?;
-
-        Ok(())
-    }
-
-    fn process_input(&mut self) -> Result<()> {
-        let mut commands = self.scheduler.input_commands(&self.input);
-        let mut context = CommandContext {
-            commands: &mut commands,
-            world: &mut self.world,
-            renderer: &mut self.renderer,
-            input: &self.input,
-            primitive_meshes: &mut self.primitive_meshes,
-            models: &self.models,
-            textures: &self.textures,
-            positions: &self.positions,
-        };
-
-        self.scheduler.execute_commands(&mut context)
-    }
 
     fn create_input_system() -> InputSystem {
         InputSystem::new()
@@ -557,7 +543,8 @@ impl App {
     }
 
     fn use_skybox_texture(&self, name: &str) -> SkyboxTextureHandle {
-        self.skybox_textures
+        self.resources
+            .skybox_textures
             .get(name)
             .copied()
             .unwrap_or(DEFAULT_SKYBOX_TEXTURE)
@@ -600,7 +587,7 @@ impl App {
         spawn_triangle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             p0,
             p1,
             p2,
@@ -621,7 +608,7 @@ impl App {
         spawn_triangle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             vec3(0.0, p0.x, p0.y),
             vec3(0.0, p1.x, p1.y),
             vec3(0.0, p2.x, p2.y),
@@ -645,7 +632,7 @@ impl App {
         spawn_rectangle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             pos,
             width,
             height,
@@ -669,7 +656,7 @@ impl App {
         spawn_rectangle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             vec3(0.0, pos.x, pos.y),
             width,
             height,
@@ -692,7 +679,7 @@ impl App {
         spawn_cube_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             pos,
             length,
             rotation,
@@ -714,7 +701,7 @@ impl App {
         spawn_circle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             pos,
             radius,
             segments,
@@ -735,7 +722,7 @@ impl App {
         spawn_circle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             vec3(0.0, pos.x, pos.y),
             radius,
             segments,
@@ -755,7 +742,7 @@ impl App {
         spawn_polygon_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             points,
             material,
         )
@@ -773,7 +760,7 @@ impl App {
         spawn_polygon_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             points,
             material,
         )
@@ -794,7 +781,7 @@ impl App {
         spawn_sphere_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             center,
             radius,
             rings,
@@ -814,7 +801,7 @@ impl App {
         spawn_line_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             pos0,
             pos1,
             material,
@@ -839,7 +826,7 @@ impl App {
         spawn_rectangle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.primitive_meshes,
+            &mut self.resources.primitive_meshes,
             center,
             width,
             length,
@@ -850,6 +837,7 @@ impl App {
 
     pub unsafe fn set_skybox(&mut self, texture: SkyboxTextureHandle) -> Result<()> {
         let mesh = self
+            .resources
             .skybox_mesh
             .ok_or_else(|| anyhow!("Skybox mesh has not been created."))?;
 
