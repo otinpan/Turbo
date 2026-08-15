@@ -28,20 +28,15 @@ impl RenderSystem {
 
         renderer.set_render_items(render_items);
 
-        if let Some(camera_entity) = registry.active_camera_entity() {
-            if let Some((_, transform, camera)) = registry
-                .query2::<Transform, Camera>()
-                .find(|(entity, _, _)| *entity == camera_entity)
-            {
-                renderer.set_camera(RenderCamera {
-                    position: transform.position,
-                    target: camera.target,
-                    up: vec3(0.0, 0.0, 1.0),
-                    fov_y: camera.fov_y,
-                    near: camera.near,
-                    far: camera.far,
-                });
-            }
+        if let Some((_, transform, camera)) = registry.query2::<Transform, Camera>().next() {
+            renderer.set_camera(RenderCamera {
+                position: transform.position,
+                target: camera.target,
+                up: vec3(0.0, 0.0, 1.0),
+                fov_y: camera.fov_y,
+                near: camera.near,
+                far: camera.far,
+            });
         }
 
         Ok(())

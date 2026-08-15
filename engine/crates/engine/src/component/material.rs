@@ -1,8 +1,8 @@
 use cgmath::Vector3;
 use renderer_vulkan::{PipelineKey, TextureHandle};
 
+use super::Component;
 use crate::app::DEFAULT_TEXTURE;
-
 pub type Vec3 = Vector3<f32>;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -31,6 +31,8 @@ impl Material {
         }
     }
 }
+
+impl Component for Material {}
 
 impl Default for Material {
     fn default() -> Self {

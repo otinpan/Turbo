@@ -1,3 +1,4 @@
+use super::Component;
 // Camera ///////////////////////////////////////
 #[derive(Clone, Debug)]
 pub struct Camera {
@@ -8,3 +9,5 @@ pub struct Camera {
     pub yaw: f32,
     pub pitch: f32,
 }
+
+impl Component for Camera {}

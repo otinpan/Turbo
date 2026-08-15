@@ -21,15 +21,8 @@ impl CameraSystem {
         let mouse_sensitivity = 0.003;
         let max_pitch = std::f32::consts::FRAC_PI_2 - 0.01;
 
-        let Some(camera_entity) = registry.active_camera_entity() else {
-            return Ok(());
-        };
-
-        for (entity, transform, camera) in registry.query2_mut_mut::<Transform, Camera>() {
-            if entity != camera_entity {
-                continue;
-            }
-
+        if let Some((_, transform, camera)) = registry.query2_mut_mut::<Transform, Camera>().next()
+        {
             let mouse_delta = input.mouse_delta();
             if input.mouse_button_down(MouseButton::Right) {
                 camera.yaw -= mouse_delta.x * mouse_sensitivity;
@@ -66,7 +59,6 @@ impl CameraSystem {
             }
 
             camera.target = transform.position + direction;
-            break;
         }
 
         Ok(())

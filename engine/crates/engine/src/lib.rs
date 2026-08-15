@@ -17,7 +17,9 @@ mod time;
 mod world;
 
 pub use app::App;
-pub use component::{Camera, CameraComponent, Material, MeshRenderer, Rotator, Visibility};
+pub use component::{
+    Camera, CameraComponent, Component, Material, MeshRenderer, Rotator, Visibility,
+};
 pub use ecs::{ComponentPool, EntityId, Registry};
 pub use input::Input;
 pub use primitive::{PrimitiveMesh, PrimitiveType};

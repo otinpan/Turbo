@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use turbo_math::Transform;
 
 use super::{Command, CommandContext};
-use crate::{Material, MeshRenderer};
+use crate::{Material, MeshRenderer, Rotator};
 
 #[derive(Clone, Debug)]
 pub struct SpawnVikingRoomCommand;
@@ -59,14 +59,20 @@ impl Command for SpawnVikingRoomCommand {
                 },
             ) {
                 Ok(mesh_renderer) => {
-                    context.world.spawn(
+                    let entity = context.world.spawn();
+                    context.world.registry.add_component(
+                        entity,
                         Transform {
                             position: context.positions[index],
                             ..Default::default()
                         },
-                        Some(mesh_renderer),
-                        None,
-                        vec3(20.0, 0.0, 0.0),
+                    );
+                    context.world.registry.add_component(entity, mesh_renderer);
+                    context.world.registry.add_component(
+                        entity,
+                        Rotator {
+                            speed: vec3(20.0, 0.0, 0.0),
+                        },
                     );
                 }
                 Err(e) => {

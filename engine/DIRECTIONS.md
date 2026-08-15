@@ -5,18 +5,32 @@ When you want to create entity, you use `world.spawn()`.
 ```rust
 pub fn spawn(
     &mut self,
-    transform: Transform,
-    mesh_renderer: Option<MeshRenderer>,
-    camera: Option<Camera>,
-    rotate_speed: Vec3,
 ) -> EntityId {
     let entity = self.registry.create();
-
-    self.registry.add_component(entity, transform);
-    self.registry.add_component(entity, Visibility::default());
-    ...
+}
 ```
-`spawn()` create Entity and attach specified component.
+`spawn()` create Entity.
+
+### Create and Attach Component
+To attach components to entity, you have to create component firstly. Components have to have `Component` trait like this.
+```rust
+#[derive(Clone, Debug)]
+pub struct Rotator {
+    pub speed: Vector3<f32>,
+}
+
+impl Component for Rotator {}
+```
+Then, you can attach component using `Registry::add_component(entity, component)`.
+
+```rust
+world.registry.add_component(
+    entity,
+    Rotator {
+        speed: Vec3(20.0,0.0,0.0)
+    },
+);
+```
 
 ### Create System
 System is classified

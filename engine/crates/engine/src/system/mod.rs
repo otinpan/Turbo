@@ -19,4 +19,4 @@ pub use command::{
 pub use input_system::{CommandQueue, CommandRef, InputSystem, InputTrigger, KeyBinding};
 pub use render_system::RenderSystem;
 pub use scheduler::Scheduler;
-pub use update::{CameraSystem, ScheduledUpdateSystem, RotatorSystem, UpdateContext, UpdateSystem};
+pub use update::{CameraSystem, RotatorSystem, ScheduledUpdateSystem, UpdateContext, UpdateSystem};

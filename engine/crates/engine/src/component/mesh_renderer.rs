@@ -1,3 +1,4 @@
+use super::Component;
 use super::Material;
 use anyhow::{Result, bail};
 use renderer_vulkan::MeshHandle;
@@ -21,3 +22,5 @@ impl MeshRenderer {
         Ok(Self { mesh, material })
     }
 }
+
+impl Component for MeshRenderer {}

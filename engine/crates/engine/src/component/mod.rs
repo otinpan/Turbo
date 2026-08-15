@@ -18,3 +18,10 @@ pub use material::Material;
 pub use mesh_renderer::MeshRenderer;
 pub use rotator::Rotator;
 pub use visibility::Visibility;
+
+use turbo_math::Transform;
+
+// Component does not have short reference like &'a str, &String
+pub trait Component: 'static {}
+
+impl Component for Transform {}

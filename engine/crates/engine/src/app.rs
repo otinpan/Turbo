@@ -21,9 +21,9 @@ use crate::primitive::{
 };
 
 use super::{
-    Camera, CommandContext, DespawnLastCommand, EntityId, Input, InputTrigger, Material, Resources,
-    Scheduler, SpawnPrimitiveCommand, SpawnVikingRoomCommand, Time, UpdateContext,
-    UpdatePrimitiveMeshesCommand, World, RotatorSystem, CameraSystem,
+    Camera, CameraSystem, CommandContext, DespawnLastCommand, EntityId, Input, InputTrigger,
+    Material, Registry, Resources, RotatorSystem, Scheduler, SpawnPrimitiveCommand,
+    SpawnVikingRoomCommand, Time, UpdateContext, UpdatePrimitiveMeshesCommand, World,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -46,7 +46,8 @@ pub struct App {
 impl App {
     pub unsafe fn create(window: &Window) -> Result<Self> {
         let mut renderer = VulkanRenderer::create(window)?;
-        let mut world = World::default();
+        let registry = create_registry();
+        let world = World { registry };
 
         // load data
         let models = load_models(&mut renderer)?;
@@ -61,24 +62,6 @@ impl App {
             vec3(0.0, -1.25, -1.0),
             vec3(0.0, 1.25, -1.0),
         ];
-
-        // camera //////////////////
-        world.spawn(
-            Transform {
-                position: vec3(-1.0, 0.0, 0.0),
-                ..Default::default()
-            },
-            None,
-            Some(Camera {
-                target: vec3(0.0, 0.0, 0.0),
-                fov_y: 45.0,
-                near: 0.1,
-                far: 100.0,
-                yaw: std::f32::consts::PI,
-                pitch: 0.0,
-            }),
-            vec3(0.0, 0.0, 0.0),
-        );
 
         let mut input = Input::default();
         let window_size = window.inner_size();
@@ -856,10 +839,35 @@ fn create_scheduler() -> Scheduler {
     // input command
     App::bind_input_commands(&mut scheduler);
     // update system
-    scheduler.add_update_system("rotator",RotatorSystem);
-    scheduler.add_update_system("camera",CameraSystem);
+    scheduler.add_update_system("rotator", RotatorSystem);
+    scheduler.add_update_system("camera", CameraSystem);
 
     scheduler
+}
+
+fn create_registry() -> Registry {
+    let mut registry = Registry::default();
+    let camera = registry.create();
+    registry.add_component(
+        camera,
+        Camera {
+            target: vec3(0.0, 0.0, 0.0),
+            fov_y: 45.0,
+            near: 0.1,
+            far: 100.0,
+            yaw: std::f32::consts::PI,
+            pitch: 0.0,
+        },
+    );
+    registry.add_component(
+        camera,
+        Transform {
+            position: vec3(-1.0, 0.0, 0.0),
+            ..Default::default()
+        },
+    );
+
+    registry
 }
 
 unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, MeshHandle>> {
@@ -1053,20 +1061,22 @@ mod tests {
             vertex_layout: VertexLayout::Mesh3D,
         };
 
+        let camera = world.spawn();
+        world.registry.add_component(camera, Transform::default());
+        world.registry.add_component(
+            camera,
+            Camera {
+                target: vec3(0.0, 0.0, 0.0),
+                fov_y: 45.0,
+                near: 0.1,
+                far: 100.0,
+                yaw: 0.0,
+                pitch: 0.0,
+            },
+        );
+
         let ids = vec![
-            world.spawn(
-                Transform::default(),
-                None,
-                Some(Camera {
-                    target: vec3(0.0, 0.0, 0.0),
-                    fov_y: 45.0,
-                    near: 0.1,
-                    far: 100.0,
-                    yaw: 0.0,
-                    pitch: 0.0,
-                }),
-                vec3(0.0, 0.0, 0.0),
-            ),
+            camera,
             spawn_primitive_from_mesh(
                 &mut world,
                 triangle_mesh.handle,

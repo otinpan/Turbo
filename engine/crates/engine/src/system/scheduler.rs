@@ -2,8 +2,8 @@ use anyhow::Result;
 use renderer_vulkan::VulkanRenderer;
 
 use super::{
-    CameraSystem, Command, CommandContext, CommandQueue, CommandSystem, InputSystem, InputTrigger,
-    RenderSystem, RotatorSystem, UpdateContext, UpdateSystem, ScheduledUpdateSystem,
+    Command, CommandContext, CommandQueue, CommandSystem, InputSystem, InputTrigger, RenderSystem,
+    ScheduledUpdateSystem, UpdateContext, UpdateSystem,
 };
 
 use crate::{Input, Registry};
@@ -69,7 +69,7 @@ impl Scheduler {
 
     pub fn run_update_stage(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
         for scheduled_system in &mut self.update_systems {
-            if scheduled_system.enabled{
+            if scheduled_system.enabled {
                 scheduled_system.system.update(context)?
             }
         }

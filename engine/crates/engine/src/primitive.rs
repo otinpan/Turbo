@@ -578,12 +578,17 @@ pub fn spawn_primitive_from_mesh(
     material: Material,
     transform: Transform,
 ) -> Result<EntityId> {
-    Ok(world.spawn(
-        transform,
-        Some(MeshRenderer::new(mesh, material)?),
-        None,
-        vec3(0.0, 0.0, 0.0),
-    ))
+    let mesh_renderer = MeshRenderer::new(mesh, material)?;
+    let entity = world.spawn();
+
+    let added_transform = world.registry.add_component(entity, transform);
+    let added_mesh_renderer = world.registry.add_component(entity, mesh_renderer);
+
+    if added_transform && added_mesh_renderer {
+        Ok(entity)
+    } else {
+        bail!("failed to spawn primitive")
+    }
 }
 
 unsafe fn spawn_shape_with_material(
