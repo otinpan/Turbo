@@ -24,7 +24,7 @@ use super::{
     Camera, CameraSystem, CommandContext, DespawnLastCommand, EntityId, Input, InputTrigger,
     Material, Registry, Resources, RotatorSystem, Scheduler, SpawnPrimitiveCommand,
     SpawnVikingRoomCommand, Time, UpdateContext, UpdatePrimitiveMeshesCommand, World,
-    DebugMonitor,
+    DebugMonitor, MeshRenderer, Visibility,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -108,6 +108,20 @@ impl App {
                     .get("escapee")
                     .copied()
                     .unwrap_or(DEFAULT_TEXTURE);
+                let viking_room=app.spawn_model(
+                    "viking_room_lit3d",
+                    Transform{
+                        position: vec3(-5.0,0.0,2.0),
+                        ..Default::default()
+                    },
+                    Material {
+                        color: vec3(1.0,1.0,0.0),
+                        alpha: 1.0,
+                        use_texture: false,
+                        texture: ghost_texture,
+                        pipeline_key: PipelineKey::Lit3D
+                    }
+                );
                 let triangle_id0 = app.spawn_triangle_3d(
                     vec3(5.0, -0.2, -0.5),
                     vec3(5.0, 0.5, 0.2),
@@ -837,6 +851,27 @@ impl App {
             .ok_or_else(|| anyhow!("Skybox mesh has not been created."))?;
 
         self.renderer.set_skybox(mesh, texture)
+    }
+
+    pub fn spawn_model(
+        &mut self,
+        model_name: &str,
+        transform: Transform,
+        material: Material,
+    ) -> Result<EntityId> {
+        let mesh = self
+            .resources
+            .models
+            .get(model_name)
+            .copied()
+            .ok_or_else(|| anyhow!("model not found: {model_name}"))?;
+
+        let entity = self.world.spawn();
+        self.world.add_component(entity, transform);
+        self.world.add_component(entity, MeshRenderer { mesh, material });
+        self.world.add_component(entity, Visibility::default());
+
+        Ok(entity)
     }
 }
 
