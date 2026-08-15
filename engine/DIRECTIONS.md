@@ -32,6 +32,25 @@ world.registry.add_component(
 );
 ```
 
+### Name and Tags to Entity
+Entities can have name and tags. Entity be able to have one name and optional tags.
+```rust
+self.world.set_name(entity, ["Model0"]);
+self.world.set_tags(entity, ["Model", "VikingRoom"]);
+```
+You can monitor them.
+```rust
+let named_entities = context.world.get_all_named_entities();
+let taged_entities = context.world.get_all_taged_entities();
+for (name, entity) in named_entities {
+    log::debug!("Named entity: {name} -> {entity:?}");
+}
+
+for (tag, entity) in taged_entities {
+    log::debug!("Tagged entity: {tag} -> {entity:?}");
+}
+```
+
 ### Create System
 System is classified
 * InputSystem: detecting input, this create InputCommand queue.

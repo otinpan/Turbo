@@ -21,10 +21,10 @@ use crate::primitive::{
 };
 
 use super::{
-    Camera, CameraSystem, CommandContext, DespawnLastCommand, EntityId, Input, InputTrigger,
-    Material, Registry, Resources, RotatorSystem, Scheduler, SpawnPrimitiveCommand,
-    SpawnVikingRoomCommand, Time, UpdateContext, UpdatePrimitiveMeshesCommand, World,
-    DebugMonitor, MeshRenderer, Visibility,
+    Camera, CameraSystem, CommandContext, DebugMonitor, DespawnLastCommand, EntityId, Input,
+    InputTrigger, Material, MeshRenderer, Registry, Resources, RotatorSystem, Scheduler,
+    SpawnPrimitiveCommand, SpawnVikingRoomCommand, Time, UpdateContext,
+    UpdatePrimitiveMeshesCommand, Visibility, World,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -108,19 +108,19 @@ impl App {
                     .get("escapee")
                     .copied()
                     .unwrap_or(DEFAULT_TEXTURE);
-                let viking_room=app.spawn_model(
+                let viking_room = app.spawn_model(
                     "viking_room_lit3d",
-                    Transform{
-                        position: vec3(-5.0,0.0,2.0),
+                    Transform {
+                        position: vec3(-5.0, 0.0, 2.0),
                         ..Default::default()
                     },
                     Material {
-                        color: vec3(1.0,1.0,0.0),
+                        color: vec3(1.0, 1.0, 0.0),
                         alpha: 1.0,
                         use_texture: false,
                         texture: ghost_texture,
-                        pipeline_key: PipelineKey::Lit3D
-                    }
+                        pipeline_key: PipelineKey::Lit3D,
+                    },
                 );
                 let triangle_id0 = app.spawn_triangle_3d(
                     vec3(5.0, -0.2, -0.5),
@@ -469,7 +469,6 @@ impl App {
         self.scheduler
             .run_render_stage(&mut self.world.registry, &mut self.renderer)?;
 
-
         self.input.clear_transitions();
         Ok(())
     }
@@ -544,11 +543,7 @@ impl App {
             InputTrigger::Pressed,
             UpdatePrimitiveMeshesCommand,
         );
-        scheduler.bind_key(
-            KeyCode::Enter,
-            InputTrigger::Pressed,
-            DebugMonitor,
-        )
+        scheduler.bind_key(KeyCode::Enter, InputTrigger::Pressed, DebugMonitor)
     }
 
     fn use_skybox_texture(&self, name: &str) -> SkyboxTextureHandle {
@@ -868,8 +863,10 @@ impl App {
 
         let entity = self.world.spawn();
         self.world.add_component(entity, transform);
-        self.world.add_component(entity, MeshRenderer { mesh, material });
+        self.world
+            .add_component(entity, MeshRenderer { mesh, material });
         self.world.add_component(entity, Visibility::default());
+        self.world.set_tags(entity, ["Model", model_name]);
 
         Ok(entity)
     }

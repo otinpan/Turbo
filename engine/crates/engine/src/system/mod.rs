@@ -13,8 +13,8 @@ mod scheduler;
 mod update;
 
 pub use command::{
-    Command, CommandContext, CommandSystem, DespawnLastCommand, SpawnPrimitiveCommand,
-    SpawnVikingRoomCommand, UpdatePrimitiveMeshesCommand, DebugMonitor,
+    Command, CommandContext, CommandSystem, DebugMonitor, DespawnLastCommand,
+    SpawnPrimitiveCommand, SpawnVikingRoomCommand, UpdatePrimitiveMeshesCommand,
 };
 pub use input_system::{CommandQueue, CommandRef, InputSystem, InputTrigger, KeyBinding};
 pub use render_system::RenderSystem;
