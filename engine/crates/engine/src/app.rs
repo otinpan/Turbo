@@ -24,6 +24,7 @@ use super::{
     Camera, CameraSystem, CommandContext, DespawnLastCommand, EntityId, Input, InputTrigger,
     Material, Registry, Resources, RotatorSystem, Scheduler, SpawnPrimitiveCommand,
     SpawnVikingRoomCommand, Time, UpdateContext, UpdatePrimitiveMeshesCommand, World,
+    DebugMonitor,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -46,8 +47,7 @@ pub struct App {
 impl App {
     pub unsafe fn create(window: &Window) -> Result<Self> {
         let mut renderer = VulkanRenderer::create(window)?;
-        let registry = create_registry();
-        let world = World { registry };
+        let world = create_world();
 
         // load data
         let models = load_models(&mut renderer)?;
@@ -455,6 +455,7 @@ impl App {
         self.scheduler
             .run_render_stage(&mut self.world.registry, &mut self.renderer)?;
 
+
         self.input.clear_transitions();
         Ok(())
     }
@@ -529,6 +530,11 @@ impl App {
             InputTrigger::Pressed,
             UpdatePrimitiveMeshesCommand,
         );
+        scheduler.bind_key(
+            KeyCode::Enter,
+            InputTrigger::Pressed,
+            DebugMonitor,
+        )
     }
 
     fn use_skybox_texture(&self, name: &str) -> SkyboxTextureHandle {
@@ -845,7 +851,7 @@ fn create_scheduler() -> Scheduler {
     scheduler
 }
 
-fn create_registry() -> Registry {
+fn create_world() -> World {
     let mut registry = Registry::default();
     let camera = registry.create();
     registry.add_component(
@@ -867,7 +873,10 @@ fn create_registry() -> Registry {
         },
     );
 
-    registry
+    let mut world = World { registry };
+    world.set_name(camera, "Camera");
+
+    world
 }
 
 unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, MeshHandle>> {

@@ -74,6 +74,7 @@ impl Command for SpawnVikingRoomCommand {
                             speed: vec3(20.0, 0.0, 0.0),
                         },
                     );
+                    context.world.set_tags(entity, ["VikingRoom"]);
                 }
                 Err(e) => {
                     log::error!("Failed to spawn triangle primitive: {e:?}");

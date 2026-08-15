@@ -10,11 +10,13 @@ mod despawn_last_command;
 mod spawn_primitive_command;
 mod spawn_viking_room_command;
 mod update_primitive_meshes_command;
+mod debug_monitor;
 
 pub use despawn_last_command::DespawnLastCommand;
 pub use spawn_primitive_command::SpawnPrimitiveCommand;
 pub use spawn_viking_room_command::SpawnVikingRoomCommand;
 pub use update_primitive_meshes_command::UpdatePrimitiveMeshesCommand;
+pub use debug_monitor::DebugMonitor;
 
 use anyhow::Result;
 use cgmath::Vector3;

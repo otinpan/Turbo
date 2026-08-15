@@ -18,7 +18,7 @@ mod world;
 
 pub use app::App;
 pub use component::{
-    Camera, CameraComponent, Component, Material, MeshRenderer, Rotator, Visibility,
+    Camera, CameraComponent, Component, Material, MeshRenderer, Name, Rotator, Tags, Visibility,
 };
 pub use ecs::{ComponentPool, EntityId, Registry};
 pub use input::Input;
@@ -28,7 +28,7 @@ pub use system::{
     CameraSystem, Command, CommandContext, CommandQueue, CommandRef, CommandSystem,
     DespawnLastCommand, InputSystem, InputTrigger, KeyBinding, RenderSystem, RotatorSystem,
     Scheduler, SpawnPrimitiveCommand, SpawnVikingRoomCommand, UpdateContext,
-    UpdatePrimitiveMeshesCommand, UpdateSystem,
+    UpdatePrimitiveMeshesCommand, UpdateSystem, DebugMonitor,
 };
 pub use time::Time;
 pub use world::World;

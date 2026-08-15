@@ -9,14 +9,18 @@
 mod camera;
 mod material;
 mod mesh_renderer;
+mod name;
 mod rotator;
+mod tags;
 mod visibility;
 
 pub use camera::Camera;
 pub use camera::Camera as CameraComponent;
 pub use material::Material;
 pub use mesh_renderer::MeshRenderer;
+pub use name::Name;
 pub use rotator::Rotator;
+pub use tags::Tags;
 pub use visibility::Visibility;
 
 use turbo_math::Transform;

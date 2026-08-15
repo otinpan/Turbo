@@ -5,10 +5,7 @@ use renderer_vulkan::{
 };
 use turbo_math::Transform;
 
-use super::EntityId;
-use super::Material;
-use super::MeshRenderer;
-use super::World;
+use super::{EntityId, Material, MeshRenderer, World};
 
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Vec2 = cgmath::Vector2<f32>;
@@ -583,8 +580,9 @@ pub fn spawn_primitive_from_mesh(
 
     let added_transform = world.add_component(entity, transform);
     let added_mesh_renderer = world.add_component(entity, mesh_renderer);
+    let added_name = world.set_tags(entity, ["Primitive"]);
 
-    if added_transform && added_mesh_renderer {
+    if added_transform && added_mesh_renderer && added_name {
         Ok(entity)
     } else {
         bail!("failed to spawn primitive")
