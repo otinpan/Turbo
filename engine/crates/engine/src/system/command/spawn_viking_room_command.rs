@@ -60,15 +60,15 @@ impl Command for SpawnVikingRoomCommand {
             ) {
                 Ok(mesh_renderer) => {
                     let entity = context.world.spawn();
-                    context.world.registry.add_component(
+                    context.world.add_component(
                         entity,
                         Transform {
                             position: context.positions[index],
                             ..Default::default()
                         },
                     );
-                    context.world.registry.add_component(entity, mesh_renderer);
-                    context.world.registry.add_component(
+                    context.world.add_component(entity, mesh_renderer);
+                    context.world.add_component(
                         entity,
                         Rotator {
                             speed: vec3(20.0, 0.0, 0.0),

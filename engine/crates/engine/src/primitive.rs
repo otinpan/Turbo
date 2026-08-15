@@ -581,8 +581,8 @@ pub fn spawn_primitive_from_mesh(
     let mesh_renderer = MeshRenderer::new(mesh, material)?;
     let entity = world.spawn();
 
-    let added_transform = world.registry.add_component(entity, transform);
-    let added_mesh_renderer = world.registry.add_component(entity, mesh_renderer);
+    let added_transform = world.add_component(entity, transform);
+    let added_mesh_renderer = world.add_component(entity, mesh_renderer);
 
     if added_transform && added_mesh_renderer {
         Ok(entity)
