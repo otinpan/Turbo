@@ -267,6 +267,7 @@ mod tests {
             entity,
             MeshRenderer {
                 mesh,
+                asset_id: None,
                 material: Material::default(),
             },
         );

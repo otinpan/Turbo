@@ -1,11 +1,9 @@
-use anyhow::{Result, bail};
+use anyhow::{Result, anyhow, bail};
 use cgmath::{InnerSpace, vec2, vec3};
-use renderer_vulkan::{
-    MeshHandle, SourceMesh, SourceTopology, SourceVertex, VertexLayout, VulkanRenderer,
-};
+use renderer_vulkan::{SourceMesh, SourceTopology, SourceVertex, VertexLayout, VulkanRenderer};
 use turbo_math::Transform;
 
-use super::{EntityId, Material, MeshRenderer, World};
+use super::{EntityId, Material, MeshAssetId, MeshRenderer, Resources, World};
 
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Vec2 = cgmath::Vector2<f32>;
@@ -23,7 +21,7 @@ pub enum PrimitiveType {
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PrimitiveMesh {
-    pub handle: MeshHandle,
+    pub asset_id: MeshAssetId,
     pub primitive_type: PrimitiveType,
     pub vertex_layout: VertexLayout,
 }
@@ -85,6 +83,7 @@ impl PrimitiveShape {
 // create mesh ////////////////////////////////////////////
 pub unsafe fn create_primitive_mesh3d(
     renderer: &mut VulkanRenderer,
+    resources: &mut Resources,
     shape: PrimitiveShape,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
@@ -93,8 +92,9 @@ pub unsafe fn create_primitive_mesh3d(
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Mesh3D)?;
 
+    let asset_id = resources.insert_mesh_asset(handle, true);
     Ok(PrimitiveMesh {
-        handle,
+        asset_id,
         primitive_type,
         vertex_layout: VertexLayout::Mesh3D,
     })
@@ -102,6 +102,7 @@ pub unsafe fn create_primitive_mesh3d(
 
 pub unsafe fn create_primitive_debug_line(
     renderer: &mut VulkanRenderer,
+    resources: &mut Resources,
     shape: PrimitiveShape,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
@@ -110,8 +111,10 @@ pub unsafe fn create_primitive_debug_line(
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::DebugLine3D)?;
 
+    let asset_id = resources.insert_mesh_asset(handle, true);
+
     Ok(PrimitiveMesh {
-        handle,
+        asset_id,
         primitive_type,
         vertex_layout: VertexLayout::DebugLine3D,
     })
@@ -119,6 +122,7 @@ pub unsafe fn create_primitive_debug_line(
 
 pub unsafe fn create_primitive_lit3d(
     renderer: &mut VulkanRenderer,
+    resources: &mut Resources,
     shape: PrimitiveShape,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
@@ -127,8 +131,10 @@ pub unsafe fn create_primitive_lit3d(
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Lit3D)?;
 
+    let asset_id = resources.insert_mesh_asset(handle, true);
+
     Ok(PrimitiveMesh {
-        handle,
+        asset_id,
         primitive_type,
         vertex_layout: VertexLayout::Lit3D,
     })
@@ -136,6 +142,7 @@ pub unsafe fn create_primitive_lit3d(
 
 pub unsafe fn create_primitive_ui2d(
     renderer: &mut VulkanRenderer,
+    resources: &mut Resources,
     shape: PrimitiveShape,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
@@ -144,8 +151,10 @@ pub unsafe fn create_primitive_ui2d(
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Ui2D)?;
 
+    let asset_id = resources.insert_mesh_asset(handle, true);
+
     Ok(PrimitiveMesh {
-        handle,
+        asset_id,
         primitive_type,
         vertex_layout: VertexLayout::Ui2D,
     })
@@ -153,6 +162,7 @@ pub unsafe fn create_primitive_ui2d(
 
 pub unsafe fn create_primitive_skybox(
     renderer: &mut VulkanRenderer,
+    resources: &mut Resources,
     shape: PrimitiveShape,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
@@ -160,9 +170,9 @@ pub unsafe fn create_primitive_skybox(
     let mesh_data = source.to_skybox_data();
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Skybox)?;
-
+    let asset_id = resources.insert_mesh_asset(handle, true);
     Ok(PrimitiveMesh {
-        handle,
+        asset_id,
         primitive_type,
         vertex_layout: VertexLayout::Skybox,
     })
@@ -170,15 +180,16 @@ pub unsafe fn create_primitive_skybox(
 
 pub unsafe fn create_primitive_with_layout(
     renderer: &mut VulkanRenderer,
+    resources: &mut Resources,
     shape: PrimitiveShape,
     vertex_layout: VertexLayout,
 ) -> Result<PrimitiveMesh> {
     match vertex_layout {
-        VertexLayout::Mesh3D => create_primitive_mesh3d(renderer, shape),
-        VertexLayout::DebugLine3D => create_primitive_debug_line(renderer, shape),
-        VertexLayout::Lit3D => create_primitive_lit3d(renderer, shape),
-        VertexLayout::Ui2D => create_primitive_ui2d(renderer, shape),
-        VertexLayout::Skybox => create_primitive_skybox(renderer, shape),
+        VertexLayout::Mesh3D => create_primitive_mesh3d(renderer, resources, shape),
+        VertexLayout::DebugLine3D => create_primitive_debug_line(renderer, resources, shape),
+        VertexLayout::Lit3D => create_primitive_lit3d(renderer, resources, shape),
+        VertexLayout::Ui2D => create_primitive_ui2d(renderer, resources, shape),
+        VertexLayout::Skybox => create_primitive_skybox(renderer, resources, shape),
     }
 }
 
@@ -571,11 +582,16 @@ fn normalized_or(value: Vec3, fallback: Vec3) -> Vec3 {
 // spawn primitive object //////////////////////////////////////////////
 pub fn spawn_primitive_from_mesh(
     world: &mut World,
-    mesh: MeshHandle,
+    resources: &mut Resources,
+    asset_id: MeshAssetId,
     material: Material,
     transform: Transform,
 ) -> Result<EntityId> {
+    let mesh = resources
+        .retain_mesh(asset_id)
+        .ok_or_else(|| anyhow!("mesh asset not found: {asset_id:?}"))?;
     let mesh_renderer = MeshRenderer::new(mesh, material)?;
+    let mesh_renderer = mesh_renderer.with_asset_id(asset_id);
     let entity = world.spawn();
 
     let added_transform = world.add_component(entity, transform);
@@ -592,23 +608,29 @@ pub fn spawn_primitive_from_mesh(
 unsafe fn spawn_shape_with_material(
     world: &mut World,
     renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
+    resources: &mut Resources,
     shape: PrimitiveShape,
     transform: Transform,
     material: Material,
 ) -> Result<EntityId> {
     let vertex_layout = material.pipeline_key.required_vertex_layout();
-    let primitive_mesh = create_primitive_with_layout(renderer, shape, vertex_layout)?;
-    meshes.push(primitive_mesh);
+    let primitive_mesh = create_primitive_with_layout(renderer, resources, shape, vertex_layout)?;
+    resources.primitive_meshes.push(primitive_mesh);
 
-    spawn_primitive_from_mesh(world, primitive_mesh.handle, material, transform)
+    spawn_primitive_from_mesh(
+        world,
+        resources,
+        primitive_mesh.asset_id,
+        material,
+        transform,
+    )
 }
 
 // create new object ////////////////////////////////////////
 pub unsafe fn spawn_triangle_with_material(
     world: &mut World,
     renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
+    resources: &mut Resources,
     p0: Vec3,
     p1: Vec3,
     p2: Vec3,
@@ -625,14 +647,14 @@ pub unsafe fn spawn_triangle_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
 }
 
 // parallel to yz
 pub unsafe fn spawn_rectangle_with_material(
     world: &mut World,
     renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
+    resources: &mut Resources,
     pos: Vec3,
     width: f32,
     height: f32,
@@ -655,13 +677,13 @@ pub unsafe fn spawn_rectangle_with_material(
         rotation,
         ..Default::default()
     };
-    spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
 }
 
 pub unsafe fn spawn_cube_with_material(
     world: &mut World,
     renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
+    resources: &mut Resources,
     pos: Vec3,
     length: f32,
     rotation: Vec3,
@@ -688,14 +710,14 @@ pub unsafe fn spawn_cube_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
 }
 
 // parallel to yz
 pub unsafe fn spawn_circle_with_material(
     world: &mut World,
     renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
+    resources: &mut Resources,
     pos: Vec3,
     radius: f32,
     segments: u32,
@@ -712,13 +734,13 @@ pub unsafe fn spawn_circle_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
 }
 
 pub unsafe fn spawn_polygon_with_material(
     world: &mut World,
     renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
+    resources: &mut Resources,
     points: Vec<Vec3>,
     material: Material,
 ) -> Result<EntityId> {
@@ -739,13 +761,13 @@ pub unsafe fn spawn_polygon_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
 }
 
 pub unsafe fn spawn_sphere_with_material(
     world: &mut World,
     renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
+    resources: &mut Resources,
     center: Vec3,
     radius: f32,
     rings: u32,
@@ -763,13 +785,13 @@ pub unsafe fn spawn_sphere_with_material(
         position: center,
         ..Default::default()
     };
-    spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
 }
 
 pub unsafe fn spawn_line_with_material(
     world: &mut World,
     renderer: &mut VulkanRenderer,
-    meshes: &mut Vec<PrimitiveMesh>,
+    resources: &mut Resources,
     pos0: Vec3,
     pos1: Vec3,
     material: Material,
@@ -786,13 +808,14 @@ pub unsafe fn spawn_line_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, meshes, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
 }
 
 // update mesh ///////////////////////////////////////////////////////////
 // refered mesh in VulkanData update vertices and indices
 pub unsafe fn update_primitive_mesh(
     renderer: &mut VulkanRenderer,
+    resources: &mut Resources,
     mesh: PrimitiveMesh,
     shape: PrimitiveShape,
 ) -> Result<()> {
@@ -805,26 +828,29 @@ pub unsafe fn update_primitive_mesh(
     }
 
     let source = build_primitive_source(shape);
+    let mesh_handle = resources
+        .get_mesh_handle(mesh.asset_id)
+        .ok_or_else(|| anyhow!("mesh handle not found"))?;
 
     match mesh.vertex_layout {
         VertexLayout::Mesh3D => renderer.update_mesh_from_data(
-            mesh.handle,
+            mesh_handle,
             source.to_mesh3d_data(),
             VertexLayout::Mesh3D,
         ),
         VertexLayout::DebugLine3D => renderer.update_mesh_from_data(
-            mesh.handle,
+            mesh_handle,
             source.to_debugline_data(),
             VertexLayout::DebugLine3D,
         ),
         VertexLayout::Lit3D => {
-            renderer.update_mesh_from_data(mesh.handle, source.to_lit3d_data(), VertexLayout::Lit3D)
+            renderer.update_mesh_from_data(mesh_handle, source.to_lit3d_data(), VertexLayout::Lit3D)
         }
         VertexLayout::Ui2D => {
-            renderer.update_mesh_from_data(mesh.handle, source.to_ui2d_data(), VertexLayout::Ui2D)
+            renderer.update_mesh_from_data(mesh_handle, source.to_ui2d_data(), VertexLayout::Ui2D)
         }
         VertexLayout::Skybox => renderer.update_mesh_from_data(
-            mesh.handle,
+            mesh_handle,
             source.to_skybox_data(),
             VertexLayout::Skybox,
         ),
@@ -835,6 +861,7 @@ pub unsafe fn update_primitive_mesh(
 mod tests {
     use super::*;
     use cgmath::vec3;
+    use renderer_vulkan::MeshHandle;
 
     fn white() -> Vec3 {
         vec3(1.0, 1.0, 1.0)
@@ -1024,15 +1051,13 @@ mod tests {
     #[test]
     fn spawn_primitive_from_mesh_accepts_matching_mesh3d_material() {
         let mut world = World::default();
-        let primitive_mesh = PrimitiveMesh {
-            handle: MeshHandle::new(0, VertexLayout::Mesh3D),
-            primitive_type: PrimitiveType::Triangle,
-            vertex_layout: VertexLayout::Mesh3D,
-        };
+        let mut resources = Resources::default();
+        let asset_id = resources.insert_mesh_asset(MeshHandle::new(0, VertexLayout::Mesh3D), false);
 
         let result = spawn_primitive_from_mesh(
             &mut world,
-            primitive_mesh.handle,
+            &mut resources,
+            asset_id,
             Material {
                 pipeline_key: renderer_vulkan::PipelineKey::Mesh3D,
                 ..Material::default()
@@ -1046,15 +1071,14 @@ mod tests {
     #[test]
     fn spawn_primitive_from_mesh_accepts_matching_debugline_material() {
         let mut world = World::default();
-        let primitive_mesh = PrimitiveMesh {
-            handle: MeshHandle::new(0, VertexLayout::DebugLine3D),
-            primitive_type: PrimitiveType::Line,
-            vertex_layout: VertexLayout::DebugLine3D,
-        };
+        let mut resources = Resources::default();
+        let asset_id =
+            resources.insert_mesh_asset(MeshHandle::new(0, VertexLayout::DebugLine3D), false);
 
         let result = spawn_primitive_from_mesh(
             &mut world,
-            primitive_mesh.handle,
+            &mut resources,
+            asset_id,
             Material {
                 pipeline_key: renderer_vulkan::PipelineKey::DebugLine3D,
                 ..Material::default()
@@ -1068,15 +1092,13 @@ mod tests {
     #[test]
     fn spawn_primitive_from_mesh_rejects_mismatched_pipeline_and_vertex_layout() {
         let mut world = World::default();
-        let primitive_mesh = PrimitiveMesh {
-            handle: MeshHandle::new(0, VertexLayout::Mesh3D),
-            primitive_type: PrimitiveType::Triangle,
-            vertex_layout: VertexLayout::Mesh3D,
-        };
+        let mut resources = Resources::default();
+        let asset_id = resources.insert_mesh_asset(MeshHandle::new(0, VertexLayout::Mesh3D), false);
 
         let result = spawn_primitive_from_mesh(
             &mut world,
-            primitive_mesh.handle,
+            &mut resources,
+            asset_id,
             Material {
                 pipeline_key: renderer_vulkan::PipelineKey::DebugLine3D,
                 ..Material::default()

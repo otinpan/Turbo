@@ -1,11 +1,12 @@
 use anyhow::Result;
 use cgmath::vec3;
-use renderer_vulkan::{MeshHandle, PipelineKey, TextureHandle};
+use renderer_vulkan::{PipelineKey, TextureHandle};
 use std::collections::HashMap;
 use turbo_math::Transform;
 
 use super::{Command, CommandContext};
 use crate::Material;
+use crate::MeshAssetId;
 use crate::app::DEFAULT_TEXTURE;
 use crate::primitive::{PrimitiveMesh, PrimitiveType, spawn_primitive_from_mesh};
 
@@ -31,12 +32,13 @@ impl Command for SpawnPrimitiveCommand {
             .map(|name| use_texture(&context.resources.textures, name))
             .unwrap_or(DEFAULT_TEXTURE);
 
-        if let Some(mesh) =
-            primitive_handle(&context.resources.primitive_meshes, self.primitive_type)
+        if let Some(asset_id) =
+            primitive_asset_id(&context.resources.primitive_meshes, self.primitive_type)
         {
             if let Err(e) = spawn_primitive_from_mesh(
                 context.world,
-                mesh,
+                context.resources,
+                asset_id,
                 Material {
                     color: vec3(1.0, 1.0, 1.0),
                     use_texture: true,
@@ -57,14 +59,14 @@ impl Command for SpawnPrimitiveCommand {
     }
 }
 
-fn primitive_handle(
+fn primitive_asset_id(
     primitive_meshes: &[PrimitiveMesh],
     primitive_type: PrimitiveType,
-) -> Option<MeshHandle> {
+) -> Option<MeshAssetId> {
     primitive_meshes
         .iter()
         .find(|mesh| mesh.primitive_type == primitive_type)
-        .map(|mesh| mesh.handle)
+        .map(|mesh| mesh.asset_id)
 }
 
 fn mouse_position_on_spawn_plane(context: &CommandContext<'_>) -> cgmath::Vector3<f32> {

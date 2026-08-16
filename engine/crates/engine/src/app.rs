@@ -50,11 +50,13 @@ impl App {
         let world = create_world();
 
         // load data
-        let models = load_models(&mut renderer)?;
-        let primitive_meshes = create_primitive_meshes(&mut renderer)?;
-        let textures = load_textures(&mut renderer)?;
-        let skybox_mesh = Some(create_skybox_mesh(&mut renderer, 20.0)?);
-        let skybox_textures = load_skybox_textures(&mut renderer)?;
+        let mut resources = Resources::default();
+        load_models(&mut renderer, &mut resources)?;
+        let primitive_meshes = create_primitive_meshes(&mut renderer, &mut resources)?;
+        resources.primitive_meshes = primitive_meshes;
+        resources.textures = load_textures(&mut renderer)?;
+        resources.skybox_mesh = Some(create_skybox_mesh(&mut renderer, 20.0)?);
+        resources.skybox_textures = load_skybox_textures(&mut renderer)?;
 
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
@@ -74,13 +76,7 @@ impl App {
             world,
             input,
             time: Time::default(),
-            resources: Resources {
-                models,
-                textures,
-                primitive_meshes,
-                skybox_mesh,
-                skybox_textures,
-            },
+            resources,
             positions,
             scheduler,
         };
@@ -445,6 +441,16 @@ impl App {
         self.renderer.render(window)
     }
 
+    pub fn despawn(&mut self, entity: EntityId) -> bool {
+        if let Some(mesh_renderer) = self.world.get_component::<MeshRenderer>(entity) {
+            if let Some(asset_id) = mesh_renderer.asset_id {
+                self.resources.release_mesh_for_renderer(asset_id);
+            }
+        }
+
+        self.world.despawn(entity)
+    }
+
     pub fn update(&mut self) -> Result<()> {
         self.time.update();
         let delta_time = self.time.delta_seconds();
@@ -591,7 +597,7 @@ impl App {
         spawn_triangle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             p0,
             p1,
             p2,
@@ -612,7 +618,7 @@ impl App {
         spawn_triangle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             vec3(0.0, p0.x, p0.y),
             vec3(0.0, p1.x, p1.y),
             vec3(0.0, p2.x, p2.y),
@@ -636,7 +642,7 @@ impl App {
         spawn_rectangle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             pos,
             width,
             height,
@@ -660,7 +666,7 @@ impl App {
         spawn_rectangle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             vec3(0.0, pos.x, pos.y),
             width,
             height,
@@ -683,7 +689,7 @@ impl App {
         spawn_cube_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             pos,
             length,
             rotation,
@@ -705,7 +711,7 @@ impl App {
         spawn_circle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             pos,
             radius,
             segments,
@@ -726,7 +732,7 @@ impl App {
         spawn_circle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             vec3(0.0, pos.x, pos.y),
             radius,
             segments,
@@ -746,7 +752,7 @@ impl App {
         spawn_polygon_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             points,
             material,
         )
@@ -764,7 +770,7 @@ impl App {
         spawn_polygon_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             points,
             material,
         )
@@ -785,7 +791,7 @@ impl App {
         spawn_sphere_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             center,
             radius,
             rings,
@@ -805,7 +811,7 @@ impl App {
         spawn_line_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             pos0,
             pos1,
             material,
@@ -830,7 +836,7 @@ impl App {
         spawn_rectangle_with_material(
             &mut self.world,
             &mut self.renderer,
-            &mut self.resources.primitive_meshes,
+            &mut self.resources,
             center,
             width,
             length,
@@ -854,17 +860,19 @@ impl App {
         transform: Transform,
         material: Material,
     ) -> Result<EntityId> {
+        let asset_id = self
+            .resources
+            .model_asset_id(model_name)
+            .ok_or_else(|| anyhow!("model not found: {model_name}"))?;
         let mesh = self
             .resources
-            .models
-            .get(model_name)
-            .copied()
-            .ok_or_else(|| anyhow!("model not found: {model_name}"))?;
+            .retain_mesh(asset_id)
+            .ok_or_else(|| anyhow!("mesh asset not found: {asset_id:?}"))?;
+        let mesh_renderer = MeshRenderer::new(mesh, material)?.with_asset_id(asset_id);
 
         let entity = self.world.spawn();
         self.world.add_component(entity, transform);
-        self.world
-            .add_component(entity, MeshRenderer { mesh, material });
+        self.world.add_component(entity, mesh_renderer);
         self.world.add_component(entity, Visibility::default());
         self.world.set_tags(entity, ["Model", model_name]);
 
@@ -911,23 +919,24 @@ fn create_world() -> World {
     world
 }
 
-unsafe fn load_models(renderer: &mut VulkanRenderer) -> Result<HashMap<String, MeshHandle>> {
-    let mut models = HashMap::new();
-
-    models.insert(
-        "viking_room".to_string(),
+unsafe fn load_models(renderer: &mut VulkanRenderer, resources: &mut Resources) -> Result<()> {
+    resources.register_model(
+        "viking_room",
         renderer.load_mesh3d_from_model("assets/models/viking_room.obj")?,
+        false,
     );
-    models.insert(
-        "viking_room_debug_line".to_string(),
+    resources.register_model(
+        "viking_room_debug_line",
         renderer.load_debug_line_from_model("assets/models/viking_room.obj")?,
+        false,
     );
-    models.insert(
-        "viking_room_lit3d".to_string(),
+    resources.register_model(
+        "viking_room_lit3d",
         renderer.load_lit3d_from_model("assets/models/viking_room.obj")?,
+        false,
     );
 
-    Ok(models)
+    Ok(())
 }
 
 unsafe fn load_textures(renderer: &mut VulkanRenderer) -> Result<HashMap<String, TextureHandle>> {
@@ -1001,10 +1010,14 @@ unsafe fn create_skybox_mesh(renderer: &mut VulkanRenderer, size: f32) -> Result
     renderer.load_mesh_from_data(source.to_skybox_data(), VertexLayout::Skybox)
 }
 
-unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<PrimitiveMesh>> {
+unsafe fn create_primitive_meshes(
+    renderer: &mut VulkanRenderer,
+    resources: &mut Resources,
+) -> Result<Vec<PrimitiveMesh>> {
     let primitive_meshes = vec![
         create_primitive_lit3d(
             renderer,
+            resources,
             PrimitiveShape::Triangle {
                 points: [
                     vec3(0.0, 0.0, 0.5),
@@ -1016,6 +1029,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
         )?,
         create_primitive_ui2d(
             renderer,
+            resources,
             PrimitiveShape::Rectangle {
                 points: [
                     vec3(0.0, -0.5, 0.5),
@@ -1028,6 +1042,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
         )?,
         create_primitive_debug_line(
             renderer,
+            resources,
             PrimitiveShape::Cube {
                 points: [
                     vec3(0.5, -0.5, 0.5),
@@ -1044,6 +1059,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
         )?,
         create_primitive_mesh3d(
             renderer,
+            resources,
             PrimitiveShape::Circle {
                 radius: 1.0,
                 segments: 32,
@@ -1052,6 +1068,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
         )?,
         create_primitive_mesh3d(
             renderer,
+            resources,
             PrimitiveShape::Polygon {
                 points: vec![
                     vec3(0.0, -0.7, 0.7),
@@ -1065,6 +1082,7 @@ unsafe fn create_primitive_meshes(renderer: &mut VulkanRenderer) -> Result<Vec<P
         )?,
         create_primitive_lit3d(
             renderer,
+            resources,
             PrimitiveShape::Sphere {
                 radius: 1.0,
                 rings: 32,
@@ -1086,21 +1104,13 @@ mod tests {
     #[test]
     fn created_world_object_count_matches_created_entity_id_count() {
         let mut world = World::default();
-        let triangle_mesh = PrimitiveMesh {
-            handle: MeshHandle::new(0, VertexLayout::Mesh3D),
-            primitive_type: PrimitiveType::Triangle,
-            vertex_layout: VertexLayout::Mesh3D,
-        };
-        let rectangle_mesh = PrimitiveMesh {
-            handle: MeshHandle::new(1, VertexLayout::Mesh3D),
-            primitive_type: PrimitiveType::Rectangle,
-            vertex_layout: VertexLayout::Mesh3D,
-        };
-        let cube_mesh = PrimitiveMesh {
-            handle: MeshHandle::new(2, VertexLayout::Mesh3D),
-            primitive_type: PrimitiveType::Cube,
-            vertex_layout: VertexLayout::Mesh3D,
-        };
+        let mut resources = Resources::default();
+        let triangle_mesh =
+            resources.insert_mesh_asset(MeshHandle::new(0, VertexLayout::Mesh3D), false);
+        let rectangle_mesh =
+            resources.insert_mesh_asset(MeshHandle::new(1, VertexLayout::Mesh3D), false);
+        let cube_mesh =
+            resources.insert_mesh_asset(MeshHandle::new(2, VertexLayout::Mesh3D), false);
 
         let camera = world.spawn();
         world.registry.add_component(camera, Transform::default());
@@ -1120,21 +1130,24 @@ mod tests {
             camera,
             spawn_primitive_from_mesh(
                 &mut world,
-                triangle_mesh.handle,
+                &mut resources,
+                triangle_mesh,
                 Material::default(),
                 Transform::default(),
             )
             .unwrap(),
             spawn_primitive_from_mesh(
                 &mut world,
-                rectangle_mesh.handle,
+                &mut resources,
+                rectangle_mesh,
                 Material::default(),
                 Transform::default(),
             )
             .unwrap(),
             spawn_primitive_from_mesh(
                 &mut world,
-                cube_mesh.handle,
+                &mut resources,
+                cube_mesh,
                 Material::default(),
                 Transform::default(),
             )

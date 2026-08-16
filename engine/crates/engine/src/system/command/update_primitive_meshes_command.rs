@@ -17,6 +17,7 @@ impl Command for UpdatePrimitiveMeshesCommand {
             unsafe {
                 update_primitive_mesh(
                     context.renderer,
+                    context.resources,
                     mesh,
                     PrimitiveShape::Polygon {
                         points: vec![
@@ -35,6 +36,7 @@ impl Command for UpdatePrimitiveMeshesCommand {
             unsafe {
                 update_primitive_mesh(
                     context.renderer,
+                    context.resources,
                     mesh,
                     PrimitiveShape::Sphere {
                         radius: 2.0,
@@ -49,6 +51,7 @@ impl Command for UpdatePrimitiveMeshesCommand {
             unsafe {
                 update_primitive_mesh(
                     context.renderer,
+                    context.resources,
                     mesh,
                     PrimitiveShape::Rectangle {
                         points: [

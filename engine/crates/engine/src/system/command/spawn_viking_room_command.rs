@@ -1,11 +1,11 @@
 use anyhow::{Result, anyhow};
 use cgmath::vec3;
-use renderer_vulkan::{MeshHandle, PipelineKey, TextureHandle};
+use renderer_vulkan::{PipelineKey, TextureHandle};
 use std::collections::HashMap;
 use turbo_math::Transform;
 
 use super::{Command, CommandContext};
-use crate::{Material, MeshRenderer, Rotator};
+use crate::{Material, MeshAssetId, MeshRenderer, Resources, Rotator};
 
 #[derive(Clone, Debug)]
 pub struct SpawnVikingRoomCommand;
@@ -16,10 +16,9 @@ impl Command for SpawnVikingRoomCommand {
     }
 
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        let viking_room_mesh3d = use_model(&context.resources.models, "viking_room")?;
-        let viking_room_debug_line =
-            use_model(&context.resources.models, "viking_room_debug_line")?;
-        let viking_room_lit3d = use_model(&context.resources.models, "viking_room_lit3d")?;
+        let viking_room_mesh3d = use_model(context.resources, "viking_room")?;
+        let viking_room_debug_line = use_model(context.resources, "viking_room_debug_line")?;
+        let viking_room_lit3d = use_model(context.resources, "viking_room_lit3d")?;
         let viking_texture = use_texture(&context.resources.textures, "viking_room");
         let viking_meshes = [
             viking_room_mesh3d,
@@ -36,7 +35,11 @@ impl Command for SpawnVikingRoomCommand {
                     .world
                     .registry
                     .get_component::<MeshRenderer>(**entity)
-                    .is_some_and(|mesh_renderer| viking_meshes.contains(&mesh_renderer.mesh))
+                    .is_some_and(|mesh_renderer| {
+                        mesh_renderer
+                            .asset_id
+                            .is_some_and(|asset_id| viking_meshes.contains(&asset_id))
+                    })
             })
             .count();
 
@@ -47,7 +50,11 @@ impl Command for SpawnVikingRoomCommand {
                 (viking_room_mesh3d, PipelineKey::Transparent3D, 0.5),
                 (viking_room_lit3d, PipelineKey::Lit3D, 1.0),
             ];
-            let (mesh, pipeline_key, alpha) = variants[index];
+            let (asset_id, pipeline_key, alpha) = variants[index];
+            let mesh = context
+                .resources
+                .retain_mesh(asset_id)
+                .ok_or_else(|| anyhow!("mesh asset not found: {asset_id:?}"))?;
             match MeshRenderer::new(
                 mesh,
                 Material {
@@ -59,6 +66,7 @@ impl Command for SpawnVikingRoomCommand {
                 },
             ) {
                 Ok(mesh_renderer) => {
+                    let mesh_renderer = mesh_renderer.with_asset_id(asset_id);
                     let entity = context.world.spawn();
                     context.world.add_component(
                         entity,
@@ -86,10 +94,9 @@ impl Command for SpawnVikingRoomCommand {
     }
 }
 
-fn use_model(models: &HashMap<String, MeshHandle>, name: &str) -> Result<MeshHandle> {
-    models
-        .get(name)
-        .copied()
+fn use_model(resources: &Resources, name: &str) -> Result<MeshAssetId> {
+    resources
+        .model_asset_id(name)
         .ok_or_else(|| anyhow!("Model not found: {name}"))
 }
 

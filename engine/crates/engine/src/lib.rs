@@ -23,7 +23,7 @@ pub use component::{
 pub use ecs::{ComponentPool, EntityId, Registry};
 pub use input::Input;
 pub use primitive::{PrimitiveMesh, PrimitiveType};
-pub use resources::Resources;
+pub use resources::{MeshAsset, MeshAssetId, Resources};
 pub use system::{
     CameraSystem, Command, CommandContext, CommandQueue, CommandRef, CommandSystem, DebugMonitor,
     DespawnLastCommand, InputSystem, InputTrigger, KeyBinding, RenderSystem, RotatorSystem,

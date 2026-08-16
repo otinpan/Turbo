@@ -75,16 +75,17 @@
 	- ~~ユーザがsystemを登録できるようなインターフェースの作成~~
 	- query3 や optional component query が必要になったら追加
 	- ScheduledUpdateSystemを優先度を扱えるように作成
-* オブジェクトAPI
-  - spawn_model
-  - spawn_cube
-  - despawn
-  - get/set transform
-  - tag/name検索
+* ~~オブジェクトAPI~~
+  - ~~spawn_model~~
+  - ~~spawn_cube~~
+  - ~~despawn~~
+  - ~~get/set transform~~
+  - ~~tag/name検索~~
 * MeshAsset管理
 	- 現状はEntityがdespawnされてもloadされたmeshは残り続ける
 	- Entityごとにmeshを持たせる場合はメモリリークになる
 	- 参照カウンタ的なものでdespawn時に自動的にdestroyする
+	- assetのrelease (Resources.release_mesh)
 * シーン管理
   - Scene trait
   - current_scene
@@ -122,8 +123,8 @@ log::error!("error");
 ```
 
 ```
-RUST_LOG=debug cargo run --release
-RUST_LOG=debug cargo run
+$env:RUST_LOG="debug"
+cargo run
 ```
 では
 ```
