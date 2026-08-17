@@ -1,6 +1,9 @@
 use crate::{PrimitiveMesh, PrimitiveType};
+use anyhow::Result;
 use cgmath::Vector3;
-use renderer_vulkan::{MeshHandle, SkyboxTextureHandle, TextureHandle, VertexLayout};
+use renderer_vulkan::{
+    MeshHandle, SkyboxTextureHandle, TextureHandle, VertexLayout, VulkanRenderer,
+};
 use std::collections::HashMap;
 
 pub type Vec3 = Vector3<f32>;
@@ -95,10 +98,17 @@ impl Resources {
         None
     }
 
-    pub fn release_mesh_for_renderer(&mut self, id: MeshAssetId) {
+    pub unsafe fn release_mesh_for_renderer(
+        &mut self,
+        id: MeshAssetId,
+        renderer: &mut VulkanRenderer,
+    ) -> Result<()> {
         if let Some(handle) = self.release_mesh(id) {
             log::debug!("Mesh asset released and ready to destroy: {handle:?}");
+            renderer.destroy_mesh(handle)?;
         }
+
+        Ok(())
     }
 }
 

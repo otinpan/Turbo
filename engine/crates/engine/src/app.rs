@@ -13,10 +13,11 @@ pub const DEFAULT_TEXTURE: TextureHandle = TextureHandle(0);
 pub const DEFAULT_SKYBOX_TEXTURE: SkyboxTextureHandle = SkyboxTextureHandle(0);
 
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveShape, PrimitiveType, build_primitive_source, create_primitive_lit3d,
-    spawn_circle_with_material, spawn_cube_with_material, spawn_line_with_material,
-    spawn_polygon_with_material, spawn_rectangle_with_material, spawn_sphere_with_material,
-    spawn_triangle_with_material,
+    PrimitiveMesh, PrimitiveShape, PrimitiveType, build_primitive_source,
+    create_primitive_debug_line, create_primitive_lit3d, create_primitive_mesh3d,
+    create_primitive_ui2d, spawn_circle_with_material, spawn_cube_with_material,
+    spawn_line_with_material, spawn_polygon_with_material, spawn_rectangle_with_material,
+    spawn_sphere_with_material, spawn_triangle_with_material,
 };
 
 use super::{
@@ -440,14 +441,17 @@ impl App {
         self.renderer.render(window)
     }
 
-    pub fn despawn(&mut self, entity: EntityId) -> bool {
+    pub fn despawn(&mut self, entity: EntityId) -> Result<bool> {
         if let Some(mesh_renderer) = self.world.get_component::<MeshRenderer>(entity) {
             if let Some(asset_id) = mesh_renderer.asset_id {
-                self.resources.release_mesh_for_renderer(asset_id);
+                unsafe {
+                    self.resources
+                        .release_mesh_for_renderer(asset_id, &mut self.renderer)?;
+                }
             }
         }
 
-        self.world.despawn(entity)
+        Ok(self.world.despawn(entity))
     }
 
     pub fn update(&mut self) -> Result<()> {
@@ -1041,7 +1045,7 @@ unsafe fn create_primitive_meshes(
             },
             false,
         )?,
-        create_primitive_lit3d(
+        create_primitive_ui2d(
             renderer,
             resources,
             PrimitiveShape::Rectangle {
@@ -1055,7 +1059,7 @@ unsafe fn create_primitive_meshes(
             },
             false,
         )?,
-        create_primitive_lit3d(
+        create_primitive_debug_line(
             renderer,
             resources,
             PrimitiveShape::Cube {
@@ -1073,7 +1077,7 @@ unsafe fn create_primitive_meshes(
             },
             false,
         )?,
-        create_primitive_lit3d(
+        create_primitive_mesh3d(
             renderer,
             resources,
             PrimitiveShape::Circle {
@@ -1083,7 +1087,7 @@ unsafe fn create_primitive_meshes(
             },
             false,
         )?,
-        create_primitive_lit3d(
+        create_primitive_mesh3d(
             renderer,
             resources,
             PrimitiveShape::Polygon {
