@@ -113,7 +113,7 @@ pub unsafe fn create_primitive_debug_line(
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::DebugLine3D)?;
 
-    let asset_id = resources.insert_mesh_asset(handle,auto_release);
+    let asset_id = resources.insert_mesh_asset(handle, auto_release);
 
     Ok(PrimitiveMesh {
         asset_id,
@@ -191,11 +191,13 @@ pub unsafe fn create_primitive_with_layout(
     auto_release: bool,
 ) -> Result<PrimitiveMesh> {
     match vertex_layout {
-        VertexLayout::Mesh3D => create_primitive_mesh3d(renderer, resources, shape,auto_release),
-        VertexLayout::DebugLine3D => create_primitive_debug_line(renderer, resources, shape,auto_release),
-        VertexLayout::Lit3D => create_primitive_lit3d(renderer, resources, shape,auto_release),
-        VertexLayout::Ui2D => create_primitive_ui2d(renderer, resources, shape,auto_release),
-        VertexLayout::Skybox => create_primitive_skybox(renderer, resources, shape,auto_release),
+        VertexLayout::Mesh3D => create_primitive_mesh3d(renderer, resources, shape, auto_release),
+        VertexLayout::DebugLine3D => {
+            create_primitive_debug_line(renderer, resources, shape, auto_release)
+        }
+        VertexLayout::Lit3D => create_primitive_lit3d(renderer, resources, shape, auto_release),
+        VertexLayout::Ui2D => create_primitive_ui2d(renderer, resources, shape, auto_release),
+        VertexLayout::Skybox => create_primitive_skybox(renderer, resources, shape, auto_release),
     }
 }
 
@@ -621,7 +623,8 @@ unsafe fn spawn_shape_with_material(
     auto_release: bool,
 ) -> Result<EntityId> {
     let vertex_layout = material.pipeline_key.required_vertex_layout();
-    let primitive_mesh = create_primitive_with_layout(renderer, resources, shape, vertex_layout,auto_release)?;
+    let primitive_mesh =
+        create_primitive_with_layout(renderer, resources, shape, vertex_layout, auto_release)?;
     resources.primitive_meshes.push(primitive_mesh);
 
     spawn_primitive_from_mesh(
@@ -655,7 +658,15 @@ pub unsafe fn spawn_triangle_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
+    spawn_shape_with_material(
+        world,
+        renderer,
+        resources,
+        shape,
+        transform,
+        material,
+        auto_release,
+    )
 }
 
 // parallel to yz
@@ -686,7 +697,15 @@ pub unsafe fn spawn_rectangle_with_material(
         rotation,
         ..Default::default()
     };
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
+    spawn_shape_with_material(
+        world,
+        renderer,
+        resources,
+        shape,
+        transform,
+        material,
+        auto_release,
+    )
 }
 
 pub unsafe fn spawn_cube_with_material(
@@ -720,7 +739,15 @@ pub unsafe fn spawn_cube_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
+    spawn_shape_with_material(
+        world,
+        renderer,
+        resources,
+        shape,
+        transform,
+        material,
+        auto_release,
+    )
 }
 
 // parallel to yz
@@ -745,7 +772,15 @@ pub unsafe fn spawn_circle_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
+    spawn_shape_with_material(
+        world,
+        renderer,
+        resources,
+        shape,
+        transform,
+        material,
+        auto_release,
+    )
 }
 
 pub unsafe fn spawn_polygon_with_material(
@@ -773,7 +808,15 @@ pub unsafe fn spawn_polygon_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
+    spawn_shape_with_material(
+        world,
+        renderer,
+        resources,
+        shape,
+        transform,
+        material,
+        auto_release,
+    )
 }
 
 pub unsafe fn spawn_sphere_with_material(
@@ -798,7 +841,15 @@ pub unsafe fn spawn_sphere_with_material(
         position: center,
         ..Default::default()
     };
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
+    spawn_shape_with_material(
+        world,
+        renderer,
+        resources,
+        shape,
+        transform,
+        material,
+        auto_release,
+    )
 }
 
 pub unsafe fn spawn_line_with_material(
@@ -822,7 +873,15 @@ pub unsafe fn spawn_line_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
+    spawn_shape_with_material(
+        world,
+        renderer,
+        resources,
+        shape,
+        transform,
+        material,
+        auto_release,
+    )
 }
 
 // update mesh ///////////////////////////////////////////////////////////

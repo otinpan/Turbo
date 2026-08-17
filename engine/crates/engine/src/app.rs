@@ -13,11 +13,10 @@ pub const DEFAULT_TEXTURE: TextureHandle = TextureHandle(0);
 pub const DEFAULT_SKYBOX_TEXTURE: SkyboxTextureHandle = SkyboxTextureHandle(0);
 
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveShape, PrimitiveType, build_primitive_source,
-    create_primitive_debug_line, create_primitive_lit3d, create_primitive_mesh3d,
-    create_primitive_ui2d, spawn_circle_with_material, spawn_cube_with_material,
-    spawn_line_with_material, spawn_polygon_with_material, spawn_rectangle_with_material,
-    spawn_sphere_with_material, spawn_triangle_with_material,
+    PrimitiveMesh, PrimitiveShape, PrimitiveType, build_primitive_source, create_primitive_lit3d,
+    spawn_circle_with_material, spawn_cube_with_material, spawn_line_with_material,
+    spawn_polygon_with_material, spawn_rectangle_with_material, spawn_sphere_with_material,
+    spawn_triangle_with_material,
 };
 
 use super::{
@@ -1021,7 +1020,6 @@ unsafe fn create_skybox_mesh(renderer: &mut VulkanRenderer, size: f32) -> Result
 
     renderer.load_mesh_from_data(source.to_skybox_data(), VertexLayout::Skybox)
 }
-
 
 // these primitives are not released (resources.release_mesh) by DespawnLastCommand
 // becuase DespawnLastCommand release only Entitis that have MeshRenderer Component

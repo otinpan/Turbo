@@ -349,7 +349,9 @@ impl VulkanRenderer {
             .data
             .meshes
             .get(mesh_index)
-            .ok_or_else(|| anyhow!("Mesh index out of range: {mesh_index}"))?;
+            .ok_or_else(|| anyhow!("Mesh index out of range: {mesh_index}"))?
+            .as_ref()
+            .ok_or_else(|| anyhow!("Mesh slot is empty: {mesh_index}"))?;
 
         let vertex_buffer_size = (size_of::<V>() * mesh_data.vertices.len()) as vk::DeviceSize;
         let index_buffer_size = (size_of::<u32>() * mesh_data.indices.len()) as vk::DeviceSize;
@@ -362,7 +364,9 @@ impl VulkanRenderer {
             self.upload_to_buffer(mesh.vertex_buffer, &mesh_data.vertices)?;
             self.upload_to_buffer(mesh.index_buffer, &mesh_data.indices)?;
 
-            let mesh = &mut self.data.meshes[mesh_index];
+            let mesh = self.data.meshes[mesh_index]
+                .as_mut()
+                .ok_or_else(|| anyhow!("Mesh slot is empty: {mesh_index}"))?;
             mesh.index_count = mesh_data.indices.len() as u32;
         } else {
             let new_mesh = create_mesh(
@@ -375,7 +379,9 @@ impl VulkanRenderer {
 
             self.device.device_wait_idle()?;
 
-            let old_mesh = std::mem::replace(&mut self.data.meshes[mesh_index], new_mesh);
+            let old_mesh = self.data.meshes[mesh_index]
+                .replace(new_mesh)
+                .ok_or_else(|| anyhow!("Mesh slot is empty: {mesh_index}"))?;
             self.device.free_memory(old_mesh.index_buffer_memory, None);
             self.device.destroy_buffer(old_mesh.index_buffer, None);
             self.device.free_memory(old_mesh.vertex_buffer_memory, None);
@@ -423,9 +429,39 @@ impl VulkanRenderer {
             mesh_data,
             vertex_layout,
         )?;
-        self.data.meshes.push(mesh);
+        self.data.meshes.push(Some(mesh));
 
         Ok(MeshHandle::new(self.data.meshes.len() - 1, vertex_layout))
+    }
+
+    pub unsafe fn destroy_mesh(&mut self, mesh_handle: MeshHandle) -> Result<()> {
+        let mesh_index = mesh_handle.index;
+        let slot = self
+            .data
+            .meshes
+            .get_mut(mesh_index)
+            .ok_or_else(|| anyhow!("Mesh index out of range: {mesh_index}"))?;
+
+        let Some(mesh) = slot.take() else {
+            return Ok(());
+        };
+
+        if mesh.vertex_layout != mesh_handle.vertex_layout {
+            *slot = Some(mesh);
+            return Err(anyhow!(
+                "MeshHandle vertex layout {:?} does not match mesh slot {:?}.",
+                mesh_handle.vertex_layout,
+                slot.as_ref().unwrap().vertex_layout
+            ));
+        }
+
+        self.device.device_wait_idle()?;
+        self.device.free_memory(mesh.index_buffer_memory, None);
+        self.device.destroy_buffer(mesh.index_buffer, None);
+        self.device.free_memory(mesh.vertex_buffer_memory, None);
+        self.device.destroy_buffer(mesh.vertex_buffer, None);
+
+        Ok(())
     }
 
     pub fn set_render_items(&mut self, render_items: Vec<RenderItem>) {
@@ -507,7 +543,7 @@ impl VulkanRenderer {
             .image_available_semaphores
             .iter()
             .for_each(|s| self.device.destroy_semaphore(*s, None));
-        self.data.meshes.drain(..).for_each(|mesh| {
+        self.data.meshes.drain(..).flatten().for_each(|mesh| {
             self.device.free_memory(mesh.index_buffer_memory, None);
             self.device.destroy_buffer(mesh.index_buffer, None);
             self.device.free_memory(mesh.vertex_buffer_memory, None);

@@ -45,7 +45,7 @@ pub struct VulkanData {
     pub color_image_memory: vk::DeviceMemory,
     pub color_image_view: vk::ImageView,
     // Mesh/Object data for the next renderer step.
-    pub meshes: Vec<Mesh>,
+    pub meshes: Vec<Option<Mesh>>,
     pub render_objects: Vec<RenderItem>,
     pub skybox: Option<RenderSkybox>,
     // Buffers

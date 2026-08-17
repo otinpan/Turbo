@@ -123,7 +123,14 @@ pub unsafe fn update_command_buffer(
     let mut secondary_command_buffers = Vec::new();
 
     if let Some(skybox) = renderer.data.skybox {
-        if skybox.is_visible && renderer.data.skybox_descriptor_sets.len() > image_index {
+        if skybox.is_visible
+            && renderer.data.skybox_descriptor_sets.len() > image_index
+            && renderer
+                .data
+                .meshes
+                .get(skybox.mesh.index)
+                .is_some_and(|slot| slot.is_some())
+        {
             secondary_command_buffers.push(update_skybox_command_buffer(
                 renderer,
                 image_index,
@@ -179,7 +186,14 @@ unsafe fn update_skybox_command_buffer(
     };
 
     let pipeline = renderer.data.pipeline(PipelineKey::Skybox);
-    let mesh = &renderer.data.meshes[skybox.mesh.index];
+    let Some(mesh) = renderer
+        .data
+        .meshes
+        .get(skybox.mesh.index)
+        .and_then(|slot| slot.as_ref())
+    else {
+        return Ok(command_buffer);
+    };
 
     let inheritance_info = vk::CommandBufferInheritanceInfo::builder()
         .render_pass(renderer.data.render_pass)
@@ -244,6 +258,13 @@ fn sorted_render_indices(data: &VulkanData) -> Vec<usize> {
 
     for (index, object) in data.render_objects.iter().enumerate() {
         if !object.is_visible {
+            continue;
+        }
+        if data
+            .meshes
+            .get(object.mesh_index.index)
+            .is_none_or(|slot| slot.is_none())
+        {
             continue;
         }
 
@@ -316,7 +337,14 @@ unsafe fn update_secondary_command_buffer(
     }
 
     let pipeline = renderer.data.pipeline(object.pipeline_key);
-    let mesh = &renderer.data.meshes[object.mesh_index.index];
+    let Some(mesh) = renderer
+        .data
+        .meshes
+        .get(object.mesh_index.index)
+        .and_then(|slot| slot.as_ref())
+    else {
+        return Ok(command_buffer);
+    };
 
     let model = object.transform.matrix();
 
