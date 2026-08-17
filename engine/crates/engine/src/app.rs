@@ -602,6 +602,7 @@ impl App {
             p1,
             p2,
             material,
+            true,
         )
     }
 
@@ -623,6 +624,7 @@ impl App {
             vec3(0.0, p1.x, p1.y),
             vec3(0.0, p2.x, p2.y),
             material,
+            true,
         )
     }
 
@@ -648,6 +650,7 @@ impl App {
             height,
             rotation,
             material,
+            true,
         )
     }
 
@@ -672,6 +675,7 @@ impl App {
             height,
             vec3(rotation, 0.0, 0.0),
             material,
+            true,
         )
     }
 
@@ -694,6 +698,7 @@ impl App {
             length,
             rotation,
             material,
+            true,
         )
     }
 
@@ -716,6 +721,7 @@ impl App {
             radius,
             segments,
             material,
+            true,
         )
     }
 
@@ -737,6 +743,7 @@ impl App {
             radius,
             segments,
             material,
+            true,
         )
     }
 
@@ -755,6 +762,7 @@ impl App {
             &mut self.resources,
             points,
             material,
+            true,
         )
     }
     pub unsafe fn spawn_polygon_2d(
@@ -773,6 +781,7 @@ impl App {
             &mut self.resources,
             points,
             material,
+            true,
         )
     }
 
@@ -797,6 +806,7 @@ impl App {
             rings,
             segments,
             material,
+            true,
         )
     }
 
@@ -815,6 +825,7 @@ impl App {
             pos0,
             pos1,
             material,
+            true,
         )
     }
 
@@ -842,6 +853,7 @@ impl App {
             length,
             rotation,
             material,
+            true,
         )
     }
 
@@ -1010,6 +1022,9 @@ unsafe fn create_skybox_mesh(renderer: &mut VulkanRenderer, size: f32) -> Result
     renderer.load_mesh_from_data(source.to_skybox_data(), VertexLayout::Skybox)
 }
 
+
+// these primitives are not released (resources.release_mesh) by DespawnLastCommand
+// becuase DespawnLastCommand release only Entitis that have MeshRenderer Component
 unsafe fn create_primitive_meshes(
     renderer: &mut VulkanRenderer,
     resources: &mut Resources,
@@ -1026,8 +1041,9 @@ unsafe fn create_primitive_meshes(
                 ],
                 color: vec3(1.0, 1.0, 1.0),
             },
+            false,
         )?,
-        create_primitive_ui2d(
+        create_primitive_lit3d(
             renderer,
             resources,
             PrimitiveShape::Rectangle {
@@ -1039,8 +1055,9 @@ unsafe fn create_primitive_meshes(
                 ],
                 color: vec3(1.0, 1.0, 0.0),
             },
+            false,
         )?,
-        create_primitive_debug_line(
+        create_primitive_lit3d(
             renderer,
             resources,
             PrimitiveShape::Cube {
@@ -1056,8 +1073,9 @@ unsafe fn create_primitive_meshes(
                 ],
                 color: vec3(1.0, 0.0, 0.0),
             },
+            false,
         )?,
-        create_primitive_mesh3d(
+        create_primitive_lit3d(
             renderer,
             resources,
             PrimitiveShape::Circle {
@@ -1065,8 +1083,9 @@ unsafe fn create_primitive_meshes(
                 segments: 32,
                 color: vec3(0.0, 1.0, 1.0),
             },
+            false,
         )?,
-        create_primitive_mesh3d(
+        create_primitive_lit3d(
             renderer,
             resources,
             PrimitiveShape::Polygon {
@@ -1079,6 +1098,7 @@ unsafe fn create_primitive_meshes(
                 ],
                 color: vec3(0.0, 1.0, 0.0),
             },
+            false,
         )?,
         create_primitive_lit3d(
             renderer,
@@ -1089,6 +1109,7 @@ unsafe fn create_primitive_meshes(
                 segments: 32,
                 color: vec3(0.0, 0.0, 1.0),
             },
+            false,
         )?,
     ];
 

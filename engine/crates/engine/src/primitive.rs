@@ -85,6 +85,7 @@ pub unsafe fn create_primitive_mesh3d(
     renderer: &mut VulkanRenderer,
     resources: &mut Resources,
     shape: PrimitiveShape,
+    auto_release: bool,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
     let source = build_primitive_source(shape);
@@ -92,7 +93,7 @@ pub unsafe fn create_primitive_mesh3d(
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Mesh3D)?;
 
-    let asset_id = resources.insert_mesh_asset(handle, true);
+    let asset_id = resources.insert_mesh_asset(handle, auto_release);
     Ok(PrimitiveMesh {
         asset_id,
         primitive_type,
@@ -104,6 +105,7 @@ pub unsafe fn create_primitive_debug_line(
     renderer: &mut VulkanRenderer,
     resources: &mut Resources,
     shape: PrimitiveShape,
+    auto_release: bool,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
     let source = build_primitive_source(shape);
@@ -111,7 +113,7 @@ pub unsafe fn create_primitive_debug_line(
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::DebugLine3D)?;
 
-    let asset_id = resources.insert_mesh_asset(handle, true);
+    let asset_id = resources.insert_mesh_asset(handle,auto_release);
 
     Ok(PrimitiveMesh {
         asset_id,
@@ -124,6 +126,7 @@ pub unsafe fn create_primitive_lit3d(
     renderer: &mut VulkanRenderer,
     resources: &mut Resources,
     shape: PrimitiveShape,
+    auto_release: bool,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
     let source = build_primitive_source(shape);
@@ -131,7 +134,7 @@ pub unsafe fn create_primitive_lit3d(
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Lit3D)?;
 
-    let asset_id = resources.insert_mesh_asset(handle, true);
+    let asset_id = resources.insert_mesh_asset(handle, auto_release);
 
     Ok(PrimitiveMesh {
         asset_id,
@@ -144,6 +147,7 @@ pub unsafe fn create_primitive_ui2d(
     renderer: &mut VulkanRenderer,
     resources: &mut Resources,
     shape: PrimitiveShape,
+    auto_release: bool,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
     let source = build_primitive_source(shape);
@@ -151,7 +155,7 @@ pub unsafe fn create_primitive_ui2d(
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Ui2D)?;
 
-    let asset_id = resources.insert_mesh_asset(handle, true);
+    let asset_id = resources.insert_mesh_asset(handle, auto_release);
 
     Ok(PrimitiveMesh {
         asset_id,
@@ -164,13 +168,14 @@ pub unsafe fn create_primitive_skybox(
     renderer: &mut VulkanRenderer,
     resources: &mut Resources,
     shape: PrimitiveShape,
+    auto_release: bool,
 ) -> Result<PrimitiveMesh> {
     let primitive_type = shape.primitive_type();
     let source = build_primitive_source(shape);
     let mesh_data = source.to_skybox_data();
 
     let handle = renderer.load_mesh_from_data(mesh_data, VertexLayout::Skybox)?;
-    let asset_id = resources.insert_mesh_asset(handle, true);
+    let asset_id = resources.insert_mesh_asset(handle, auto_release);
     Ok(PrimitiveMesh {
         asset_id,
         primitive_type,
@@ -183,13 +188,14 @@ pub unsafe fn create_primitive_with_layout(
     resources: &mut Resources,
     shape: PrimitiveShape,
     vertex_layout: VertexLayout,
+    auto_release: bool,
 ) -> Result<PrimitiveMesh> {
     match vertex_layout {
-        VertexLayout::Mesh3D => create_primitive_mesh3d(renderer, resources, shape),
-        VertexLayout::DebugLine3D => create_primitive_debug_line(renderer, resources, shape),
-        VertexLayout::Lit3D => create_primitive_lit3d(renderer, resources, shape),
-        VertexLayout::Ui2D => create_primitive_ui2d(renderer, resources, shape),
-        VertexLayout::Skybox => create_primitive_skybox(renderer, resources, shape),
+        VertexLayout::Mesh3D => create_primitive_mesh3d(renderer, resources, shape,auto_release),
+        VertexLayout::DebugLine3D => create_primitive_debug_line(renderer, resources, shape,auto_release),
+        VertexLayout::Lit3D => create_primitive_lit3d(renderer, resources, shape,auto_release),
+        VertexLayout::Ui2D => create_primitive_ui2d(renderer, resources, shape,auto_release),
+        VertexLayout::Skybox => create_primitive_skybox(renderer, resources, shape,auto_release),
     }
 }
 
@@ -612,9 +618,10 @@ unsafe fn spawn_shape_with_material(
     shape: PrimitiveShape,
     transform: Transform,
     material: Material,
+    auto_release: bool,
 ) -> Result<EntityId> {
     let vertex_layout = material.pipeline_key.required_vertex_layout();
-    let primitive_mesh = create_primitive_with_layout(renderer, resources, shape, vertex_layout)?;
+    let primitive_mesh = create_primitive_with_layout(renderer, resources, shape, vertex_layout,auto_release)?;
     resources.primitive_meshes.push(primitive_mesh);
 
     spawn_primitive_from_mesh(
@@ -635,6 +642,7 @@ pub unsafe fn spawn_triangle_with_material(
     p1: Vec3,
     p2: Vec3,
     material: Material,
+    auto_release: bool,
 ) -> Result<EntityId> {
     let center = (p0 + p1 + p2) / 3.0;
     let shape = PrimitiveShape::Triangle {
@@ -647,7 +655,7 @@ pub unsafe fn spawn_triangle_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
 }
 
 // parallel to yz
@@ -660,6 +668,7 @@ pub unsafe fn spawn_rectangle_with_material(
     height: f32,
     rotation: Vec3,
     material: Material,
+    auto_release: bool,
 ) -> Result<EntityId> {
     let half_width = width * 0.5;
     let half_height = height * 0.5;
@@ -677,7 +686,7 @@ pub unsafe fn spawn_rectangle_with_material(
         rotation,
         ..Default::default()
     };
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
 }
 
 pub unsafe fn spawn_cube_with_material(
@@ -688,6 +697,7 @@ pub unsafe fn spawn_cube_with_material(
     length: f32,
     rotation: Vec3,
     material: Material,
+    auto_release: bool,
 ) -> Result<EntityId> {
     let h = length * 0.5;
     let shape = PrimitiveShape::Cube {
@@ -710,7 +720,7 @@ pub unsafe fn spawn_cube_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
 }
 
 // parallel to yz
@@ -722,6 +732,7 @@ pub unsafe fn spawn_circle_with_material(
     radius: f32,
     segments: u32,
     material: Material,
+    auto_release: bool,
 ) -> Result<EntityId> {
     let shape = PrimitiveShape::Circle {
         radius,
@@ -734,7 +745,7 @@ pub unsafe fn spawn_circle_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
 }
 
 pub unsafe fn spawn_polygon_with_material(
@@ -743,6 +754,7 @@ pub unsafe fn spawn_polygon_with_material(
     resources: &mut Resources,
     points: Vec<Vec3>,
     material: Material,
+    auto_release: bool,
 ) -> Result<EntityId> {
     if points.is_empty() {
         bail!("Polygon must have at least one point.");
@@ -761,7 +773,7 @@ pub unsafe fn spawn_polygon_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
 }
 
 pub unsafe fn spawn_sphere_with_material(
@@ -773,6 +785,7 @@ pub unsafe fn spawn_sphere_with_material(
     rings: u32,
     segments: u32,
     material: Material,
+    auto_release: bool,
 ) -> Result<EntityId> {
     let shape = PrimitiveShape::Sphere {
         radius,
@@ -785,7 +798,7 @@ pub unsafe fn spawn_sphere_with_material(
         position: center,
         ..Default::default()
     };
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
 }
 
 pub unsafe fn spawn_line_with_material(
@@ -795,6 +808,7 @@ pub unsafe fn spawn_line_with_material(
     pos0: Vec3,
     pos1: Vec3,
     material: Material,
+    auto_release: bool,
 ) -> Result<EntityId> {
     let center = (pos0 + pos1) / 2.0;
     let shape = PrimitiveShape::Line {
@@ -808,7 +822,7 @@ pub unsafe fn spawn_line_with_material(
         ..Default::default()
     };
 
-    spawn_shape_with_material(world, renderer, resources, shape, transform, material)
+    spawn_shape_with_material(world, renderer, resources, shape, transform, material,auto_release)
 }
 
 // update mesh ///////////////////////////////////////////////////////////
