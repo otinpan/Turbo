@@ -8,6 +8,7 @@
 
 mod command;
 mod input_system;
+mod render_command;
 mod render_system;
 mod scheduler;
 mod update;
@@ -17,6 +18,7 @@ pub use command::{
     SpawnPrimitiveCommand, SpawnVikingRoomCommand, UpdatePrimitiveMeshesCommand,
 };
 pub use input_system::{CommandQueue, CommandRef, InputSystem, InputTrigger, KeyBinding};
-pub use render_system::RenderSystem;
+pub use render_command::{RenderCommand, RenderCommandQueue};
+pub use render_system::{RenderContext, RenderSystem};
 pub use scheduler::Scheduler;
 pub use update::{CameraSystem, RotatorSystem, ScheduledUpdateSystem, UpdateContext, UpdateSystem};

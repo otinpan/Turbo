@@ -21,10 +21,9 @@ use crate::primitive::{
 };
 
 use super::{
-    Camera, CameraSystem, CommandContext, DebugMonitor, DespawnLastCommand, EntityId, Input,
-    InputTrigger, Material, MeshRenderer, Registry, Resources, RotatorSystem, Scheduler,
-    SpawnPrimitiveCommand, SpawnVikingRoomCommand, Time, UpdateContext,
-    UpdatePrimitiveMeshesCommand, Visibility, World,
+    Camera, CameraSystem, DebugMonitor, DespawnLastCommand, EntityId, Input, InputTrigger,
+    Material, MeshRenderer, Registry, Resources, RotatorSystem, Scheduler, SpawnPrimitiveCommand,
+    SpawnVikingRoomCommand, Time, UpdatePrimitiveMeshesCommand, Visibility, World,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -427,8 +426,7 @@ impl App {
             }
         }
         app.scheduler
-            .render_system
-            .update(&mut app.world.registry, &mut app.renderer)?;
+            .run_render_stage(&mut app.world, &mut app.renderer, &mut app.resources)?;
 
         Ok(app)
     }
@@ -444,9 +442,8 @@ impl App {
     pub fn despawn(&mut self, entity: EntityId) -> Result<bool> {
         if let Some(mesh_renderer) = self.world.get_component::<MeshRenderer>(entity) {
             if let Some(asset_id) = mesh_renderer.asset_id {
-                unsafe {
-                    self.resources
-                        .release_mesh_for_renderer(asset_id, &mut self.renderer)?;
+                if let Some(mesh) = self.resources.release_mesh(asset_id) {
+                    self.scheduler.render_commands.destroy_mesh(mesh);
                 }
             }
         }
@@ -460,23 +457,26 @@ impl App {
 
         let mut commands = self.scheduler.run_input_stage(&self.input);
 
-        self.scheduler.run_command_stage(&mut CommandContext {
-            commands: &mut commands,
-            world: &mut self.world,
-            renderer: &mut self.renderer,
-            input: &self.input,
-            resources: &mut self.resources,
-            positions: &self.positions,
-        })?;
+        self.scheduler.run_command_stage(
+            &mut commands,
+            &mut self.world,
+            &self.input,
+            &mut self.resources,
+            &self.positions,
+        )?;
 
-        self.scheduler.run_update_stage(&mut UpdateContext {
-            registry: &mut self.world.registry,
-            input: &self.input,
-            delta_time,
-        })?;
+        self.scheduler.run_update_stage(
+            &mut self.world,
+            &self.input,
+            &self.time,
+            &self.resources,
+        )?;
 
-        self.scheduler
-            .run_render_stage(&mut self.world.registry, &mut self.renderer)?;
+        self.scheduler.run_render_stage(
+            &mut self.world,
+            &mut self.renderer,
+            &mut self.resources,
+        )?;
 
         self.input.clear_transitions();
         Ok(())
@@ -928,7 +928,7 @@ fn create_world() -> World {
         },
     );
 
-    let mut world = World { registry };
+    let mut world = World::from_registry(registry);
     world.set_name(camera, "Camera");
 
     world
@@ -1136,8 +1136,8 @@ mod tests {
             resources.insert_mesh_asset(MeshHandle::new(2, VertexLayout::Mesh3D), false);
 
         let camera = world.spawn();
-        world.registry.add_component(camera, Transform::default());
-        world.registry.add_component(
+        world.add_component(camera, Transform::default());
+        world.add_component(
             camera,
             Camera {
                 target: vec3(0.0, 0.0, 0.0),
@@ -1177,8 +1177,8 @@ mod tests {
             .unwrap(),
         ];
 
-        assert_eq!(world.registry.entity_count(), ids.len());
-        assert!(ids.iter().all(|id| world.registry.contains(*id)));
+        assert_eq!(world.entity_count(), ids.len());
+        assert!(ids.iter().all(|id| world.contains(*id)));
     }
 
     #[test]

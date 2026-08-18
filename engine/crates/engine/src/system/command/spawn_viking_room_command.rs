@@ -25,15 +25,11 @@ impl Command for SpawnVikingRoomCommand {
             viking_room_debug_line,
             viking_room_lit3d,
         ];
-        let index = context
-            .world
-            .registry
-            .entities()
+        let entities = context.entities().to_vec();
+        let index = entities
             .iter()
             .filter(|entity| {
                 context
-                    .world
-                    .registry
                     .get_component::<MeshRenderer>(**entity)
                     .is_some_and(|mesh_renderer| {
                         mesh_renderer

@@ -106,6 +106,7 @@ impl Resources {
         if let Some(handle) = self.release_mesh(id) {
             log::debug!("Mesh asset released and ready to destroy: {handle:?}");
             renderer.destroy_mesh(handle)?;
+            assert!(renderer.data.meshes[handle.index].is_none());
         }
 
         Ok(())

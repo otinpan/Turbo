@@ -5,7 +5,7 @@ use winit::event::MouseButton;
 use winit::keyboard::KeyCode;
 
 use super::{UpdateContext, UpdateSystem};
-use crate::{Camera, Input, Registry};
+use crate::{Camera, Input};
 
 #[derive(Clone, Debug)]
 pub struct CameraSystem;
@@ -13,7 +13,7 @@ pub struct CameraSystem;
 impl CameraSystem {
     fn update_camera(
         &mut self,
-        registry: &mut Registry,
+        context: &mut UpdateContext<'_>,
         input: &Input,
         delta_time: f32,
     ) -> Result<()> {
@@ -21,8 +21,7 @@ impl CameraSystem {
         let mouse_sensitivity = 0.003;
         let max_pitch = std::f32::consts::FRAC_PI_2 - 0.01;
 
-        if let Some((_, transform, camera)) = registry.query2_mut_mut::<Transform, Camera>().next()
-        {
+        if let Some((_, transform, camera)) = context.query2_mut_mut::<Transform, Camera>().next() {
             let mouse_delta = input.mouse_delta();
             if input.mouse_button_down(MouseButton::Right) {
                 camera.yaw -= mouse_delta.x * mouse_sensitivity;
@@ -67,6 +66,9 @@ impl CameraSystem {
 
 impl UpdateSystem for CameraSystem {
     fn update(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
-        self.update_camera(context.registry, context.input, context.delta_time)
+        let input = context.input().clone();
+        let delta_time = context.delta_seconds();
+
+        self.update_camera(context, &input, delta_time)
     }
 }

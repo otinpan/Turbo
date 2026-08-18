@@ -81,11 +81,15 @@
   - ~~despawn~~
   - ~~get/set transform~~
   - ~~tag/name検索~~
-* MeshAsset管理
+* ~~MeshAsset管理~~
 	- 現状はEntityがdespawnされてもloadされたmeshは残り続ける
 	- Entityごとにmeshを持たせる場合はメモリリークになる
 	- 参照カウンタ的なものでdespawn時に自動的にdestroyする
 	- assetのrelease (Resources.release_mesh)
+* Component、SystemのAPI準備
+	- UpdateContext、CommandContext、RenderContextのフィールド pub -> private
+	- <system>.rsではworldやrendererを触らせない
+	- systemはContext情報のみでupdateする
 * シーン管理
   - Scene trait
   - current_scene

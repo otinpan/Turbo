@@ -9,8 +9,10 @@ pub struct RotatorSystem;
 
 impl UpdateSystem for RotatorSystem {
     fn update(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
-        for (_, transform, rotator) in context.registry.query2_mut::<Transform, Rotator>() {
-            transform.rotate(rotator.speed * context.delta_time);
+        let delta_time = context.delta_seconds();
+
+        for (_, transform, rotator) in context.query2_mut::<Transform, Rotator>() {
+            transform.rotate(rotator.speed * delta_time);
         }
 
         Ok(())

@@ -1,17 +1,22 @@
 use anyhow::Result;
-use renderer_vulkan::VulkanRenderer;
 
 use super::{
-    Command, CommandContext, CommandQueue, CommandSystem, InputSystem, InputTrigger, RenderSystem,
-    ScheduledUpdateSystem, UpdateContext, UpdateSystem,
+    Command, CommandContext, CommandQueue, CommandSystem, InputSystem, InputTrigger,
+    RenderCommandQueue, RenderContext, RenderSystem, ScheduledUpdateSystem, UpdateContext,
+    UpdateSystem,
 };
 
-use crate::{Input, Registry};
+use crate::{Input, Resources, Time, World};
+use cgmath::Vector3;
+use renderer_vulkan::VulkanRenderer;
+
+pub type Vec3 = Vector3<f32>;
 
 pub struct Scheduler {
     pub command_system: CommandSystem,
     pub input_system: InputSystem,
     pub render_system: RenderSystem,
+    pub render_commands: RenderCommandQueue,
     update_systems: Vec<ScheduledUpdateSystem>,
 }
 
@@ -27,12 +32,14 @@ impl Scheduler {
         command_system: CommandSystem,
         input_system: InputSystem,
         render_system: RenderSystem,
+        render_commands: RenderCommandQueue,
         update_systems: Vec<ScheduledUpdateSystem>,
     ) -> Self {
         Self {
             command_system,
             input_system,
             render_system,
+            render_commands,
             update_systems,
         }
     }
@@ -63,14 +70,39 @@ impl Scheduler {
         self.input_system.update(input)
     }
 
-    pub fn run_command_stage(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        self.command_system.update(context)
+    pub fn run_command_stage(
+        &mut self,
+        commands: &mut CommandQueue,
+        world: &mut World,
+        input: &Input,
+        resources: &mut Resources,
+        positions: &[Vec3],
+    ) -> Result<()> {
+        let mut context = CommandContext::new(
+            commands,
+            world,
+            input,
+            resources,
+            &mut self.render_commands,
+            positions,
+        );
+
+        self.command_system.update(&mut context)
     }
 
-    pub fn run_update_stage(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
+    pub fn run_update_stage(
+        &mut self,
+        world: &mut World,
+        input: &Input,
+        time: &Time,
+        resources: &Resources,
+    ) -> Result<()> {
+        let mut context =
+            UpdateContext::new(world, input, time, resources, &mut self.render_commands);
+
         for scheduled_system in &mut self.update_systems {
             if scheduled_system.enabled {
-                scheduled_system.system.update(context)?
+                scheduled_system.system.update(&mut context)?
             }
         }
         Ok(())
@@ -78,10 +110,14 @@ impl Scheduler {
 
     pub fn run_render_stage(
         &mut self,
-        registry: &mut Registry,
+        world: &mut World,
         renderer: &mut VulkanRenderer,
+        resources: &mut Resources,
     ) -> Result<()> {
-        self.render_system.update(registry, renderer)
+        let mut context=
+            RenderContext::new(world,resources,renderer,&mut self.render_commands);
+
+        self.render_system.update(&mut context)
     }
 }
 
@@ -91,6 +127,7 @@ impl Default for Scheduler {
             command_system: CommandSystem,
             input_system: InputSystem::new(),
             render_system: RenderSystem,
+            render_commands: RenderCommandQueue::default(),
             update_systems: Vec::new(),
         }
     }

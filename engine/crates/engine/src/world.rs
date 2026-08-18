@@ -1,16 +1,32 @@
-use super::{Component, EntityId, Name, Registry, Tags};
+use super::{Component, ComponentPool, EntityId, Name, Registry, Tags};
 
 pub type Vec3 = cgmath::Vector3<f32>;
 
 // World ///////////////////////////////////////////
 #[derive(Debug)]
 pub struct World {
-    pub registry: Registry,
+    registry: Registry,
 }
 
 impl World {
+    pub(crate) fn from_registry(registry: Registry) -> Self {
+        Self { registry }
+    }
+
     pub fn spawn(&mut self) -> EntityId {
         self.registry.create()
+    }
+
+    pub fn entities(&self) -> &[EntityId] {
+        self.registry.entities()
+    }
+
+    pub fn contains(&self, entity: EntityId) -> bool {
+        self.registry.contains(entity)
+    }
+
+    pub fn entity_count(&self) -> usize {
+        self.registry.entity_count()
     }
 
     pub fn despawn(&mut self, entity: EntityId) -> bool {
@@ -25,6 +41,14 @@ impl World {
         self.registry.remove_component::<T>(entity)
     }
 
+    pub fn get_pool<T: Component>(&self) -> Option<&ComponentPool<T>> {
+        self.registry.get_pool::<T>()
+    }
+
+    pub fn get_pool_mut<T: Component>(&mut self) -> Option<&mut ComponentPool<T>> {
+        self.registry.get_pool_mut::<T>()
+    }
+
     pub fn get_component<T: Component>(&self, entity: EntityId) -> Option<&T> {
         self.registry.get_component::<T>(entity)
     }
@@ -35,6 +59,32 @@ impl World {
 
     pub fn has_component<T: Component>(&self, entity: EntityId) -> bool {
         self.registry.has_component::<T>(entity)
+    }
+
+    pub fn query2<A, B>(&self) -> Box<dyn Iterator<Item = (EntityId, &A, &B)> + '_>
+    where
+        A: Component,
+        B: Component,
+    {
+        self.registry.query2::<A, B>()
+    }
+
+    pub fn query2_mut<A, B>(&mut self) -> Box<dyn Iterator<Item = (EntityId, &mut A, &B)> + '_>
+    where
+        A: Component,
+        B: Component,
+    {
+        self.registry.query2_mut::<A, B>()
+    }
+
+    pub fn query2_mut_mut<A, B>(
+        &mut self,
+    ) -> Box<dyn Iterator<Item = (EntityId, &mut A, &mut B)> + '_>
+    where
+        A: Component,
+        B: Component,
+    {
+        self.registry.query2_mut_mut::<A, B>()
     }
 
     pub fn find_by_name(&self, target: &str) -> Option<EntityId> {
