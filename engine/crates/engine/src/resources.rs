@@ -20,12 +20,12 @@ pub struct MeshAsset {
 pub struct MeshAssetId(pub usize);
 
 pub struct Resources {
-    pub mesh_assets: Vec<Option<MeshAsset>>,
-    pub models: HashMap<String, MeshAssetId>,
-    pub textures: HashMap<String, TextureHandle>,
-    pub primitive_meshes: Vec<PrimitiveMesh>,
-    pub skybox_mesh: Option<MeshHandle>,
-    pub skybox_textures: HashMap<String, SkyboxTextureHandle>,
+    mesh_assets: Vec<Option<MeshAsset>>,
+    models: HashMap<String, MeshAssetId>,
+    textures: HashMap<String, TextureHandle>,
+    primitive_meshes: Vec<PrimitiveMesh>,
+    skybox_mesh: Option<MeshHandle>,
+    skybox_textures: HashMap<String, SkyboxTextureHandle>,
 }
 
 impl Resources {
@@ -52,8 +52,50 @@ impl Resources {
         id
     }
 
+    pub fn register_texture(&mut self, name: &str, handle: TextureHandle) -> TextureHandle {
+        self.textures.insert(name.to_string(), handle);
+        handle
+    }
+
+    pub(crate) fn set_textures(&mut self, textures: HashMap<String, TextureHandle>) {
+        self.textures = textures;
+    }
+
+    pub(crate) fn register_primitive_mesh(&mut self, mesh: PrimitiveMesh) -> PrimitiveMesh {
+        self.primitive_meshes.push(mesh);
+        mesh
+    }
+
+    pub(crate) fn set_primitive_meshes(&mut self, primitive_meshes: Vec<PrimitiveMesh>) {
+        self.primitive_meshes = primitive_meshes;
+    }
+
+    pub(crate) fn set_skybox_mesh(&mut self, mesh: MeshHandle) {
+        self.skybox_mesh = Some(mesh);
+    }
+
+    pub(crate) fn skybox_mesh(&self) -> Option<MeshHandle> {
+        self.skybox_mesh
+    }
+
+    pub(crate) fn set_skybox_textures(
+        &mut self,
+        skybox_textures: HashMap<String, SkyboxTextureHandle>,
+    ) {
+        self.skybox_textures = skybox_textures;
+    }
+
+    pub(crate) fn skybox_texture(&self, name: &str) -> Option<SkyboxTextureHandle> {
+        self.skybox_textures.get(name).copied()
+    }
+
+    // get asset id
     pub fn model_asset_id(&self, name: &str) -> Option<MeshAssetId> {
         self.models.get(name).copied()
+    }
+
+    pub fn get_texture_handle(&self, name: &str) -> Option<TextureHandle> {
+        self.textures.get(name).copied()
     }
 
     pub fn primitive_asset_id(
@@ -76,6 +118,33 @@ impl Resources {
             .map(|asset| asset.handle)
     }
 
+    // query for primitives
+    pub fn primitive_type_from_asset_id(&self, asset_id: MeshAssetId) -> Option<PrimitiveType> {
+        self.primitive_meshes
+            .iter()
+            .find(|mesh| mesh.asset_id == asset_id)
+            .map(|mesh| mesh.primitive_type)
+    }
+
+    pub fn vertex_layout_from_asset_id(&self, asset_id: MeshAssetId) -> Option<VertexLayout> {
+        self.primitive_meshes
+            .iter()
+            .find(|mesh| mesh.asset_id == asset_id)
+            .map(|mesh| mesh.vertex_layout)
+    }
+
+    pub fn mesh_assets(&self) -> impl Iterator<Item = (MeshAssetId, &MeshAsset)> {
+        self.mesh_assets
+            .iter()
+            .enumerate()
+            .filter_map(|(index, mesh_asset)| {
+                mesh_asset
+                    .as_ref()
+                    .map(|mesh_asset| (MeshAssetId(index), mesh_asset))
+            })
+    }
+
+    // reference counter
     pub fn retain_mesh(&mut self, id: MeshAssetId) -> Option<MeshHandle> {
         let asset = self.mesh_assets.get_mut(id.0)?.as_mut()?;
         asset.ref_count += 1;
@@ -98,7 +167,7 @@ impl Resources {
         None
     }
 
-    pub unsafe fn release_mesh_for_renderer(
+    pub(crate) unsafe fn release_mesh_for_renderer(
         &mut self,
         id: MeshAssetId,
         renderer: &mut VulkanRenderer,

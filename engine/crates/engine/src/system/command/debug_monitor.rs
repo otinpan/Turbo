@@ -17,8 +17,8 @@ impl Command for DebugMonitor {
 
 impl DebugMonitor {
     fn monitor_entities(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        let named_entities = context.world.get_all_named_entities();
-        let taged_entities = context.world.get_all_taged_entities();
+        let named_entities = context.get_all_named_entities();
+        let taged_entities = context.get_all_taged_entities();
 
         for (name, entity) in named_entities {
             log::debug!("Named entity: {name} -> {entity:?}");
@@ -32,12 +32,10 @@ impl DebugMonitor {
     }
 
     fn monitor_mesh_assets(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        let mesh_assets = context.resources.mesh_assets.iter();
-        for mesh_asset in mesh_assets {
-            if let Some(mesh) = mesh_asset {
-                log::debug!("Mesh: {mesh:?}")
-            }
+        for (asset_id, mesh) in context.mesh_assets() {
+            log::debug!("Mesh {asset_id:?}: {mesh:?}");
         }
+
         Ok(())
     }
 }

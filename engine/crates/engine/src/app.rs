@@ -52,10 +52,10 @@ impl App {
         let mut resources = Resources::default();
         load_models(&mut renderer, &mut resources)?;
         let primitive_meshes = create_primitive_meshes(&mut renderer, &mut resources)?;
-        resources.primitive_meshes = primitive_meshes;
-        resources.textures = load_textures(&mut renderer)?;
-        resources.skybox_mesh = Some(create_skybox_mesh(&mut renderer, 20.0)?);
-        resources.skybox_textures = load_skybox_textures(&mut renderer)?;
+        resources.set_primitive_meshes(primitive_meshes);
+        resources.set_textures(load_textures(&mut renderer)?);
+        resources.set_skybox_mesh(create_skybox_mesh(&mut renderer, 20.0)?);
+        resources.set_skybox_textures(load_skybox_textures(&mut renderer)?);
 
         let positions = vec![
             vec3(0.0, -1.25, 1.0),
@@ -85,24 +85,9 @@ impl App {
             app.set_skybox(app.use_skybox_texture("ghost"))?;
             // create primitive ////////////////////////////
             unsafe {
-                let face_texture = app
-                    .resources
-                    .textures
-                    .get("face")
-                    .copied()
-                    .unwrap_or(DEFAULT_TEXTURE);
-                let ghost_texture = app
-                    .resources
-                    .textures
-                    .get("ghost")
-                    .copied()
-                    .unwrap_or(DEFAULT_TEXTURE);
-                let escapee_texture = app
-                    .resources
-                    .textures
-                    .get("escapee")
-                    .copied()
-                    .unwrap_or(DEFAULT_TEXTURE);
+                let face_texture = app.use_texture("face");
+                let ghost_texture = app.use_texture("ghost");
+                let escapee_texture = app.use_texture("escapee");
                 let viking_room = app.spawn_model(
                     "viking_room_lit3d",
                     Transform {
@@ -557,10 +542,14 @@ impl App {
 
     fn use_skybox_texture(&self, name: &str) -> SkyboxTextureHandle {
         self.resources
-            .skybox_textures
-            .get(name)
-            .copied()
+            .skybox_texture(name)
             .unwrap_or(DEFAULT_SKYBOX_TEXTURE)
+    }
+
+    fn use_texture(&self, name: &str) -> TextureHandle {
+        self.resources
+            .get_texture_handle(name)
+            .unwrap_or(DEFAULT_TEXTURE)
     }
 
     pub unsafe fn destroy(&mut self) {
@@ -863,7 +852,7 @@ impl App {
     pub unsafe fn set_skybox(&mut self, texture: SkyboxTextureHandle) -> Result<()> {
         let mesh = self
             .resources
-            .skybox_mesh
+            .skybox_mesh()
             .ok_or_else(|| anyhow!("Skybox mesh has not been created."))?;
 
         self.renderer.set_skybox(mesh, texture)
@@ -883,7 +872,13 @@ impl App {
             .resources
             .retain_mesh(asset_id)
             .ok_or_else(|| anyhow!("mesh asset not found: {asset_id:?}"))?;
-        let mesh_renderer = MeshRenderer::new(mesh, material)?.with_asset_id(asset_id);
+        let mesh_renderer = match MeshRenderer::new(mesh, material) {
+            Ok(mesh_renderer) => mesh_renderer.with_asset_id(asset_id),
+            Err(error) => {
+                self.resources.release_mesh(asset_id);
+                return Err(error);
+            }
+        };
 
         let entity = self.world.spawn();
         self.world.add_component(entity, transform);

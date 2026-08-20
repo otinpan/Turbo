@@ -14,7 +14,7 @@ impl Command for UpdatePrimitiveMeshesCommand {
     }
 
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        context.render_commands.update_primitive_mesh(
+        context.update_primitive_mesh(
             PrimitiveType::Polygon,
             VertexLayout::Mesh3D,
             PrimitiveShape::Polygon {
@@ -29,7 +29,7 @@ impl Command for UpdatePrimitiveMeshesCommand {
             },
         );
 
-        context.render_commands.update_primitive_mesh(
+        context.update_primitive_mesh(
             PrimitiveType::Sphere,
             VertexLayout::Lit3D,
             PrimitiveShape::Sphere {
@@ -40,7 +40,7 @@ impl Command for UpdatePrimitiveMeshesCommand {
             },
         );
 
-        context.render_commands.update_primitive_mesh(
+        context.update_primitive_mesh(
             PrimitiveType::Rectangle,
             VertexLayout::Ui2D,
             PrimitiveShape::Rectangle {

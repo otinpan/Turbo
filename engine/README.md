@@ -90,6 +90,7 @@
 	- UpdateContext、CommandContext、RenderContextのフィールド pub -> private
 	- <system>.rsではworldやrendererを触らせない
 	- systemはContext情報のみでupdateする
+	- 既存のsystemをcontext api経由にする
 * シーン管理
   - Scene trait
   - current_scene

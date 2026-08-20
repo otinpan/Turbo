@@ -1,14 +1,11 @@
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use cgmath::vec3;
-use renderer_vulkan::{PipelineKey, TextureHandle};
-use std::collections::HashMap;
+use renderer_vulkan::PipelineKey;
 use turbo_math::Transform;
 
 use super::{Command, CommandContext};
 use crate::Material;
-use crate::MeshAssetId;
-use crate::app::DEFAULT_TEXTURE;
-use crate::primitive::{PrimitiveMesh, PrimitiveType, spawn_primitive_from_mesh};
+use crate::primitive::PrimitiveType;
 
 #[derive(Clone, Debug)]
 pub struct SpawnPrimitiveCommand {
@@ -24,54 +21,43 @@ impl Command for SpawnPrimitiveCommand {
             self.primitive_type, self.pipeline_key, self.texture_name
         )
     }
-
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
         let position = mouse_position_on_spawn_plane(context);
-        let texture = self
-            .texture_name
-            .map(|name| use_texture(&context.resources.textures, name))
-            .unwrap_or(DEFAULT_TEXTURE);
 
-        if let Some(asset_id) =
-            primitive_asset_id(&context.resources.primitive_meshes, self.primitive_type)
-        {
-            if let Err(e) = spawn_primitive_from_mesh(
-                context.world,
-                context.resources,
-                asset_id,
-                Material {
-                    color: vec3(1.0, 1.0, 1.0),
-                    use_texture: true,
-                    texture,
-                    pipeline_key: self.pipeline_key,
-                    ..Default::default()
-                },
-                Transform {
-                    position,
-                    ..Default::default()
-                },
-            ) {
-                log::error!("Failed to spawn {:?} primitive: {e:?}", self.primitive_type);
-            }
-        }
+        let texture = match self.texture_name {
+            Some(name) => context.texture(name)?,
+            None => context.default_texture(),
+        };
+
+        let asset_id = context
+            .primitive_asset_id(
+                self.primitive_type,
+                self.pipeline_key.required_vertex_layout(),
+            )
+            .ok_or_else(|| anyhow!("not found primitive by primitive_asset_id"))?;
+
+        context.spawn_primitive_from_mesh(
+            asset_id,
+            Material {
+                color: vec3(1.0, 1.0, 1.0),
+                use_texture: self.texture_name.is_some(),
+                texture,
+                pipeline_key: self.pipeline_key,
+                ..Default::default()
+            },
+            Transform {
+                position,
+                ..Default::default()
+            },
+        )?;
 
         Ok(())
     }
 }
 
-fn primitive_asset_id(
-    primitive_meshes: &[PrimitiveMesh],
-    primitive_type: PrimitiveType,
-) -> Option<MeshAssetId> {
-    primitive_meshes
-        .iter()
-        .find(|mesh| mesh.primitive_type == primitive_type)
-        .map(|mesh| mesh.asset_id)
-}
-
 fn mouse_position_on_spawn_plane(context: &CommandContext<'_>) -> cgmath::Vector3<f32> {
-    let mouse = context.input.mouse_position();
-    let window_size = context.input.window_size();
+    let mouse = context.mouse_position();
+    let window_size = context.window_size();
     let width = window_size.x.max(1.0);
     let height = window_size.y.max(1.0);
     let aspect = width / height;
@@ -81,8 +67,4 @@ fn mouse_position_on_spawn_plane(context: &CommandContext<'_>) -> cgmath::Vector
     let y = 0.5 - mouse.y / height;
 
     vec3(0.0, x * world_height * aspect, y * world_height)
-}
-
-fn use_texture(textures: &HashMap<String, TextureHandle>, name: &str) -> TextureHandle {
-    textures.get(name).copied().unwrap_or(DEFAULT_TEXTURE)
 }

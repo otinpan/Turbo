@@ -625,7 +625,7 @@ unsafe fn spawn_shape_with_material(
     let vertex_layout = material.pipeline_key.required_vertex_layout();
     let primitive_mesh =
         create_primitive_with_layout(renderer, resources, shape, vertex_layout, auto_release)?;
-    resources.primitive_meshes.push(primitive_mesh);
+    resources.register_primitive_mesh(primitive_mesh);
 
     spawn_primitive_from_mesh(
         world,

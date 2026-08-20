@@ -114,8 +114,7 @@ impl Scheduler {
         renderer: &mut VulkanRenderer,
         resources: &mut Resources,
     ) -> Result<()> {
-        let mut context=
-            RenderContext::new(world,resources,renderer,&mut self.render_commands);
+        let mut context = RenderContext::new(world, resources, renderer, &mut self.render_commands);
 
         self.render_system.update(&mut context)
     }
