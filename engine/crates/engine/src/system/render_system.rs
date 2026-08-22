@@ -1,11 +1,15 @@
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use cgmath::vec3;
 use renderer_vulkan::{RenderCamera, RenderItem, VertexLayout, VulkanRenderer};
 use turbo_math::Transform;
 
 use super::render_command::{RenderCommand, RenderCommandQueue};
-use crate::primitive::{PrimitiveMesh, PrimitiveType, update_primitive_mesh};
-use crate::{Camera, Component, EntityId, MeshAssetId, MeshRenderer, Resources, Visibility, World};
+use crate::primitive::{
+    PrimitiveMesh, PrimitiveType, create_primitive_with_layout, update_primitive_mesh,
+};
+use crate::{EntityId, MeshAssetId, Resources, World};
+
+use crate::component::{Camera, Component, MeshRenderer, PendingPrimitiveMesh, Visibility};
 
 pub struct RenderContext<'a> {
     world: &'a mut World,
@@ -27,6 +31,14 @@ impl<'a> RenderContext<'a> {
             renderer,
             render_commands,
         }
+    }
+
+    pub fn add_component<T: Component>(&mut self, entity: EntityId, component: T) -> bool {
+        self.world.add_component::<T>(entity, component)
+    }
+
+    pub fn remove_component<T: Component>(&mut self, entity: EntityId) -> Option<T> {
+        self.world.remove_component::<T>(entity)
     }
 
     pub fn query2<A, B>(&self) -> Box<dyn Iterator<Item = (EntityId, &A, &B)> + '_>
@@ -68,6 +80,39 @@ impl<'a> RenderContext<'a> {
         shape: crate::PrimitiveShape,
     ) -> Result<()> {
         update_primitive_mesh(self.renderer, self.resources, mesh, shape)
+    }
+
+    pub(crate) unsafe fn create_primitive_mesh(
+        &mut self,
+        pending: PendingPrimitiveMesh,
+    ) -> Result<PrimitiveMesh> {
+        let vertex_layout = pending.material.pipeline_key.required_vertex_layout();
+
+        create_primitive_with_layout(
+            self.renderer,
+            self.resources,
+            pending.shape,
+            vertex_layout,
+            pending.auto_release,
+        )
+    }
+
+    pub(crate) fn register_primitive_mesh(&mut self, mesh: PrimitiveMesh) -> PrimitiveMesh {
+        self.resources.register_primitive_mesh(mesh)
+    }
+
+    pub(crate) fn retain_mesh(
+        &mut self,
+        asset_id: MeshAssetId,
+    ) -> Option<renderer_vulkan::MeshHandle> {
+        self.resources.retain_mesh(asset_id)
+    }
+
+    pub(crate) fn release_mesh(
+        &mut self,
+        asset_id: MeshAssetId,
+    ) -> Option<renderer_vulkan::MeshHandle> {
+        self.resources.release_mesh(asset_id)
     }
 
     pub(crate) fn drain_render_commands(&mut self) -> Vec<RenderCommand> {
@@ -145,6 +190,36 @@ impl RenderSystem {
                             context.update_primitive_mesh(primitive_mesh, shape)?;
                         }
                     }
+                }
+                RenderCommand::CreatePrimitiveMesh { entity } => {
+                    let Some(pending) = context
+                        .get_component::<PendingPrimitiveMesh>(entity)
+                        .cloned()
+                    else {
+                        continue;
+                    };
+                    
+                    // new mesh is created here (MeshAssetId)
+                    let primitive_mesh = unsafe { context.create_primitive_mesh(pending.clone())? };
+
+                    context.register_primitive_mesh(primitive_mesh);
+
+                    let mesh = context
+                        .retain_mesh(primitive_mesh.asset_id)
+                        .ok_or_else(|| {
+                            anyhow!("mesh asset not found: {:?}", primitive_mesh.asset_id)
+                        })?;
+
+                    let mesh_renderer = match MeshRenderer::new(mesh, pending.material) {
+                        Ok(mesh_renderer) => mesh_renderer.with_asset_id(primitive_mesh.asset_id),
+                        Err(error) => {
+                            context.release_mesh(primitive_mesh.asset_id);
+                            return Err(error);
+                        }
+                    };
+
+                    context.add_component(entity, mesh_renderer);
+                    context.remove_component::<PendingPrimitiveMesh>(entity);
                 }
             }
         }

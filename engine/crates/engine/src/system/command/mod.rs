@@ -22,10 +22,11 @@ use anyhow::{Result, anyhow};
 use cgmath::Vector3;
 
 use crate::app::{DEFAULT_SKYBOX_TEXTURE, DEFAULT_TEXTURE};
+use crate::component::{Component, Material, MeshRenderer, PendingPrimitiveMesh, Visibility};
 use crate::primitive::spawn_primitive_from_mesh;
 use crate::{
-    CommandQueue, Component, ComponentPool, EntityId, Input, Material, MeshAsset, MeshAssetId,
-    MeshRenderer, PrimitiveShape, PrimitiveType, RenderCommandQueue, Resources, Visibility, World,
+    CommandQueue, ComponentPool, EntityId, Input, MeshAsset, MeshAssetId, PrimitiveShape,
+    PrimitiveType, RenderCommandQueue, Resources, World,
 };
 use renderer_vulkan::{SkyboxTextureHandle, TextureHandle, VertexLayout};
 use turbo_math::Transform;
@@ -241,6 +242,7 @@ impl<'a> CommandContext<'a> {
         Ok(entity)
     }
 
+    // create new primitive entity by using existing mesh (MeshAssetId)
     pub fn spawn_primitive_from_mesh(
         &mut self,
         asset_id: MeshAssetId,
@@ -248,6 +250,34 @@ impl<'a> CommandContext<'a> {
         transform: Transform,
     ) -> Result<EntityId> {
         spawn_primitive_from_mesh(self.world, self.resources, asset_id, material, transform)
+    }
+
+    // create new primitive entity and new mesh
+    // entity is create here, but mesh is created in RenderSystem using VulkanRenderer.
+    // the frame this called do not render new primitive
+    pub fn spawn_shape_with_material(
+        &mut self,
+        shape: PrimitiveShape,
+        transform: Transform,
+        material: Material,
+        auto_release: bool,
+    ) -> Result<EntityId> {
+        let entity = self.spawn();
+
+        self.add_component(entity, transform);
+        self.add_component(entity, Visibility::default());
+        self.add_component(
+            entity,
+            PendingPrimitiveMesh {
+                shape: shape.clone(),
+                material,
+                auto_release,
+            },
+        );
+
+        self.render_commands.create_primitive_mesh(entity);
+
+        Ok(entity)
     }
 
     // return mesh asset id from resources

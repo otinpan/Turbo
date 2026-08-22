@@ -613,7 +613,7 @@ pub fn spawn_primitive_from_mesh(
     }
 }
 
-unsafe fn spawn_shape_with_material(
+pub unsafe fn spawn_shape_with_material(
     world: &mut World,
     renderer: &mut VulkanRenderer,
     resources: &mut Resources,

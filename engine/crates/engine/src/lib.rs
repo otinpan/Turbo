@@ -18,7 +18,8 @@ mod world;
 
 pub use app::App;
 pub use component::{
-    Camera, CameraComponent, Component, Material, MeshRenderer, Name, Rotator, Tags, Visibility,
+    Camera, CameraComponent, Component, Material, MeshRenderer, Name, PendingPrimitiveMesh,
+    Rotator, Tags, Visibility,
 };
 pub use ecs::{ComponentPool, EntityId, Registry};
 pub use input::Input;

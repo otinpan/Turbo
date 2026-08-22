@@ -113,8 +113,26 @@
   - debug text
   - simple HUD
 
+## ユーザ触れられるもの
+* App
+	* CommandContext
+	* UpdateContext
+	* RenderContext
+* Command
+	* UpdateContext
+* Component
+* EntityId
+* Transform
+* Material
+* PrimitiveShape
+* PrimitiveType
+* MeshAssetId
+* Camera
+* Rotator
+* Visibility
+* Name
+* Tag
 
-create_primitivesでcreate_primitive_debug_lineでprimitiveを作った後に、spawnでmesh3dのことをするとクラッシュする
 
     
 
