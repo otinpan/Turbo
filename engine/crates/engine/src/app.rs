@@ -21,9 +21,13 @@ use crate::primitive::{
 };
 
 use super::{
-    Camera, CameraSystem, DebugMonitor, DespawnLastCommand, EntityId, Input, InputTrigger,
-    Material, MeshRenderer, Registry, Resources, RotatorSystem, Scheduler, SpawnPrimitiveCommand,
-    SpawnVikingRoomCommand, Time, UpdatePrimitiveMeshesCommand, Visibility, World,
+    Camera, CameraSystem, EntityId, Input, InputTrigger, Material, MeshRenderer, Registry,
+    Resources, RotatorSystem, Scheduler, Time, Visibility, World,
+};
+
+use super::system::{
+    CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, SpawnPrimitiveCommand,
+    SpawnVikingRoomCommand, UpdatePrimitiveMeshesCommand,
 };
 
 pub type Vec3 = cgmath::Vector3<f32>;
@@ -536,6 +540,31 @@ impl App {
             KeyCode::KeyU,
             InputTrigger::Pressed,
             UpdatePrimitiveMeshesCommand,
+        );
+
+        // create primitives
+        scheduler.bind_key(
+            KeyCode::Digit1,
+            InputTrigger::Pressed,
+            CreatePrimitiveCommand {
+                primitive_shape: PrimitiveShape::Triangle {
+                    points: [
+                        vec3(0.0, 2.0, -0.3),
+                        vec3(-7.0, 2.0, 0.3),
+                        vec3(-2.0, 2.0, 1.0),
+                    ],
+                    color: vec3(1.0, 1.0, 1.0),
+                },
+                transform: Transform {
+                    position: vec3(-5.0, 2.0, 0.0),
+                    ..Default::default()
+                },
+                color: vec3(1.0, 1.0, 0.0),
+                alpha: 1.0,
+                texture: Some("face"),
+                pipeline_key: PipelineKey::DebugLine3D,
+                auto_release: true,
+            },
         );
         scheduler.bind_key(KeyCode::Enter, InputTrigger::Pressed, DebugMonitor)
     }

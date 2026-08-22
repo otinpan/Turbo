@@ -198,7 +198,7 @@ impl RenderSystem {
                     else {
                         continue;
                     };
-                    
+
                     // new mesh is created here (MeshAssetId)
                     let primitive_mesh = unsafe { context.create_primitive_mesh(pending.clone())? };
 

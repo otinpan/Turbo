@@ -6,12 +6,14 @@
     clippy::unnecessary_wraps
 )]
 
+mod create_primitive_command;
 mod debug_monitor;
 mod despawn_last_command;
 mod spawn_primitive_command;
 mod spawn_viking_room_command;
 mod update_primitive_meshes_command;
 
+pub use create_primitive_command::CreatePrimitiveCommand;
 pub use debug_monitor::DebugMonitor;
 pub use despawn_last_command::DespawnLastCommand;
 pub use spawn_primitive_command::SpawnPrimitiveCommand;

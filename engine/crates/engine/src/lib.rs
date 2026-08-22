@@ -26,10 +26,11 @@ pub use input::Input;
 pub use primitive::{PrimitiveMesh, PrimitiveShape, PrimitiveType};
 pub use resources::{MeshAsset, MeshAssetId, Resources};
 pub use system::{
-    CameraSystem, Command, CommandContext, CommandQueue, CommandRef, CommandSystem, DebugMonitor,
-    DespawnLastCommand, InputSystem, InputTrigger, KeyBinding, RenderCommand, RenderCommandQueue,
-    RenderSystem, RotatorSystem, Scheduler, SpawnPrimitiveCommand, SpawnVikingRoomCommand,
-    UpdateContext, UpdatePrimitiveMeshesCommand, UpdateSystem,
+    CameraSystem, Command, CommandContext, CommandQueue, CommandRef, CommandSystem,
+    CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, InputSystem, InputTrigger,
+    KeyBinding, RenderCommand, RenderCommandQueue, RenderSystem, RotatorSystem, Scheduler,
+    SpawnPrimitiveCommand, SpawnVikingRoomCommand, UpdateContext, UpdatePrimitiveMeshesCommand,
+    UpdateSystem,
 };
 pub use time::Time;
 pub use world::World;
