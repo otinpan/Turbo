@@ -44,7 +44,7 @@ impl Command for CreatePrimitiveCommand {
             pipeline_key: self.pipeline_key,
         };
 
-        context.spawn_shape_with_material(
+        context.enqueue_spawn_shape(
             self.primitive_shape.clone(),
             self.transform.clone(),
             material,

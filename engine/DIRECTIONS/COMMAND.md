@@ -229,6 +229,288 @@ pub fn vertex_layout_from_asset_id(&self, asset_id: MeshAssetId) -> Option<Verte
 
 Returns primitive metadata for a primitive mesh asset.
 
+```rust
+pub fn enqueue_spawn_shape(
+    &mut self,
+    shape: PrimitiveShape,
+    transform: Transform,
+    material: Material,
+    auto_release: bool
+) -> Result<EntityId>
+```
+
+This method create new mesh and spawn new entity. When you want to create primitive from `PrimitiveShape` and `Material`, you use it.
+
+<details>
+<summary>example</summary>
+
+```rust
+pub struct CreatePrimitiveCommand {
+    pub primitive_shape: PrimitiveShape,
+    pub transform: Transform,
+    pub color: Vector3<f32>,
+    pub alpha: f32,
+    pub texture: Option<&'static str>,
+    pub pipeline_key: PipelineKey,
+    pub auto_release: bool,
+}
+
+impl Command for CreatePrimitiveCommand {
+    fn id(&self) -> String {
+        format!(
+            "create_primitive:{:?}:{:?}:{:?}:{:?}:{:?}:{:?}",
+            self.primitive_shape,
+            self.transform,
+            self.color,
+            self.alpha,
+            self.texture,
+            self.pipeline_key
+        )
+    }
+
+    fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
+        let texture = match self.texture {
+            Some(name) => context.texture(name)?,
+            None => context.default_texture(),
+        };
+
+        let material = Material {
+            color: self.color,
+            alpha: self.alpha,
+            use_texture: self.texture.is_some(),
+            texture,
+            pipeline_key: self.pipeline_key,
+        };
+
+        context.enqueue_spawn_shape(
+            self.primitive_shape.clone(),
+            self.transform.clone(),
+            material,
+            self.auto_release,
+        )?;
+
+        Ok(())
+    }
+}
+```
+```rust
+scheduler.bind_key(
+    KeyCode::Digit2,
+    InputTrigger::Pressed,
+    CreatePrimitiveCommand {
+        primitive_shape: PrimitiveShape::Triangle {
+            points: [
+                vec3(0.0, 2.0, -0.3),
+                vec3(-7.0, 2.0, 0.3),
+                vec3(-2.0, 2.0, 1.0),
+            ],
+            color: vec3(1.0, 1.0, 1.0),
+        },
+        transform: Transform {
+            position: vec3(-5.0, 2.0, 0.0),
+            ..Default::default()
+        },
+        color: vec3(1.0, 1.0, 0.0),
+        alpha: 1.0,
+        texture: Some("face"),
+        pipeline_key: PipelineKey::DebugLine3D,
+        auto_release: true,
+    },
+);
+```
+</details>
+
+```rust
+fn spawn_triangle_3d(
+    &mut self,
+    p0: Vec3,
+    p1: Vec3,
+    p2: Vec3,
+    color: Vec3,
+    alpha: f32,
+    texture: Option<&str>,
+    pipeline_key: PipelineKey,
+) -> Result<EntityId> 
+```
+```rust
+fn spawn_triangle_2d(
+    &mut self,
+    p0: Vec2,
+    p1: Vec2,
+    p2: Vec2,
+    color: Vec3,
+    alpha: f32,
+    texture: Option<&str>,
+) -> Result<EntityId> 
+```
+```rust
+fn spawn_rectangle_3d(
+    &mut self,
+    pos: Vec3,
+    width: f32,
+    height: f32,
+    rotation: Vec3,
+    color: Vec3,
+    alpha: f32,
+    texture: Option<&str>,
+    pipeline_key: PipelineKey,
+) -> Result<EntityId> 
+```
+```rust
+fn spawn_rectangle_2d(
+    &mut self,
+    pos: Vec2,
+    width: f32,
+    height: f32,
+    rotation: f32,
+    color: Vec3,
+    alpha: f32,
+    texture: Option<&str>,
+) -> Result<EntityId> 
+```
+```rust
+fn spawn_cube_3d(
+    &mut self,
+    pos: Vec3,
+    length: f32,
+    rotation: Vec3,
+    color: Vec3,
+    alpha: f32,
+    texture: Option<&str>,
+    pipeline_key: PipelineKey,
+) -> Result<EntityId> 
+```
+
+```rust
+fn spawn_circle_3d(
+    &mut self,
+    pos: Vec3,
+    radius: f32,
+    segments: u32,
+    color: Vec3,
+    alpha: f32,
+    texture: Option<&str>,
+    pipeline_key: PipelineKey,
+) -> Result<EntityId>
+```
+
+```rust
+fn spawn_circle_2d(
+    &mut self,
+    pos: Vec2,
+    radius: f32,
+    segments: u32,
+    color: Vec3,
+    alpha: f32,
+    texture: Option<&str>,
+) -> Result<EntityId> 
+```
+
+```rust
+fn spawn_polygon_3d(
+    &mut self,
+    points: Vec<Vec3>,
+    color: Vec3,
+    alpha: f32,
+    texture: Option<&str>,
+    pipeline_key: PipelineKey,
+) -> Result<EntityId> 
+```
+
+```rust
+fn spawn_polygon_2d(
+    &mut self,
+    points: Vec<Vec2>,
+    color: Vec3,
+    alpha: f32,
+    texture: Option<&str>,
+) -> Result<EntityId> 
+```
+
+```rust
+fn spawn_sphere_3d(
+    &mut self,
+    center: Vec3,
+    radius: f32,
+    rings: u32,
+    segments: u32,
+    color: Vec3,
+    alpha: f32,
+    texture: Option<&str>,
+    pipeline_key: PipelineKey,
+) -> Result<EntityId> 
+```
+
+```rust
+fn spawn_line_3d(
+    &mut self,
+    pos0: Vec3,
+    pos1: Vec3,
+    color: Vec3,
+    alpha: f32,
+) -> Result<EntityId>
+```
+
+```rust
+fn spawn_line_2d(
+    &mut self,
+    pos0: Vec2,
+    pos1: Vec2,
+    color: Vec3,
+    width: f32,
+    alpha: f32,
+) -> Result<EntityId> 
+```
+
+These method create new mesh and spawn primitive easily. They call `enqueue_spawn_primitive()` in themselves.
+
+<details>
+<summary>example</summary>
+
+```rust
+    struct CreateTriangle{
+        p0: Vec3,
+        p1: Vec3,
+        p2: Vec3,
+        color: Vec3,
+        alpha: f32,
+        texture: Option<&'static str>,
+        pipeline_key: PipelineKey,
+    }
+    impl Command for CreateTriangle{
+        fn id(&self) -> String{
+            format!(
+                "create_triangle"
+            )
+        }
+        fn execute(&self, context: &mut CommandContext<'_>) -> Result<()>{
+            context.spawn_triangle_3d(
+                self.p0,self.p1,self.p2,
+                self.color, self.alpha,
+                self.texture,
+                self.pipeline_key,
+            )?;
+
+            Ok(())
+        }
+    }
+    scheduler.bind_key(
+        KeyCode::Digit1,
+        InputTrigger::Pressed,
+        CreateTriangle{
+            p0: vec3(0.0,2.0,-0.3),
+            p1: vec3(-7.0,2.0,0.3),
+            p2: vec3(-2.0,2.0,1.0),
+            color: vec3(1.0,1.0,0.0),
+            alpha: 1.0,
+            texture: Some("face"),
+            pipeline_key: PipelineKey::Lit3D,
+        },
+    );
+```
+
+
+
 ### Texture
 
 ```rust

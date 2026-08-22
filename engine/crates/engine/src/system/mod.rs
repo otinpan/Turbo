@@ -8,6 +8,7 @@
 
 mod command;
 mod input_system;
+mod primitive_system;
 mod render_command;
 mod render_system;
 mod scheduler;
@@ -19,6 +20,7 @@ pub use command::{
     UpdatePrimitiveMeshesCommand,
 };
 pub use input_system::{CommandQueue, CommandRef, InputSystem, InputTrigger, KeyBinding};
+pub use primitive_system::PrimitiveSystem;
 pub use render_command::{RenderCommand, RenderCommandQueue};
 pub use render_system::{RenderContext, RenderSystem};
 pub use scheduler::Scheduler;

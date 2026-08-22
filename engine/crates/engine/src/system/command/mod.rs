@@ -28,9 +28,9 @@ use crate::component::{Component, Material, MeshRenderer, PendingPrimitiveMesh, 
 use crate::primitive::spawn_primitive_from_mesh;
 use crate::{
     CommandQueue, ComponentPool, EntityId, Input, MeshAsset, MeshAssetId, PrimitiveShape,
-    PrimitiveType, RenderCommandQueue, Resources, World,
+    PrimitiveType, RenderCommandQueue, Resources, World, PrimitiveSystem,
 };
-use renderer_vulkan::{SkyboxTextureHandle, TextureHandle, VertexLayout};
+use renderer_vulkan::{PipelineKey,SkyboxTextureHandle, TextureHandle, VertexLayout};
 use turbo_math::Transform;
 
 pub type Vec3 = Vector3<f32>;
@@ -257,7 +257,7 @@ impl<'a> CommandContext<'a> {
     // create new primitive entity and new mesh
     // entity is create here, but mesh is created in RenderSystem using VulkanRenderer.
     // the frame this called do not render new primitive
-    pub fn spawn_shape_with_material(
+    pub fn enqueue_spawn_shape(
         &mut self,
         shape: PrimitiveShape,
         transform: Transform,
@@ -340,9 +340,44 @@ impl<'a> CommandContext<'a> {
     }
 }
 
+
 pub trait Command {
     fn id(&self) -> String;
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()>;
+}
+
+impl PrimitiveSystem for CommandContext<'_> {
+    fn primitive_material(
+        &self,
+        color: Vec3,
+        alpha: f32,
+        texture: Option<&str>,
+        pipeline_key: PipelineKey,
+    ) -> Result<Material> {
+        let use_texture=texture.is_some();
+        let texture = match texture {
+            Some(texture_name) => self.texture(texture_name)?,
+            None => DEFAULT_TEXTURE,
+        };
+
+        Ok(Material {
+            color,
+            alpha,
+            use_texture, 
+            texture,
+            pipeline_key,
+        })
+    }
+
+    fn spawn_shape_with_material(
+        &mut self,
+        shape: PrimitiveShape,
+        transform: Transform,
+        material: Material,
+        auto_release: bool,
+    ) -> Result<EntityId> {
+        self.enqueue_spawn_shape(shape, transform, material, auto_release)
+    }
 }
 
 #[derive(Clone, Debug)]
