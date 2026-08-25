@@ -5,7 +5,7 @@ use winit::event::MouseButton;
 use winit::keyboard::KeyCode;
 
 use super::{UpdateContext, UpdateSystem};
-use crate::{Camera, Input};
+use crate::{Camera, EntityApi, Input};
 
 #[derive(Clone, Debug)]
 pub struct CameraSystem;

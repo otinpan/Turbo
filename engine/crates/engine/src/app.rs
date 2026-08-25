@@ -21,9 +21,9 @@ use crate::primitive::{
 };
 
 use super::{
-    Camera, CameraSystem, EntityId, Input, InputTrigger, Material, MeshRenderer, Registry,
-    Resources, RotatorSystem, Scheduler, Time, Visibility, World,
-    CommandContext, ObjectApi, Command,
+    Camera, CameraSystem, Command, CommandContext, EntityId, Input, InputTrigger, Material,
+    MeshRenderer, ObjectApi, Registry, Resources, RotatorSystem, Scheduler, Time, Visibility,
+    World,
 };
 
 use super::system::{
@@ -544,7 +544,7 @@ impl App {
         );
 
         // create primitives
-        struct CreateTriangle{
+        struct CreateTriangle {
             p0: Vec3,
             p1: Vec3,
             p2: Vec3,
@@ -553,16 +553,17 @@ impl App {
             texture: Option<&'static str>,
             pipeline_key: PipelineKey,
         }
-        impl Command for CreateTriangle{
-            fn id(&self) -> String{
-                format!(
-                    "create_triangle"
-                )
+        impl Command for CreateTriangle {
+            fn id(&self) -> String {
+                format!("create_triangle")
             }
-            fn execute(&self, context: &mut CommandContext<'_>) -> Result<()>{
+            fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
                 context.spawn_triangle_3d(
-                    self.p0,self.p1,self.p2,
-                    self.color, self.alpha,
+                    self.p0,
+                    self.p1,
+                    self.p2,
+                    self.color,
+                    self.alpha,
                     self.texture,
                     self.pipeline_key,
                 )?;
@@ -573,11 +574,11 @@ impl App {
         scheduler.bind_key(
             KeyCode::Digit1,
             InputTrigger::Pressed,
-            CreateTriangle{
-                p0: vec3(0.0,2.0,-0.3),
-                p1: vec3(-7.0,2.0,0.3),
-                p2: vec3(-2.0,2.0,1.0),
-                color: vec3(1.0,1.0,0.0),
+            CreateTriangle {
+                p0: vec3(0.0, 2.0, -0.3),
+                p1: vec3(-7.0, 2.0, 0.3),
+                p2: vec3(-2.0, 2.0, 1.0),
+                color: vec3(1.0, 1.0, 0.0),
                 alpha: 1.0,
                 texture: Some("face"),
                 pipeline_key: PipelineKey::Lit3D,

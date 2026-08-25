@@ -5,25 +5,29 @@
     clippy::too_many_arguments,
     clippy::unnecessary_wraps
 )]
-use anyhow::{Result,anyhow};
-use cgmath::{Vector2,Vector3};
+use anyhow::{Result, anyhow};
+use cgmath::{Vector2, Vector3};
 
 mod camera_system;
 mod rotator_system;
 
 pub use super::render_command::RenderCommandQueue;
+use crate::app::{DEFAULT_SKYBOX_TEXTURE, DEFAULT_TEXTURE};
+use crate::component::{Material, MeshRenderer, Visibility};
+use crate::primitive::spawn_primitive_from_mesh;
 use crate::{
-    ComponentPool, EntityId, Input, Resources, Time, World, 
+    EntityId, Input, MeshAsset, MeshAssetId, PendingPrimitiveMesh, PrimitiveShape, PrimitiveType,
+    Resources, Time, World,
 };
-use turbo_math::{Transform};
-use crate::component::{
-    Component, Material, MeshRenderer, Visibility
-};
+use renderer_vulkan::{PipelineKey, SkyboxTextureHandle, TextureHandle, VertexLayout};
+use turbo_math::Transform;
+
+use crate::{EntityApi, ObjectApi};
 pub use camera_system::CameraSystem;
 pub use rotator_system::RotatorSystem;
 
-type Vec2=Vector2<f32>;
-type Vec3=Vector3<f32>;
+type Vec2 = Vector2<f32>;
+type Vec3 = Vector3<f32>;
 
 pub struct UpdateContext<'a> {
     world: &'a mut World,
@@ -58,134 +62,124 @@ impl<'a> UpdateContext<'a> {
         self.time.delta_seconds()
     }
 
-    pub fn spawn(&mut self) -> EntityId {
-        self.world.spawn()
-    }
-
-    pub fn despawn(&mut self, entity: EntityId) -> bool {
-        self.world.despawn(entity)
-    }
-
-    pub fn entities(&self) -> &[EntityId] {
-        self.world.entities()
-    }
-
-    pub fn is_entity_registered(&self, entity: EntityId) -> bool {
-        self.world.contains(entity)
-    }
-
-    pub fn entity_count(&self) -> usize {
-        self.world.entity_count()
-    }
-
-    pub fn add_component<T: Component>(&mut self, entity: EntityId, component: T) -> bool {
-        self.world.add_component::<T>(entity, component)
-    }
-
-    pub fn remove_component<T: Component>(&mut self, entity: EntityId, component: T) -> Option<T> {
-        self.world.remove_component::<T>(entity)
-    }
-
-    pub fn get_component_pool<T: Component>(&self) -> Option<&ComponentPool<T>> {
-        self.world.get_pool::<T>()
-    }
-
-    pub fn get_component_pool_mut<T: Component>(&mut self) -> Option<&mut ComponentPool<T>> {
-        self.world.get_pool_mut::<T>()
-    }
-
-    pub fn get_component<T: Component>(&mut self, entity: EntityId) -> Option<&T> {
-        self.world.get_component::<T>(entity)
-    }
-
-    pub fn get_component_mut<T: Component>(&mut self, entity: EntityId) -> Option<&mut T> {
-        self.world.get_component_mut::<T>(entity)
-    }
-
-    pub fn has_component<T: Component>(&self, entity: EntityId) -> bool {
-        self.world.has_component::<T>(entity)
-    }
-
-    pub fn query2<A, B>(&self) -> Box<dyn Iterator<Item = (EntityId, &A, &B)> + '_>
-    where
-        A: Component,
-        B: Component,
-    {
-        self.world.query2::<A, B>()
-    }
-
-    pub fn query2_mut<A, B>(&mut self) -> Box<dyn Iterator<Item = (EntityId, &mut A, &B)> + '_>
-    where
-        A: Component,
-        B: Component,
-    {
-        self.world.query2_mut::<A, B>()
-    }
-
-    pub fn query2_mut_mut<A, B>(
-        &mut self,
-    ) -> Box<dyn Iterator<Item = (EntityId, &mut A, &mut B)> + '_>
-    where
-        A: Component,
-        B: Component,
-    {
-        self.world.query2_mut_mut::<A, B>()
-    }
-
-    pub fn find_entity_by_name(&self, name: &str) -> Option<EntityId> {
-        self.world.find_by_name(name)
-    }
-
-    pub fn set_name(&mut self, entity: EntityId, name: &str) -> bool {
-        self.world.set_name(entity, name)
-    }
-
-    pub fn remove_name(&mut self, entity: EntityId) -> bool {
-        self.world.remove_name(entity)
-    }
-
-    pub fn set_tags<const N: usize>(&mut self, entity: EntityId, tags: [&str; N]) -> bool {
-        self.world.set_tags(entity, tags)
-    }
-
-    pub fn remove_tags(&mut self, entity: EntityId) -> bool {
-        self.world.remove_tags(entity)
-    }
-
-    pub fn remove_tag(&mut self, entity: EntityId, tag: &str) -> bool {
-        self.world.remove_tag(entity, tag)
-    }
-
-    pub fn get_entities_by_tag(&self, tag: &str) -> Vec<EntityId> {
-        self.world.find_by_tag(tag)
-    }
-
-    pub fn get_all_named_entities(&self) -> Vec<(String, EntityId)> {
-        self.world.get_all_named_entities()
-    }
-
-    pub fn get_all_taged_entities(&self) -> Vec<(String, EntityId)> {
-        self.world.get_all_taged_entities()
-    }
-
-    pub fn mouse_position(&self) -> Vec2{
+    pub fn mouse_position(&self) -> Vec2 {
         self.input.mouse_position()
     }
 
-    pub fn window_size(&self) -> Vec2{
+    pub fn window_size(&self) -> Vec2 {
         self.input.window_size()
     }
 
-    pub fn spawn_model(
+    // create new primitive entity and new mesh
+    // entity is create here, but mesh is created in RenderSystem using VulkanRenderer.
+    // the frame this called do not render new primitive
+    pub fn enqueue_spawn_shape(
+        &mut self,
+        shape: PrimitiveShape,
+        transform: Transform,
+        material: Material,
+        auto_release: bool,
+    ) -> Result<EntityId> {
+        let entity = self.spawn();
+
+        self.add_component(entity, transform);
+        self.add_component(entity, Visibility::default());
+        self.add_component(
+            entity,
+            PendingPrimitiveMesh {
+                shape: shape.clone(),
+                material,
+                auto_release,
+            },
+        );
+
+        self.render_commands.create_primitive_mesh(entity);
+
+        Ok(entity)
+    }
+
+    // get front MeshAssetId matching primitive_type and vertex_layout
+    pub fn primitive_asset_id(
+        &self,
+        primitive_type: PrimitiveType,
+        vertex_layout: VertexLayout,
+    ) -> Option<MeshAssetId> {
+        self.resources
+            .primitive_asset_id(primitive_type, vertex_layout)
+    }
+
+    pub fn texture(&self, texture_name: &str) -> Result<TextureHandle> {
+        self.resources
+            .get_texture_handle(texture_name)
+            .ok_or_else(|| anyhow!("texture not found: {texture_name}"))
+    }
+
+    pub fn default_texture(&self) -> TextureHandle {
+        DEFAULT_TEXTURE
+    }
+
+    pub fn default_skybox_texture(&self) -> SkyboxTextureHandle {
+        DEFAULT_SKYBOX_TEXTURE
+    }
+
+    // query
+    pub fn primitive_type_from_asset_id(&self, asset_id: MeshAssetId) -> Option<PrimitiveType> {
+        self.resources.primitive_type_from_asset_id(asset_id)
+    }
+
+    pub fn vertex_layout_from_asset_id(&self, asset_id: MeshAssetId) -> Option<VertexLayout> {
+        self.resources.vertex_layout_from_asset_id(asset_id)
+    }
+
+    pub fn mesh_assets(&self) -> impl Iterator<Item = (MeshAssetId, &MeshAsset)> {
+        self.resources.mesh_assets()
+    }
+
+    pub fn update_primitive_mesh(
+        &mut self,
+        primitive_type: PrimitiveType,
+        vertex_layout: VertexLayout,
+        shape: PrimitiveShape,
+    ) {
+        self.render_commands
+            .update_primitive_mesh(primitive_type, vertex_layout, shape);
+    }
+}
+
+impl EntityApi for UpdateContext<'_> {
+    fn world(&self) -> &World {
+        &self.world
+    }
+    fn world_mut(&mut self) -> &mut World {
+        &mut self.world
+    }
+
+    fn render_commands(&self) -> &RenderCommandQueue {
+        &self.render_commands
+    }
+    fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
+        &mut self.render_commands
+    }
+
+    fn resources(&self) -> &Resources {
+        &self.resources
+    }
+    fn resources_mut(&mut self) -> &mut Resources {
+        &mut self.resources
+    }
+}
+
+impl ObjectApi for UpdateContext<'_> {
+    fn spawn_model(
         &mut self,
         model_name: &str,
         transform: Transform,
         material: Material,
-    ) -> Result<EntityId>{
-        let asset_id=self
+    ) -> Result<EntityId> {
+        let asset_id = self
             .resources
             .model_asset_id(model_name)
-            .ok_or_else(||anyhow!("model not found: {model_name}"))?;
+            .ok_or_else(|| anyhow!("model not found: {model_name}"))?;
 
         let mesh = self
             .resources
@@ -210,9 +204,47 @@ impl<'a> UpdateContext<'a> {
         Ok(entity)
     }
 
-}
+    fn spawn_primitive_from_mesh(
+        &mut self,
+        asset_id: MeshAssetId,
+        material: Material,
+        transform: Transform,
+    ) -> Result<EntityId> {
+        spawn_primitive_from_mesh(self.world, self.resources, asset_id, material, transform)
+    }
 
-// user api
+    fn primitive_material(
+        &self,
+        color: Vec3,
+        alpha: f32,
+        texture: Option<&str>,
+        pipeline_key: PipelineKey,
+    ) -> Result<Material> {
+        let use_texture = texture.is_some();
+        let texture = match texture {
+            Some(texture_name) => self.texture(texture_name)?,
+            None => DEFAULT_TEXTURE,
+        };
+
+        Ok(Material {
+            color,
+            alpha,
+            use_texture,
+            texture,
+            pipeline_key,
+        })
+    }
+
+    fn spawn_shape_with_material(
+        &mut self,
+        shape: PrimitiveShape,
+        transform: Transform,
+        material: Material,
+        auto_release: bool,
+    ) -> Result<EntityId> {
+        self.enqueue_spawn_shape(shape, transform, material, auto_release)
+    }
+}
 
 pub struct ScheduledUpdateSystem {
     pub name: String,

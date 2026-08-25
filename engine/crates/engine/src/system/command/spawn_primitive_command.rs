@@ -5,6 +5,7 @@ use turbo_math::Transform;
 
 use super::{Command, CommandContext};
 use crate::Material;
+use crate::ObjectApi;
 use crate::primitive::PrimitiveType;
 
 #[derive(Clone, Debug)]

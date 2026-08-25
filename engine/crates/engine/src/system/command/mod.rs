@@ -27,10 +27,10 @@ use crate::app::{DEFAULT_SKYBOX_TEXTURE, DEFAULT_TEXTURE};
 use crate::component::{Material, MeshRenderer, PendingPrimitiveMesh, Visibility};
 use crate::primitive::spawn_primitive_from_mesh;
 use crate::{
-    CommandQueue, EntityId, Input, MeshAsset, MeshAssetId, PrimitiveShape,
-    PrimitiveType, RenderCommandQueue, Resources, World, ObjectApi, EntityApi,
+    CommandQueue, EntityApi, EntityId, Input, MeshAsset, MeshAssetId, ObjectApi, PrimitiveShape,
+    PrimitiveType, RenderCommandQueue, Resources, World,
 };
-use renderer_vulkan::{PipelineKey,SkyboxTextureHandle, TextureHandle, VertexLayout};
+use renderer_vulkan::{PipelineKey, SkyboxTextureHandle, TextureHandle, VertexLayout};
 use turbo_math::Transform;
 
 pub type Vec3 = Vector3<f32>;
@@ -64,7 +64,6 @@ impl<'a> CommandContext<'a> {
         }
     }
 
-
     pub fn positions(&self) -> &[Vec3] {
         self.positions
     }
@@ -78,16 +77,6 @@ impl<'a> CommandContext<'a> {
     }
 
     // resources /////////////////////////////////
-
-    // create new primitive entity by using existing mesh (MeshAssetId)
-    pub fn spawn_primitive_from_mesh(
-        &mut self,
-        asset_id: MeshAssetId,
-        material: Material,
-        transform: Transform,
-    ) -> Result<EntityId> {
-        spawn_primitive_from_mesh(self.world, self.resources, asset_id, material, transform)
-    }
 
     // create new primitive entity and new mesh
     // entity is create here, but mesh is created in RenderSystem using VulkanRenderer.
@@ -175,7 +164,6 @@ impl<'a> CommandContext<'a> {
     }
 }
 
-
 pub trait Command {
     fn id(&self) -> String;
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()>;
@@ -216,6 +204,15 @@ impl ObjectApi for CommandContext<'_> {
         Ok(entity)
     }
 
+    fn spawn_primitive_from_mesh(
+        &mut self,
+        asset_id: MeshAssetId,
+        material: Material,
+        transform: Transform,
+    ) -> Result<EntityId> {
+        spawn_primitive_from_mesh(self.world, self.resources, asset_id, material, transform)
+    }
+
     fn primitive_material(
         &self,
         color: Vec3,
@@ -223,7 +220,7 @@ impl ObjectApi for CommandContext<'_> {
         texture: Option<&str>,
         pipeline_key: PipelineKey,
     ) -> Result<Material> {
-        let use_texture=texture.is_some();
+        let use_texture = texture.is_some();
         let texture = match texture {
             Some(texture_name) => self.texture(texture_name)?,
             None => DEFAULT_TEXTURE,
@@ -232,7 +229,7 @@ impl ObjectApi for CommandContext<'_> {
         Ok(Material {
             color,
             alpha,
-            use_texture, 
+            use_texture,
             texture,
             pipeline_key,
         })
@@ -249,26 +246,25 @@ impl ObjectApi for CommandContext<'_> {
     }
 }
 
-
-impl EntityApi for CommandContext<'_>{
-    fn world(&self) -> &World{
+impl EntityApi for CommandContext<'_> {
+    fn world(&self) -> &World {
         &self.world
     }
-    fn world_mut(&mut self) -> &mut World{
+    fn world_mut(&mut self) -> &mut World {
         &mut self.world
     }
 
-    fn render_commands(&self) -> &RenderCommandQueue{
+    fn render_commands(&self) -> &RenderCommandQueue {
         &self.render_commands
     }
-    fn render_commands_mut(&mut self) -> &mut RenderCommandQueue{
+    fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
         &mut self.render_commands
     }
 
-    fn resources(&self) -> &Resources{
+    fn resources(&self) -> &Resources {
         &self.resources
     }
-    fn resources_mut(&mut self) -> &mut Resources{
+    fn resources_mut(&mut self) -> &mut Resources {
         &mut self.resources
     }
 }

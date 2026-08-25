@@ -3,7 +3,7 @@ use cgmath::vec3;
 use renderer_vulkan::PipelineKey;
 use turbo_math::Transform;
 
-use crate::{EntityId, Material, PrimitiveShape};
+use crate::{EntityId, Material, MeshAssetId, PrimitiveShape};
 
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Vec2 = cgmath::Vector2<f32>;
@@ -13,7 +13,14 @@ pub trait ObjectApi {
         &mut self,
         model_name: &str,
         transform: Transform,
-        material: Material
+        material: Material,
+    ) -> Result<EntityId>;
+
+    fn spawn_primitive_from_mesh(
+        &mut self,
+        asset_id: MeshAssetId,
+        material: Material,
+        transform: Transform,
     ) -> Result<EntityId>;
 
     fn primitive_material(
