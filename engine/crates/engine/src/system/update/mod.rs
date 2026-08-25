@@ -5,22 +5,31 @@
     clippy::too_many_arguments,
     clippy::unnecessary_wraps
 )]
+use anyhow::{Result,anyhow};
+use cgmath::{Vector2,Vector3};
 
 mod camera_system;
 mod rotator_system;
 
 pub use super::render_command::RenderCommandQueue;
-use crate::{Component, ComponentPool, EntityId, Input, Resources, Time, World};
-use anyhow::Result;
-
+use crate::{
+    ComponentPool, EntityId, Input, Resources, Time, World, 
+};
+use turbo_math::{Transform};
+use crate::component::{
+    Component, Material, MeshRenderer, Visibility
+};
 pub use camera_system::CameraSystem;
 pub use rotator_system::RotatorSystem;
+
+type Vec2=Vector2<f32>;
+type Vec3=Vector3<f32>;
 
 pub struct UpdateContext<'a> {
     world: &'a mut World,
     input: &'a Input,
     time: &'a Time,
-    resources: &'a Resources,
+    resources: &'a mut Resources,
     render_commands: &'a mut RenderCommandQueue,
 }
 
@@ -29,7 +38,7 @@ impl<'a> UpdateContext<'a> {
         world: &'a mut World,
         input: &'a Input,
         time: &'a Time,
-        resources: &'a Resources,
+        resources: &'a mut Resources,
         render_commands: &'a mut RenderCommandQueue,
     ) -> Self {
         Self {
@@ -158,6 +167,49 @@ impl<'a> UpdateContext<'a> {
     pub fn get_all_taged_entities(&self) -> Vec<(String, EntityId)> {
         self.world.get_all_taged_entities()
     }
+
+    pub fn mouse_position(&self) -> Vec2{
+        self.input.mouse_position()
+    }
+
+    pub fn window_size(&self) -> Vec2{
+        self.input.window_size()
+    }
+
+    pub fn spawn_model(
+        &mut self,
+        model_name: &str,
+        transform: Transform,
+        material: Material,
+    ) -> Result<EntityId>{
+        let asset_id=self
+            .resources
+            .model_asset_id(model_name)
+            .ok_or_else(||anyhow!("model not found: {model_name}"))?;
+
+        let mesh = self
+            .resources
+            .retain_mesh(asset_id)
+            .ok_or_else(|| anyhow!("mesh asset not found: {asset_id:?}"))?;
+
+        let mesh_renderer = match MeshRenderer::new(mesh, material) {
+            Ok(mesh_renderer) => mesh_renderer.with_asset_id(asset_id),
+            Err(error) => {
+                self.resources.release_mesh(asset_id);
+                return Err(error);
+            }
+        };
+
+        let entity = self.spawn();
+
+        self.add_component(entity, transform);
+        self.add_component(entity, mesh_renderer);
+        self.add_component(entity, Visibility::default());
+        self.set_tags(entity, ["Model", model_name]);
+
+        Ok(entity)
+    }
+
 }
 
 // user api

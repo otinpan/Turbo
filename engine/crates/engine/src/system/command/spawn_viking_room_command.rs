@@ -6,6 +6,8 @@ use turbo_math::Transform;
 use super::{Command, CommandContext};
 use crate::{Material, MeshRenderer, Rotator};
 
+use crate::{EntityApi,ObjectApi};
+
 #[derive(Clone, Debug)]
 pub struct SpawnVikingRoomCommand;
 

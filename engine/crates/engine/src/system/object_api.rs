@@ -8,7 +8,14 @@ use crate::{EntityId, Material, PrimitiveShape};
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Vec2 = cgmath::Vector2<f32>;
 
-pub trait PrimitiveSystem {
+pub trait ObjectApi {
+    fn spawn_model(
+        &mut self,
+        model_name: &str,
+        transform: Transform,
+        material: Material
+    ) -> Result<EntityId>;
+
     fn primitive_material(
         &self,
         color: Vec3,

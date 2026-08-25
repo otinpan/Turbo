@@ -95,7 +95,7 @@ impl Scheduler {
         world: &mut World,
         input: &Input,
         time: &Time,
-        resources: &Resources,
+        resources: &mut Resources,
     ) -> Result<()> {
         let mut context =
             UpdateContext::new(world, input, time, resources, &mut self.render_commands);

@@ -28,9 +28,9 @@ pub use resources::{MeshAsset, MeshAssetId, Resources};
 pub use system::{
     CameraSystem, Command, CommandContext, CommandQueue, CommandRef, CommandSystem,
     CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, InputSystem, InputTrigger,
-    KeyBinding, PrimitiveSystem, RenderCommand, RenderCommandQueue, RenderSystem, RotatorSystem,
+    KeyBinding, ObjectApi, RenderCommand, RenderCommandQueue, RenderSystem, RotatorSystem,
     Scheduler, SpawnPrimitiveCommand, SpawnVikingRoomCommand, UpdateContext,
-    UpdatePrimitiveMeshesCommand, UpdateSystem,
+    UpdatePrimitiveMeshesCommand, UpdateSystem, EntityApi,
 };
 pub use time::Time;
 pub use world::World;

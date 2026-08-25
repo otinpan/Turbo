@@ -1,4 +1,4 @@
-## Command
+# Command
 
 A command is a user-defined action that runs with `CommandContext`.
 

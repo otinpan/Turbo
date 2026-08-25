@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 use super::{Command, CommandContext};
-
+use crate::{EntityApi};
 #[derive(Clone, Debug)]
 pub struct DespawnLastCommand;
 

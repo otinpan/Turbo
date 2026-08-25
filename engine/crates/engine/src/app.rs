@@ -23,7 +23,7 @@ use crate::primitive::{
 use super::{
     Camera, CameraSystem, EntityId, Input, InputTrigger, Material, MeshRenderer, Registry,
     Resources, RotatorSystem, Scheduler, Time, Visibility, World,
-    CommandContext, PrimitiveSystem, Command,
+    CommandContext, ObjectApi, Command,
 };
 
 use super::system::{
@@ -459,7 +459,7 @@ impl App {
             &mut self.world,
             &self.input,
             &self.time,
-            &self.resources,
+            &mut self.resources,
         )?;
 
         self.scheduler.run_render_stage(

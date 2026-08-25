@@ -1,5 +1,6 @@
 use super::{Command, CommandContext};
 use anyhow::Result;
+use crate::{EntityApi};
 
 #[derive(Clone, Debug)]
 pub struct DebugMonitor;

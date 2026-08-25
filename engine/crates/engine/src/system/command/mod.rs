@@ -24,11 +24,11 @@ use anyhow::{Result, anyhow};
 use cgmath::Vector3;
 
 use crate::app::{DEFAULT_SKYBOX_TEXTURE, DEFAULT_TEXTURE};
-use crate::component::{Component, Material, MeshRenderer, PendingPrimitiveMesh, Visibility};
+use crate::component::{Material, MeshRenderer, PendingPrimitiveMesh, Visibility};
 use crate::primitive::spawn_primitive_from_mesh;
 use crate::{
-    CommandQueue, ComponentPool, EntityId, Input, MeshAsset, MeshAssetId, PrimitiveShape,
-    PrimitiveType, RenderCommandQueue, Resources, World, PrimitiveSystem,
+    CommandQueue, EntityId, Input, MeshAsset, MeshAssetId, PrimitiveShape,
+    PrimitiveType, RenderCommandQueue, Resources, World, ObjectApi, EntityApi,
 };
 use renderer_vulkan::{PipelineKey,SkyboxTextureHandle, TextureHandle, VertexLayout};
 use turbo_math::Transform;
@@ -64,138 +64,6 @@ impl<'a> CommandContext<'a> {
         }
     }
 
-    pub fn spawn(&mut self) -> EntityId {
-        self.world.spawn()
-    }
-
-    pub fn despawn(&mut self, entity: EntityId) -> bool {
-        if !self.world.contains(entity) {
-            return false;
-        }
-
-        let asset_id = self
-            .world
-            .get_component::<MeshRenderer>(entity)
-            .and_then(|mesh_renderer| mesh_renderer.asset_id);
-
-        if let Some(asset_id) = asset_id {
-            if let Some(mesh) = self.resources.release_mesh(asset_id) {
-                self.render_commands.destroy_mesh(mesh);
-            }
-        }
-
-        self.world.despawn(entity)
-    }
-
-    pub fn despawn_last(&mut self) -> bool {
-        let Some(entity) = self.entities().last().copied() else {
-            return false;
-        };
-
-        self.despawn(entity)
-    }
-
-    pub fn entities(&self) -> &[EntityId] {
-        self.world.entities()
-    }
-
-    pub fn is_entity_registered(&self, entity: EntityId) -> bool {
-        self.world.contains(entity)
-    }
-
-    pub fn entity_count(&self) -> usize {
-        self.world.entity_count()
-    }
-
-    pub fn add_component<T: Component>(&mut self, entity: EntityId, component: T) -> bool {
-        self.world.add_component::<T>(entity, component)
-    }
-
-    pub fn remove_component<T: Component>(&mut self, entity: EntityId, component: T) -> Option<T> {
-        self.world.remove_component::<T>(entity)
-    }
-
-    pub fn get_component_pool<T: Component>(&self) -> Option<&ComponentPool<T>> {
-        self.world.get_pool::<T>()
-    }
-
-    pub fn get_component_pool_mut<T: Component>(&mut self) -> Option<&mut ComponentPool<T>> {
-        self.world.get_pool_mut::<T>()
-    }
-
-    pub fn get_component<T: Component>(&mut self, entity: EntityId) -> Option<&T> {
-        self.world.get_component::<T>(entity)
-    }
-
-    pub fn get_component_mut<T: Component>(&mut self, entity: EntityId) -> Option<&mut T> {
-        self.world.get_component_mut::<T>(entity)
-    }
-
-    pub fn has_component<T: Component>(&self, entity: EntityId) -> bool {
-        self.world.has_component::<T>(entity)
-    }
-
-    pub fn query2<A, B>(&self) -> Box<dyn Iterator<Item = (EntityId, &A, &B)> + '_>
-    where
-        A: Component,
-        B: Component,
-    {
-        self.world.query2::<A, B>()
-    }
-
-    pub fn query2_mut<A, B>(&mut self) -> Box<dyn Iterator<Item = (EntityId, &mut A, &B)> + '_>
-    where
-        A: Component,
-        B: Component,
-    {
-        self.world.query2_mut::<A, B>()
-    }
-
-    pub fn query2_mut_mut<A, B>(
-        &mut self,
-    ) -> Box<dyn Iterator<Item = (EntityId, &mut A, &mut B)> + '_>
-    where
-        A: Component,
-        B: Component,
-    {
-        self.world.query2_mut_mut::<A, B>()
-    }
-
-    pub fn find_entity_by_name(&self, name: &str) -> Option<EntityId> {
-        self.world.find_by_name(name)
-    }
-
-    pub fn set_name(&mut self, entity: EntityId, name: &str) -> bool {
-        self.world.set_name(entity, name)
-    }
-
-    pub fn remove_name(&mut self, entity: EntityId) -> bool {
-        self.world.remove_name(entity)
-    }
-
-    pub fn set_tags<const N: usize>(&mut self, entity: EntityId, tags: [&str; N]) -> bool {
-        self.world.set_tags(entity, tags)
-    }
-
-    pub fn remove_tags(&mut self, entity: EntityId) -> bool {
-        self.world.remove_tags(entity)
-    }
-
-    pub fn remove_tag(&mut self, entity: EntityId, tag: &str) -> bool {
-        self.world.remove_tag(entity, tag)
-    }
-
-    pub fn get_entities_by_tag(&self, tag: &str) -> Vec<EntityId> {
-        self.world.find_by_tag(tag)
-    }
-
-    pub fn get_all_named_entities(&self) -> Vec<(String, EntityId)> {
-        self.world.get_all_named_entities()
-    }
-
-    pub fn get_all_taged_entities(&self) -> Vec<(String, EntityId)> {
-        self.world.get_all_taged_entities()
-    }
 
     pub fn positions(&self) -> &[Vec3] {
         self.positions
@@ -209,40 +77,7 @@ impl<'a> CommandContext<'a> {
         self.input.window_size()
     }
 
-    // resources
-    pub fn spawn_model(
-        &mut self,
-        model_name: &str,
-        transform: Transform,
-        material: Material,
-    ) -> Result<EntityId> {
-        let asset_id = self
-            .resources
-            .model_asset_id(model_name)
-            .ok_or_else(|| anyhow!("model not found: {model_name}"))?;
-
-        let mesh = self
-            .resources
-            .retain_mesh(asset_id)
-            .ok_or_else(|| anyhow!("mesh asset not found: {asset_id:?}"))?;
-
-        let mesh_renderer = match MeshRenderer::new(mesh, material) {
-            Ok(mesh_renderer) => mesh_renderer.with_asset_id(asset_id),
-            Err(error) => {
-                self.resources.release_mesh(asset_id);
-                return Err(error);
-            }
-        };
-
-        let entity = self.spawn();
-
-        self.add_component(entity, transform);
-        self.add_component(entity, mesh_renderer);
-        self.add_component(entity, Visibility::default());
-        self.set_tags(entity, ["Model", model_name]);
-
-        Ok(entity)
-    }
+    // resources /////////////////////////////////
 
     // create new primitive entity by using existing mesh (MeshAssetId)
     pub fn spawn_primitive_from_mesh(
@@ -346,7 +181,41 @@ pub trait Command {
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()>;
 }
 
-impl PrimitiveSystem for CommandContext<'_> {
+impl ObjectApi for CommandContext<'_> {
+    fn spawn_model(
+        &mut self,
+        model_name: &str,
+        transform: Transform,
+        material: Material,
+    ) -> Result<EntityId> {
+        let asset_id = self
+            .resources
+            .model_asset_id(model_name)
+            .ok_or_else(|| anyhow!("model not found: {model_name}"))?;
+
+        let mesh = self
+            .resources
+            .retain_mesh(asset_id)
+            .ok_or_else(|| anyhow!("mesh asset not found: {asset_id:?}"))?;
+
+        let mesh_renderer = match MeshRenderer::new(mesh, material) {
+            Ok(mesh_renderer) => mesh_renderer.with_asset_id(asset_id),
+            Err(error) => {
+                self.resources.release_mesh(asset_id);
+                return Err(error);
+            }
+        };
+
+        let entity = self.spawn();
+
+        self.add_component(entity, transform);
+        self.add_component(entity, mesh_renderer);
+        self.add_component(entity, Visibility::default());
+        self.set_tags(entity, ["Model", model_name]);
+
+        Ok(entity)
+    }
+
     fn primitive_material(
         &self,
         color: Vec3,
@@ -377,6 +246,30 @@ impl PrimitiveSystem for CommandContext<'_> {
         auto_release: bool,
     ) -> Result<EntityId> {
         self.enqueue_spawn_shape(shape, transform, material, auto_release)
+    }
+}
+
+
+impl EntityApi for CommandContext<'_>{
+    fn world(&self) -> &World{
+        &self.world
+    }
+    fn world_mut(&mut self) -> &mut World{
+        &mut self.world
+    }
+
+    fn render_commands(&self) -> &RenderCommandQueue{
+        &self.render_commands
+    }
+    fn render_commands_mut(&mut self) -> &mut RenderCommandQueue{
+        &mut self.render_commands
+    }
+
+    fn resources(&self) -> &Resources{
+        &self.resources
+    }
+    fn resources_mut(&mut self) -> &mut Resources{
+        &mut self.resources
     }
 }
 
