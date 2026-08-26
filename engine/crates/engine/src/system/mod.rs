@@ -14,6 +14,7 @@ mod render_command;
 mod render_system;
 mod scheduler;
 mod update;
+mod asset_api;
 
 pub use command::{
     Command, CommandContext, CommandSystem, CreatePrimitiveCommand, DebugMonitor,
@@ -21,6 +22,7 @@ pub use command::{
     UpdatePrimitiveMeshesCommand,
 };
 pub use entity_api::EntityApi;
+pub use asset_api::AssetApi;
 pub use input_system::{CommandQueue, CommandRef, InputSystem, InputTrigger, KeyBinding};
 pub use object_api::ObjectApi;
 pub use render_command::{RenderCommand, RenderCommandQueue};

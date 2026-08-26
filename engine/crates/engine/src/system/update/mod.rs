@@ -12,17 +12,17 @@ mod camera_system;
 mod rotator_system;
 
 pub use super::render_command::RenderCommandQueue;
-use crate::app::{DEFAULT_SKYBOX_TEXTURE, DEFAULT_TEXTURE};
+use crate::app::{DEFAULT_TEXTURE};
 use crate::component::{Material, MeshRenderer, Visibility};
 use crate::primitive::spawn_primitive_from_mesh;
 use crate::{
-    EntityId, Input, MeshAsset, MeshAssetId, PendingPrimitiveMesh, PrimitiveShape, PrimitiveType,
+    EntityId, Input, MeshAssetId, PendingPrimitiveMesh, PrimitiveShape, PrimitiveType,
     Resources, Time, World,
 };
-use renderer_vulkan::{PipelineKey, SkyboxTextureHandle, TextureHandle, VertexLayout};
+use renderer_vulkan::{PipelineKey, VertexLayout};
 use turbo_math::Transform;
 
-use crate::{EntityApi, ObjectApi};
+use crate::{EntityApi, ObjectApi, AssetApi};
 pub use camera_system::CameraSystem;
 pub use rotator_system::RotatorSystem;
 
@@ -73,7 +73,7 @@ impl<'a> UpdateContext<'a> {
     // create new primitive entity and new mesh
     // entity is create here, but mesh is created in RenderSystem using VulkanRenderer.
     // the frame this called do not render new primitive
-    pub fn enqueue_spawn_shape(
+    pub(crate) fn enqueue_spawn_shape(
         &mut self,
         shape: PrimitiveShape,
         transform: Transform,
@@ -98,42 +98,6 @@ impl<'a> UpdateContext<'a> {
         Ok(entity)
     }
 
-    // get front MeshAssetId matching primitive_type and vertex_layout
-    pub fn primitive_asset_id(
-        &self,
-        primitive_type: PrimitiveType,
-        vertex_layout: VertexLayout,
-    ) -> Option<MeshAssetId> {
-        self.resources
-            .primitive_asset_id(primitive_type, vertex_layout)
-    }
-
-    pub fn texture(&self, texture_name: &str) -> Result<TextureHandle> {
-        self.resources
-            .get_texture_handle(texture_name)
-            .ok_or_else(|| anyhow!("texture not found: {texture_name}"))
-    }
-
-    pub fn default_texture(&self) -> TextureHandle {
-        DEFAULT_TEXTURE
-    }
-
-    pub fn default_skybox_texture(&self) -> SkyboxTextureHandle {
-        DEFAULT_SKYBOX_TEXTURE
-    }
-
-    // query
-    pub fn primitive_type_from_asset_id(&self, asset_id: MeshAssetId) -> Option<PrimitiveType> {
-        self.resources.primitive_type_from_asset_id(asset_id)
-    }
-
-    pub fn vertex_layout_from_asset_id(&self, asset_id: MeshAssetId) -> Option<VertexLayout> {
-        self.resources.vertex_layout_from_asset_id(asset_id)
-    }
-
-    pub fn mesh_assets(&self) -> impl Iterator<Item = (MeshAssetId, &MeshAsset)> {
-        self.resources.mesh_assets()
-    }
 
     pub fn update_primitive_mesh(
         &mut self,
@@ -243,6 +207,16 @@ impl ObjectApi for UpdateContext<'_> {
         auto_release: bool,
     ) -> Result<EntityId> {
         self.enqueue_spawn_shape(shape, transform, material, auto_release)
+    }
+}
+
+impl AssetApi for UpdateContext<'_>{
+    fn resources(&self) -> &Resources{
+        &self.resources
+    }
+
+    fn resources_mut(&mut self) -> &mut Resources{
+        &mut self.resources
     }
 }
 

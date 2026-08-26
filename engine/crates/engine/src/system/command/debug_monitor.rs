@@ -1,5 +1,5 @@
 use super::{Command, CommandContext};
-use crate::EntityApi;
+use crate::{EntityApi, AssetApi};
 use anyhow::Result;
 
 #[derive(Clone, Debug)]

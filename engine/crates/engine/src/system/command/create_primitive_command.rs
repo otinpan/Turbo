@@ -5,6 +5,7 @@ use turbo_math::Transform;
 
 use super::{Command, CommandContext};
 use crate::{Material, PrimitiveShape};
+use crate::{AssetApi};
 
 #[derive(Clone, Debug)]
 pub struct CreatePrimitiveCommand {
