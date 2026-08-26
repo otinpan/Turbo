@@ -21,6 +21,7 @@ scheduler.bind_key(
 
 `CommandContext` is the public API surface for commands. It owns no game data; it only gives temporary access to the operations allowed during the command stage.
 
+## EntityApi
 ### Entity
 
 ```rust
@@ -154,7 +155,7 @@ pub fn get_all_taged_entities(&self) -> Vec<(String, EntityId)>
 
 Returns debug-friendly lists of registered names and tags.
 
-### Input
+## Input
 
 ```rust
 pub fn mouse_position(&self) -> Vec2
@@ -169,6 +170,7 @@ pub fn positions(&self) -> &[Vec3]
 
 Returns predefined spawn positions used by the sample commands.
 
+## ObjectApi
 ### Model
 
 ```rust
@@ -201,124 +203,6 @@ pub fn spawn_primitive_from_mesh(
 
 Spawns a primitive entity from an existing primitive mesh asset.
 
-```rust
-pub fn primitive_asset_id(
-    &self,
-    primitive_type: PrimitiveType,
-    vertex_layout: VertexLayout,
-) -> Option<MeshAssetId>
-```
-
-Finds a primitive mesh asset by primitive type and vertex layout.
-
-```rust
-pub fn update_primitive_mesh(
-    &mut self,
-    primitive_type: PrimitiveType,
-    vertex_layout: VertexLayout,
-    shape: PrimitiveShape,
-)
-```
-
-Queues a render command to update an existing primitive mesh on the render stage.
-
-```rust
-pub fn primitive_type_from_asset_id(&self, asset_id: MeshAssetId) -> Option<PrimitiveType>
-pub fn vertex_layout_from_asset_id(&self, asset_id: MeshAssetId) -> Option<VertexLayout>
-```
-
-Returns primitive metadata for a primitive mesh asset.
-
-```rust
-pub fn enqueue_spawn_shape(
-    &mut self,
-    shape: PrimitiveShape,
-    transform: Transform,
-    material: Material,
-    auto_release: bool
-) -> Result<EntityId>
-```
-
-This method create new mesh and spawn new entity. When you want to create primitive from `PrimitiveShape` and `Material`, you use it.
-
-<details>
-<summary>example</summary>
-
-```rust
-pub struct CreatePrimitiveCommand {
-    pub primitive_shape: PrimitiveShape,
-    pub transform: Transform,
-    pub color: Vector3<f32>,
-    pub alpha: f32,
-    pub texture: Option<&'static str>,
-    pub pipeline_key: PipelineKey,
-    pub auto_release: bool,
-}
-
-impl Command for CreatePrimitiveCommand {
-    fn id(&self) -> String {
-        format!(
-            "create_primitive:{:?}:{:?}:{:?}:{:?}:{:?}:{:?}",
-            self.primitive_shape,
-            self.transform,
-            self.color,
-            self.alpha,
-            self.texture,
-            self.pipeline_key
-        )
-    }
-
-    fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        let texture = match self.texture {
-            Some(name) => context.texture(name)?,
-            None => context.default_texture(),
-        };
-
-        let material = Material {
-            color: self.color,
-            alpha: self.alpha,
-            use_texture: self.texture.is_some(),
-            texture,
-            pipeline_key: self.pipeline_key,
-        };
-
-        context.enqueue_spawn_shape(
-            self.primitive_shape.clone(),
-            self.transform.clone(),
-            material,
-            self.auto_release,
-        )?;
-
-        Ok(())
-    }
-}
-```
-```rust
-scheduler.bind_key(
-    KeyCode::Digit2,
-    InputTrigger::Pressed,
-    CreatePrimitiveCommand {
-        primitive_shape: PrimitiveShape::Triangle {
-            points: [
-                vec3(0.0, 2.0, -0.3),
-                vec3(-7.0, 2.0, 0.3),
-                vec3(-2.0, 2.0, 1.0),
-            ],
-            color: vec3(1.0, 1.0, 1.0),
-        },
-        transform: Transform {
-            position: vec3(-5.0, 2.0, 0.0),
-            ..Default::default()
-        },
-        color: vec3(1.0, 1.0, 0.0),
-        alpha: 1.0,
-        texture: Some("face"),
-        pipeline_key: PipelineKey::DebugLine3D,
-        auto_release: true,
-    },
-);
-```
-</details>
 
 ```rust
 fn spawn_triangle_3d(
@@ -510,6 +394,17 @@ These method create new mesh and spawn primitive easily. They call `enqueue_spaw
 ```
 
 
+## AssetApi
+### Model
+```rust
+fn model_asset_id(&self, model_name: &str) -> Result<MeshAssetId>
+```
+Return a loaded model as 'MeshAssetId` to create new model using existing model
+
+```rust
+fn mesh_assets(&self) -> impl Iterator<Item = (MeshAssetId, &MeshAsset)>
+```
+When you want to get all models whitch have already loaded, you use it.
 
 ### Texture
 
@@ -526,8 +421,129 @@ pub fn default_skybox_texture(&self) -> SkyboxTextureHandle
 
 Returns default texture handles.
 
-### Debug
+### Primitive
+```rust
+pub fn primitive_asset_id(
+    &self,
+    primitive_type: PrimitiveType,
+    vertex_layout: VertexLayout,
+) -> Option<MeshAssetId>
+```
 
+Finds a primitive mesh asset by primitive type and vertex layout.
+
+
+```rust
+pub fn primitive_type_from_asset_id(&self, asset_id: MeshAssetId) -> Option<PrimitiveType>
+pub fn vertex_layout_from_asset_id(&self, asset_id: MeshAssetId) -> Option<VertexLayout>
+```
+
+Returns primitive metadata for a primitive mesh asset.
+
+## Update and Enqueue Primitive
+```rust
+pub fn update_primitive_mesh(
+    &mut self,
+    primitive_type: PrimitiveType,
+    vertex_layout: VertexLayout,
+    shape: PrimitiveShape,
+)
+```
+
+Queues a render command to update an existing primitive mesh on the render stage.
+
+```rust
+pub fn enqueue_spawn_shape(
+    &mut self,
+    shape: PrimitiveShape,
+    transform: Transform,
+    material: Material,
+    auto_release: bool
+) -> Result<EntityId>
+```
+
+This method create new mesh and spawn new entity. When you want to create primitive from `PrimitiveShape` and `Material`, you use it.
+
+<details>
+<summary>example</summary>
+
+```rust
+pub struct CreatePrimitiveCommand {
+    pub primitive_shape: PrimitiveShape,
+    pub transform: Transform,
+    pub color: Vector3<f32>,
+    pub alpha: f32,
+    pub texture: Option<&'static str>,
+    pub pipeline_key: PipelineKey,
+    pub auto_release: bool,
+}
+
+impl Command for CreatePrimitiveCommand {
+    fn id(&self) -> String {
+        format!(
+            "create_primitive:{:?}:{:?}:{:?}:{:?}:{:?}:{:?}",
+            self.primitive_shape,
+            self.transform,
+            self.color,
+            self.alpha,
+            self.texture,
+            self.pipeline_key
+        )
+    }
+
+    fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
+        let texture = match self.texture {
+            Some(name) => context.texture(name)?,
+            None => context.default_texture(),
+        };
+
+        let material = Material {
+            color: self.color,
+            alpha: self.alpha,
+            use_texture: self.texture.is_some(),
+            texture,
+            pipeline_key: self.pipeline_key,
+        };
+
+        context.enqueue_spawn_shape(
+            self.primitive_shape.clone(),
+            self.transform.clone(),
+            material,
+            self.auto_release,
+        )?;
+
+        Ok(())
+    }
+}
+```
+```rust
+scheduler.bind_key(
+    KeyCode::Digit2,
+    InputTrigger::Pressed,
+    CreatePrimitiveCommand {
+        primitive_shape: PrimitiveShape::Triangle {
+            points: [
+                vec3(0.0, 2.0, -0.3),
+                vec3(-7.0, 2.0, 0.3),
+                vec3(-2.0, 2.0, 1.0),
+            ],
+            color: vec3(1.0, 1.0, 1.0),
+        },
+        transform: Transform {
+            position: vec3(-5.0, 2.0, 0.0),
+            ..Default::default()
+        },
+        color: vec3(1.0, 1.0, 0.0),
+        alpha: 1.0,
+        texture: Some("face"),
+        pipeline_key: PipelineKey::DebugLine3D,
+        auto_release: true,
+    },
+);
+```
+</details>
+
+## Debug
 ```rust
 pub fn mesh_assets(&self) -> impl Iterator<Item = (MeshAssetId, &MeshAsset)>
 ```
