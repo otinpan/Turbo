@@ -31,7 +31,7 @@ pub use system::{
     CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, EntityApi, InputApi, InputSystem,
     InputTrigger, KeyBinding, ObjectApi, RenderCommand, RenderCommandApi, RenderCommandQueue,
     RenderSystem, RotatorSystem, Scheduler, SpawnPrimitiveCommand, SpawnVikingRoomCommand,
-    UpdateContext, UpdatePrimitiveMeshesCommand, UpdateSystem,
+    UpdateContext, UpdatePrimitiveMeshesCommand, UpdateSystem, TimeApi,
 };
 pub use time::Time;
 pub use world::World;

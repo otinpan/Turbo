@@ -11,9 +11,11 @@ mod entity_api;
 mod input_api;
 mod object_api;
 mod render_command_api;
+mod time_api;
 
 pub use asset_api::AssetApi;
 pub use entity_api::EntityApi;
 pub use input_api::InputApi;
 pub use object_api::ObjectApi;
 pub use render_command_api::RenderCommandApi;
+pub use time_api::TimeApi;

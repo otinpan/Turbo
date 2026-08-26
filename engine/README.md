@@ -86,7 +86,7 @@
 	- ~~Entityごとにmeshを持たせる場合はメモリリークになる~~
 	- ~~参照カウンタ的なものでdespawn時に自動的にdestroyする~~
 	- ~~assetのrelease (Resources.release_mesh)~~
-* Component、SystemのAPI準備
+* ~~Component、SystemのAPI準備~~
 	- UpdateContext、CommandContext、RenderContextのフィールド pub -> private
 	- Object共通処理 ObjectApi trait
 	- Entity EntityApi
@@ -120,6 +120,10 @@
   - draw_text
   - debug text
   - simple HUD
+
+* ShaderApi
+	- shader作成
+	- pipelineを指定し、shaderの引数を制限
 
 ## ユーザ触れられるもの
 * App

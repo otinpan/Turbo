@@ -21,7 +21,7 @@ use crate::{
 use renderer_vulkan::PipelineKey;
 use turbo_math::Transform;
 
-use crate::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi};
+use crate::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi, TimeApi};
 pub use camera_system::CameraSystem;
 pub use rotator_system::RotatorSystem;
 
@@ -53,9 +53,6 @@ impl<'a> UpdateContext<'a> {
         }
     }
 
-    pub fn delta_seconds(&self) -> f32 {
-        self.time.delta_seconds()
-    }
 
     // create new primitive entity and new mesh
     // entity is create here, but mesh is created in RenderSystem using VulkanRenderer.
@@ -199,6 +196,12 @@ impl AssetApi for UpdateContext<'_> {
 impl InputApi for UpdateContext<'_> {
     fn input(&self) -> &Input {
         &self.input
+    }
+}
+
+impl TimeApi for UpdateContext<'_>{
+    fn time(&self) -> &Time{
+        &self.time
     }
 }
 

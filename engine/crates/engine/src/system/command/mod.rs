@@ -26,7 +26,9 @@ use cgmath::Vector3;
 use crate::app::DEFAULT_TEXTURE;
 use crate::component::{Material, MeshRenderer, PendingPrimitiveMesh, Visibility};
 use crate::primitive::spawn_primitive_from_mesh;
-use crate::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi};
+use crate::{
+    AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi,
+};
 use crate::{
     CommandQueue, EntityId, Input, MeshAssetId, PrimitiveShape, RenderCommandQueue, Resources,
     World,

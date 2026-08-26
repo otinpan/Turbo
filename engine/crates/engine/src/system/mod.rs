@@ -14,7 +14,9 @@ mod render_system;
 mod scheduler;
 mod update;
 
-pub use api::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi};
+pub use api::{
+    AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi, TimeApi,
+};
 pub use command::{
     Command, CommandContext, CommandSystem, CreatePrimitiveCommand, DebugMonitor,
     DespawnLastCommand, SpawnPrimitiveCommand, SpawnVikingRoomCommand,

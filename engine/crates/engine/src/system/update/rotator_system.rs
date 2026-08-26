@@ -2,7 +2,8 @@ use anyhow::Result;
 use turbo_math::Transform;
 
 use super::{UpdateContext, UpdateSystem};
-use crate::{EntityApi, Rotator};
+use crate::{Rotator};
+use crate::{EntityApi, TimeApi};
 
 #[derive(Clone, Debug)]
 pub struct RotatorSystem;
