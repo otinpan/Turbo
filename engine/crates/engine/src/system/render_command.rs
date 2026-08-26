@@ -1,6 +1,6 @@
-use renderer_vulkan::{MeshHandle};
+use renderer_vulkan::MeshHandle;
 
-use crate::{EntityId, PrimitiveShape, MeshAssetId};
+use crate::{EntityId, MeshAssetId, PrimitiveShape};
 
 #[derive(Debug)]
 pub enum RenderCommand {
@@ -26,15 +26,9 @@ impl RenderCommandQueue {
         self.command.push(RenderCommand::DestroyMesh { mesh });
     }
 
-    pub fn update_primitive_mesh(
-        &mut self,
-        asset_id: MeshAssetId,
-        shape: PrimitiveShape,
-    ) {
-        self.command.push(RenderCommand::UpdatePrimitiveMesh {
-            asset_id,
-            shape,
-        });
+    pub fn update_primitive_mesh(&mut self, asset_id: MeshAssetId, shape: PrimitiveShape) {
+        self.command
+            .push(RenderCommand::UpdatePrimitiveMesh { asset_id, shape });
     }
 
     pub fn create_primitive_mesh(&mut self, entity: EntityId) {

@@ -4,11 +4,9 @@ use renderer_vulkan::{RenderCamera, RenderItem, VulkanRenderer};
 use turbo_math::Transform;
 
 use super::render_command::{RenderCommand, RenderCommandQueue};
-use crate::primitive::{
-    PrimitiveMesh, create_primitive_with_layout, update_primitive_mesh,
-};
+use crate::AssetApi;
+use crate::primitive::{PrimitiveMesh, create_primitive_with_layout, update_primitive_mesh};
 use crate::{EntityId, MeshAssetId, Resources, World};
-use crate::{AssetApi};
 
 use crate::component::{Camera, Component, MeshRenderer, PendingPrimitiveMesh, Visibility};
 
@@ -112,12 +110,12 @@ impl<'a> RenderContext<'a> {
     }
 }
 
-impl AssetApi for RenderContext<'_>{
-    fn resources(&self) -> &Resources{
+impl AssetApi for RenderContext<'_> {
+    fn resources(&self) -> &Resources {
         &self.resources
     }
 
-    fn resources_mut(&mut self) -> &mut Resources{
+    fn resources_mut(&mut self) -> &mut Resources {
         &mut self.resources
     }
 }
@@ -175,15 +173,12 @@ impl RenderSystem {
                 RenderCommand::DestroyMesh { mesh } => unsafe {
                     context.destroy_mesh(mesh)?;
                 },
-                RenderCommand::UpdatePrimitiveMesh {
-                    asset_id,
-                    shape,
-                } => {
-                    let primitive_type=context
+                RenderCommand::UpdatePrimitiveMesh { asset_id, shape } => {
+                    let primitive_type = context
                         .primitive_type_from_asset_id(asset_id)
                         .ok_or_else(|| anyhow!("not found primitive_type from: {asset_id:?}"))?;
 
-                    let vertex_layout=context
+                    let vertex_layout = context
                         .vertex_layout_from_asset_id(asset_id)
                         .ok_or_else(|| anyhow!("not found primitive_type from: {asset_id:?}"))?;
 

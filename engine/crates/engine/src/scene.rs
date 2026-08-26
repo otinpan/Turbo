@@ -1,58 +1,39 @@
-#![allow(
-    dead_code,
-    unsafe_op_in_unsafe_fn,
-    unused_variables,
-    clippy::too_many_arguments,
-    clippy::unnecessary_wraps
-)]
-use anyhow::Result;
-use cgmath::{Vector2, Vector3};
-
-mod camera_system;
-mod rotator_system;
-
-pub use super::render_command::RenderCommandQueue;
-use crate::app::DEFAULT_TEXTURE;
-use crate::component::{Material, Visibility};
-use crate::primitive::spawn_primitive_from_mesh;
-use crate::{
-    EntityId, Input, MeshAssetId, PendingPrimitiveMesh, PrimitiveShape, Resources, Time, World,
+use cgmath::{Vector3};
+use crate::system::{
+    AssetApi, CommandContext, EntityApi, ObjectApi, RenderCommandApi, UpdateContext,
 };
-use renderer_vulkan::PipelineKey;
-use turbo_math::Transform;
+use crate::component::{
+    Visibility,
+};
+use crate::{
+    Input, RenderCommandQueue, Resources, Scheduler, Time, World,
+    MeshAssetId, Material, EntityId, PendingPrimitiveMesh,
+};
+use crate::primitive::{
+    spawn_primitive_from_mesh, PrimitiveShape,
+};
+use renderer_vulkan::{
+    PipelineKey,
+};
+use crate::app::{DEFAULT_TEXTURE};
 
-use crate::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi, TimeApi};
-pub use camera_system::CameraSystem;
-pub use rotator_system::RotatorSystem;
+use turbo_math::{Transform};
+use anyhow::Result;
 
-type Vec2 = Vector2<f32>;
-type Vec3 = Vector3<f32>;
+type Vec3=Vector3<f32>;
 
-pub struct UpdateContext<'a> {
+pub struct SceneContext<'a> {
     world: &'a mut World,
     input: &'a Input,
     time: &'a Time,
+    // resource
     resources: &'a mut Resources,
     render_commands: &'a mut RenderCommandQueue,
+    // system
+    scheduler: &'a mut Scheduler,
 }
 
-impl<'a> UpdateContext<'a> {
-    pub(crate) fn new(
-        world: &'a mut World,
-        input: &'a Input,
-        time: &'a Time,
-        resources: &'a mut Resources,
-        render_commands: &'a mut RenderCommandQueue,
-    ) -> Self {
-        Self {
-            world,
-            input,
-            time,
-            resources,
-            render_commands,
-        }
-    }
-
+impl<'a> SceneContext<'a> {
     // create new primitive entity and new mesh
     // entity is create here, but mesh is created in RenderSystem using VulkanRenderer.
     // the frame this called do not render new primitive
@@ -80,21 +61,17 @@ impl<'a> UpdateContext<'a> {
 
         Ok(entity)
     }
+    // bind_input_commands
+
+    // add_update_system
 }
 
-impl EntityApi for UpdateContext<'_> {
+impl EntityApi for SceneContext<'_> {
     fn world(&self) -> &World {
         &self.world
     }
     fn world_mut(&mut self) -> &mut World {
         &mut self.world
-    }
-
-    fn render_commands(&self) -> &RenderCommandQueue {
-        &self.render_commands
-    }
-    fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
-        &mut self.render_commands
     }
 
     fn resources(&self) -> &Resources {
@@ -103,9 +80,25 @@ impl EntityApi for UpdateContext<'_> {
     fn resources_mut(&mut self) -> &mut Resources {
         &mut self.resources
     }
+
+    fn render_commands(&self) -> &RenderCommandQueue {
+        &self.render_commands
+    }
+    fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
+        &mut self.render_commands
+    }
 }
 
-impl ObjectApi for UpdateContext<'_> {
+impl AssetApi for SceneContext<'_>{
+    fn resources(&self) -> &Resources{
+        &self.resources
+    }
+    fn resources_mut(&mut self) -> &mut Resources{
+        &mut self.resources
+    }
+}
+
+impl ObjectApi for SceneContext<'_>{
     fn spawn_primitive_from_mesh(
         &mut self,
         asset_id: MeshAssetId,
@@ -148,39 +141,16 @@ impl ObjectApi for UpdateContext<'_> {
     }
 }
 
-impl AssetApi for UpdateContext<'_> {
-    fn resources(&self) -> &Resources {
-        &self.resources
-    }
-
-    fn resources_mut(&mut self) -> &mut Resources {
-        &mut self.resources
-    }
-}
-
-impl InputApi for UpdateContext<'_> {
-    fn input(&self) -> &Input {
-        &self.input
-    }
-}
-
-impl TimeApi for UpdateContext<'_> {
-    fn time(&self) -> &Time {
-        &self.time
-    }
-}
-
-impl RenderCommandApi for UpdateContext<'_> {
-    fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
+impl RenderCommandApi for SceneContext<'_>{
+    fn render_commands_mut(&mut self) -> &mut RenderCommandQueue{
         &mut self.render_commands
     }
 }
 
-pub struct ScheduledUpdateSystem {
-    pub name: String,
-    pub system: Box<dyn UpdateSystem>,
-    pub enabled: bool,
-}
-pub trait UpdateSystem {
+pub trait Scene {
+    fn on_enter(&mut self, context: &mut SceneContext<'_>) -> Result<()>;
+
     fn update(&mut self, context: &mut UpdateContext<'_>) -> Result<()>;
+
+    fn on_exit(&mut self, context: &mut CommandContext<'_>) -> Result<()>;
 }

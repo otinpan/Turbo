@@ -20,15 +20,13 @@ pub use spawn_primitive_command::SpawnPrimitiveCommand;
 pub use spawn_viking_room_command::SpawnVikingRoomCommand;
 pub use update_primitive_meshes_command::UpdatePrimitiveMeshesCommand;
 
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 use cgmath::Vector3;
 
 use crate::app::DEFAULT_TEXTURE;
-use crate::component::{Material, MeshRenderer, PendingPrimitiveMesh, Visibility};
+use crate::component::{Material, PendingPrimitiveMesh, Visibility};
 use crate::primitive::spawn_primitive_from_mesh;
-use crate::{
-    AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi,
-};
+use crate::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi};
 use crate::{
     CommandQueue, EntityId, Input, MeshAssetId, PrimitiveShape, RenderCommandQueue, Resources,
     World,
@@ -108,40 +106,6 @@ pub trait Command {
 }
 
 impl ObjectApi for CommandContext<'_> {
-    fn spawn_model(
-        &mut self,
-        model_name: &str,
-        transform: Transform,
-        material: Material,
-    ) -> Result<EntityId> {
-        let asset_id = self
-            .resources
-            .model_asset_id(model_name)
-            .ok_or_else(|| anyhow!("model not found: {model_name}"))?;
-
-        let mesh = self
-            .resources
-            .retain_mesh(asset_id)
-            .ok_or_else(|| anyhow!("mesh asset not found: {asset_id:?}"))?;
-
-        let mesh_renderer = match MeshRenderer::new(mesh, material) {
-            Ok(mesh_renderer) => mesh_renderer.with_asset_id(asset_id),
-            Err(error) => {
-                self.resources.release_mesh(asset_id);
-                return Err(error);
-            }
-        };
-
-        let entity = self.spawn();
-
-        self.add_component(entity, transform);
-        self.add_component(entity, mesh_renderer);
-        self.add_component(entity, Visibility::default());
-        self.set_tags(entity, ["Model", model_name]);
-
-        Ok(entity)
-    }
-
     fn spawn_primitive_from_mesh(
         &mut self,
         asset_id: MeshAssetId,

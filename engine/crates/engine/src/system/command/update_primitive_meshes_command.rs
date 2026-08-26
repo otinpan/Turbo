@@ -3,9 +3,9 @@ use cgmath::vec3;
 use renderer_vulkan::VertexLayout;
 
 use super::{Command, CommandContext};
+use crate::AssetApi;
 use crate::RenderCommandApi;
 use crate::primitive::{PrimitiveShape, PrimitiveType};
-use crate::{AssetApi};
 #[derive(Clone, Debug)]
 pub struct UpdatePrimitiveMeshesCommand;
 
@@ -15,9 +15,9 @@ impl Command for UpdatePrimitiveMeshesCommand {
     }
 
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        let polygon_mesh3d=context
+        let polygon_mesh3d = context
             .primitive_asset_id(PrimitiveType::Polygon, VertexLayout::Mesh3D)
-            .ok_or_else(||anyhow!("not found polygon mesh3d"))?;
+            .ok_or_else(|| anyhow!("not found polygon mesh3d"))?;
         context.update_primitive_mesh(
             polygon_mesh3d,
             PrimitiveShape::Polygon {
@@ -32,9 +32,9 @@ impl Command for UpdatePrimitiveMeshesCommand {
             },
         );
 
-        let sphere_lit3d=context
+        let sphere_lit3d = context
             .primitive_asset_id(PrimitiveType::Sphere, VertexLayout::Lit3D)
-            .ok_or_else(||anyhow!("not found sphere_lit3d"))?;
+            .ok_or_else(|| anyhow!("not found sphere_lit3d"))?;
 
         context.update_primitive_mesh(
             sphere_lit3d,
@@ -46,9 +46,9 @@ impl Command for UpdatePrimitiveMeshesCommand {
             },
         );
 
-        let rectangle_ui2d=context
+        let rectangle_ui2d = context
             .primitive_asset_id(PrimitiveType::Rectangle, VertexLayout::Ui2D)
-            .ok_or_else(||anyhow!("not found rectangle ui2d"))?;
+            .ok_or_else(|| anyhow!("not found rectangle ui2d"))?;
         context.update_primitive_mesh(
             rectangle_ui2d,
             PrimitiveShape::Rectangle {

@@ -1,4 +1,4 @@
-use crate::{Time};
+use crate::Time;
 
 pub trait TimeApi {
     fn time(&self) -> &Time;

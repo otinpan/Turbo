@@ -12,6 +12,7 @@ mod ecs;
 mod input;
 mod primitive;
 mod resources;
+mod scene;
 mod system;
 mod time;
 mod world;
@@ -26,12 +27,13 @@ pub use input::Input;
 pub use primitive::{PrimitiveMesh, PrimitiveShape, PrimitiveType};
 pub use renderer_vulkan::PipelineKey;
 pub use resources::{MeshAsset, MeshAssetId, Resources};
+pub use scene::Scene;
 pub use system::{
     AssetApi, CameraSystem, Command, CommandContext, CommandQueue, CommandRef, CommandSystem,
     CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, EntityApi, InputApi, InputSystem,
     InputTrigger, KeyBinding, ObjectApi, RenderCommand, RenderCommandApi, RenderCommandQueue,
-    RenderSystem, RotatorSystem, Scheduler, SpawnPrimitiveCommand, SpawnVikingRoomCommand,
-    UpdateContext, UpdatePrimitiveMeshesCommand, UpdateSystem, TimeApi,
+    RenderSystem, RotatorSystem, Scheduler, SpawnPrimitiveCommand, SpawnVikingRoomCommand, TimeApi,
+    UpdateContext, UpdatePrimitiveMeshesCommand, UpdateSystem,
 };
 pub use time::Time;
 pub use world::World;

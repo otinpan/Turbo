@@ -1,20 +1,45 @@
-use anyhow::{Result, bail};
+use anyhow::{Result, anyhow, bail};
 use cgmath::vec3;
 use renderer_vulkan::PipelineKey;
 use turbo_math::Transform;
 
-use crate::{EntityId, Material, MeshAssetId, PrimitiveShape};
+use crate::{
+    AssetApi, EntityApi, EntityId, Material, MeshAssetId, MeshRenderer, PrimitiveShape, Visibility,
+};
 
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Vec2 = cgmath::Vector2<f32>;
 
-pub trait ObjectApi {
+pub trait ObjectApi: EntityApi + AssetApi {
     fn spawn_model(
         &mut self,
         model_name: &str,
         transform: Transform,
         material: Material,
-    ) -> Result<EntityId>;
+    ) -> Result<EntityId> {
+        let asset_id = self.model_asset_id(model_name)?;
+
+        let mesh = AssetApi::resources_mut(self)
+            .retain_mesh(asset_id)
+            .ok_or_else(|| anyhow!("mesh asset not found: {asset_id:?}"))?;
+
+        let mesh_renderer = match MeshRenderer::new(mesh, material) {
+            Ok(mesh_renderer) => mesh_renderer.with_asset_id(asset_id),
+            Err(error) => {
+                AssetApi::resources_mut(self).release_mesh(asset_id);
+                return Err(error);
+            }
+        };
+
+        let entity = self.spawn();
+
+        self.add_component(entity, transform);
+        self.add_component(entity, mesh_renderer);
+        self.add_component(entity, Visibility::default());
+        self.set_tags(entity, ["Model", model_name]);
+
+        Ok(entity)
+    }
 
     fn spawn_primitive_from_mesh(
         &mut self,

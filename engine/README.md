@@ -87,23 +87,27 @@
 	- ~~参照カウンタ的なものでdespawn時に自動的にdestroyする~~
 	- ~~assetのrelease (Resources.release_mesh)~~
 * ~~Component、SystemのAPI準備~~
-	- UpdateContext、CommandContext、RenderContextのフィールド pub -> private
-	- Object共通処理 ObjectApi trait
-	- Entity EntityApi
-	- <system>.rsではworldやrendererを触らせない
-	- systemはContext情報のみでupdateする
-	- 既存のsystemをcontext api経由にする
+	- ~~UpdateContext、CommandContext、RenderContextのフィールド pub -> private~~
+	- ~~Object共通処理 ObjectApi trait~~
+	- ~~Entity EntityApi~~
+	- ~~<system>.rsではworldやrendererを触らせない~~
+	- ~~systemはContext情報のみでupdateする~~
+	- ~~既存のsystemをcontext api経由にする~~
 	* EntityApi      spawn / despawn / component / query / name / tag
 	- InputApi       mouse_position / window_size / key state
 	- ObjectApi      spawn_model / spawn primitive
 	- AssetApi       texture / model_asset_id / mesh info
 	- RenderCommand	 update_primitive
 	- TimeApi        delta_seconds
+
 * シーン管理
   - Scene trait
   - current_scene
   - change_scene
   - sceneごとの初期化/update
+
+* セーブ機能
+
 * 当たり判定
   - BoxCollider
   - SphereCollider
