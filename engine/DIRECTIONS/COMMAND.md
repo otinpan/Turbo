@@ -159,10 +159,20 @@ Returns debug-friendly lists of registered names and tags.
 
 ```rust
 pub fn mouse_position(&self) -> Vec2
+pub fn mouse_delta(&self) -> Vec2
 pub fn window_size(&self) -> Vec2
+
+pub fn key_down(&self, key: KeyCode) -> bool
+pub fn key_pressed(&self, key: KeyCode) -> bool
+pub fn key_released(&self, key: KeyCode) -> bool
+
+pub fn mouse_button_down(&self, button: MouseButton) -> bool
+pub fn mouse_button_pressed(&self, button: MouseButton) -> bool
+pub fn mouse_button_released(&self, button: MouseButton) -> bool
 ```
 
-Returns current input state needed by commands.
+Returns input state through the context without exposing the internal `Input`.
+`*_pressed` and `*_released` are true only on the frame the transition happened.
 
 ```rust
 pub fn positions(&self) -> &[Vec3]

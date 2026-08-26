@@ -33,7 +33,7 @@ use crate::{
 use renderer_vulkan::{PipelineKey, VertexLayout};
 use turbo_math::Transform;
 use crate::{
-    EntityApi, ObjectApi, AssetApi,
+    EntityApi, ObjectApi, AssetApi, InputApi,
 };
 
 pub type Vec3 = Vector3<f32>;
@@ -71,13 +71,6 @@ impl<'a> CommandContext<'a> {
         self.positions
     }
 
-    pub fn mouse_position(&self) -> Vec2 {
-        self.input.mouse_position()
-    }
-
-    pub fn window_size(&self) -> Vec2 {
-        self.input.window_size()
-    }
 
     // resources /////////////////////////////////
 
@@ -232,6 +225,12 @@ impl AssetApi for CommandContext<'_>{
 
     fn resources_mut(&mut self) -> &mut Resources{
         &mut self.resources
+    }
+}
+
+impl InputApi for CommandContext<'_>{
+    fn input(&self) -> &Input{
+        &self.input
     }
 }
 
