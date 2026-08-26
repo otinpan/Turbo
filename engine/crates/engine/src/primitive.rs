@@ -894,7 +894,7 @@ pub unsafe fn update_primitive_mesh(
 ) -> Result<()> {
     if mesh.primitive_type != shape.primitive_type() {
         bail!(
-            "Primitive shape {:?} does not match mesh type {:?}.",
+            "Updated primitive_shape {:?} does not match mesh type {:?}.",
             shape.primitive_type(),
             mesh.primitive_type
         );

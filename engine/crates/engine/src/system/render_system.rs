@@ -1,13 +1,14 @@
 use anyhow::{Result, anyhow};
 use cgmath::vec3;
-use renderer_vulkan::{RenderCamera, RenderItem, VertexLayout, VulkanRenderer};
+use renderer_vulkan::{RenderCamera, RenderItem, VulkanRenderer};
 use turbo_math::Transform;
 
 use super::render_command::{RenderCommand, RenderCommandQueue};
 use crate::primitive::{
-    PrimitiveMesh, PrimitiveType, create_primitive_with_layout, update_primitive_mesh,
+    PrimitiveMesh, create_primitive_with_layout, update_primitive_mesh,
 };
 use crate::{EntityId, MeshAssetId, Resources, World};
+use crate::{AssetApi};
 
 use crate::component::{Camera, Component, MeshRenderer, PendingPrimitiveMesh, Visibility};
 
@@ -51,15 +52,6 @@ impl<'a> RenderContext<'a> {
 
     pub fn get_component<T: Component>(&self, entity: EntityId) -> Option<&T> {
         self.world.get_component::<T>(entity)
-    }
-
-    pub fn primitive_asset_id(
-        &self,
-        primitive_type: PrimitiveType,
-        vertex_layout: VertexLayout,
-    ) -> Option<MeshAssetId> {
-        self.resources
-            .primitive_asset_id(primitive_type, vertex_layout)
     }
 
     pub(crate) fn set_render_items(&mut self, render_items: Vec<RenderItem>) {
@@ -120,6 +112,16 @@ impl<'a> RenderContext<'a> {
     }
 }
 
+impl AssetApi for RenderContext<'_>{
+    fn resources(&self) -> &Resources{
+        &self.resources
+    }
+
+    fn resources_mut(&mut self) -> &mut Resources{
+        &mut self.resources
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct RenderSystem;
 
@@ -174,10 +176,17 @@ impl RenderSystem {
                     context.destroy_mesh(mesh)?;
                 },
                 RenderCommand::UpdatePrimitiveMesh {
-                    primitive_type,
-                    vertex_layout,
+                    asset_id,
                     shape,
                 } => {
+                    let primitive_type=context
+                        .primitive_type_from_asset_id(asset_id)
+                        .ok_or_else(|| anyhow!("not found primitive_type from: {asset_id:?}"))?;
+
+                    let vertex_layout=context
+                        .vertex_layout_from_asset_id(asset_id)
+                        .ok_or_else(|| anyhow!("not found primitive_type from: {asset_id:?}"))?;
+
                     if let Some(asset_id) =
                         context.primitive_asset_id(primitive_type, vertex_layout)
                     {

@@ -1,11 +1,11 @@
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use cgmath::vec3;
 use renderer_vulkan::VertexLayout;
 
 use super::{Command, CommandContext};
 use crate::RenderCommandApi;
 use crate::primitive::{PrimitiveShape, PrimitiveType};
-
+use crate::{AssetApi};
 #[derive(Clone, Debug)]
 pub struct UpdatePrimitiveMeshesCommand;
 
@@ -15,9 +15,11 @@ impl Command for UpdatePrimitiveMeshesCommand {
     }
 
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
+        let polygon_mesh3d=context
+            .primitive_asset_id(PrimitiveType::Polygon, VertexLayout::Mesh3D)
+            .ok_or_else(||anyhow!("not found polygon mesh3d"))?;
         context.update_primitive_mesh(
-            PrimitiveType::Polygon,
-            VertexLayout::Mesh3D,
+            polygon_mesh3d,
             PrimitiveShape::Polygon {
                 points: vec![
                     vec3(0.0, -0.7, 0.3),
@@ -30,9 +32,12 @@ impl Command for UpdatePrimitiveMeshesCommand {
             },
         );
 
+        let sphere_lit3d=context
+            .primitive_asset_id(PrimitiveType::Sphere, VertexLayout::Lit3D)
+            .ok_or_else(||anyhow!("not found sphere_lit3d"))?;
+
         context.update_primitive_mesh(
-            PrimitiveType::Sphere,
-            VertexLayout::Lit3D,
+            sphere_lit3d,
             PrimitiveShape::Sphere {
                 radius: 2.0,
                 rings: 20,
@@ -41,9 +46,11 @@ impl Command for UpdatePrimitiveMeshesCommand {
             },
         );
 
+        let rectangle_ui2d=context
+            .primitive_asset_id(PrimitiveType::Rectangle, VertexLayout::Ui2D)
+            .ok_or_else(||anyhow!("not found rectangle ui2d"))?;
         context.update_primitive_mesh(
-            PrimitiveType::Rectangle,
-            VertexLayout::Ui2D,
+            rectangle_ui2d,
             PrimitiveShape::Rectangle {
                 points: [
                     vec3(0.0, -0.2, 0.2),

@@ -97,7 +97,7 @@
 	- InputApi       mouse_position / window_size / key state
 	- ObjectApi      spawn_model / spawn primitive
 	- AssetApi       texture / model_asset_id / mesh info
-	- RenderQueueApi update_primitive_mesh / destroy mesh など
+	- RenderCommand	 update_primitive
 	- TimeApi        delta_seconds
 * シーン管理
   - Scene trait

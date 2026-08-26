@@ -1,6 +1,6 @@
-use renderer_vulkan::{MeshHandle, VertexLayout};
+use renderer_vulkan::{MeshHandle};
 
-use crate::{EntityId, PrimitiveShape, PrimitiveType};
+use crate::{EntityId, PrimitiveShape, MeshAssetId};
 
 #[derive(Debug)]
 pub enum RenderCommand {
@@ -8,8 +8,7 @@ pub enum RenderCommand {
         mesh: MeshHandle,
     },
     UpdatePrimitiveMesh {
-        primitive_type: PrimitiveType,
-        vertex_layout: VertexLayout,
+        asset_id: MeshAssetId,
         shape: PrimitiveShape,
     },
     CreatePrimitiveMesh {
@@ -29,13 +28,11 @@ impl RenderCommandQueue {
 
     pub fn update_primitive_mesh(
         &mut self,
-        primitive_type: PrimitiveType,
-        vertex_layout: VertexLayout,
+        asset_id: MeshAssetId,
         shape: PrimitiveShape,
     ) {
         self.command.push(RenderCommand::UpdatePrimitiveMesh {
-            primitive_type,
-            vertex_layout,
+            asset_id,
             shape,
         });
     }
