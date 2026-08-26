@@ -425,6 +425,13 @@ impl App {
         self.input.handle_event(event);
     }
 
+    pub fn bind_key<C>(&mut self, key: KeyCode, trigger: InputTrigger, command: C)
+    where
+        C: Command + 'static,
+    {
+        self.scheduler.bind_key(key, trigger, command);
+    }
+
     pub unsafe fn render(&mut self, window: &Window) -> Result<()> {
         self.renderer.render(window)
     }

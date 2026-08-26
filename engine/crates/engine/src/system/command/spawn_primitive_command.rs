@@ -5,8 +5,8 @@ use turbo_math::Transform;
 
 use super::{Command, CommandContext};
 use crate::Material;
-use crate::{ObjectApi, AssetApi, InputApi};
 use crate::primitive::PrimitiveType;
+use crate::{AssetApi, InputApi, ObjectApi};
 
 #[derive(Clone, Debug)]
 pub struct SpawnPrimitiveCommand {

@@ -4,8 +4,8 @@ use renderer_vulkan::PipelineKey;
 use turbo_math::Transform;
 
 use super::{Command, CommandContext};
+use crate::{AssetApi, ObjectApi};
 use crate::{Material, PrimitiveShape};
-use crate::{AssetApi};
 
 #[derive(Clone, Debug)]
 pub struct CreatePrimitiveCommand {
@@ -45,7 +45,7 @@ impl Command for CreatePrimitiveCommand {
             pipeline_key: self.pipeline_key,
         };
 
-        context.enqueue_spawn_shape(
+        context.spawn_shape_with_material(
             self.primitive_shape.clone(),
             self.transform.clone(),
             material,

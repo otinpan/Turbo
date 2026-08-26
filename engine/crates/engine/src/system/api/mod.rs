@@ -8,10 +8,12 @@
 
 mod asset_api;
 mod entity_api;
-mod object_api;
 mod input_api;
+mod object_api;
+mod render_command_api;
 
 pub use asset_api::AssetApi;
 pub use entity_api::EntityApi;
-pub use object_api::ObjectApi;
 pub use input_api::InputApi;
+pub use object_api::ObjectApi;
+pub use render_command_api::RenderCommandApi;

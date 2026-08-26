@@ -12,17 +12,16 @@ mod camera_system;
 mod rotator_system;
 
 pub use super::render_command::RenderCommandQueue;
-use crate::app::{DEFAULT_TEXTURE};
+use crate::app::DEFAULT_TEXTURE;
 use crate::component::{Material, MeshRenderer, Visibility};
 use crate::primitive::spawn_primitive_from_mesh;
 use crate::{
-    EntityId, Input, MeshAssetId, PendingPrimitiveMesh, PrimitiveShape, PrimitiveType,
-    Resources, Time, World,
+    EntityId, Input, MeshAssetId, PendingPrimitiveMesh, PrimitiveShape, Resources, Time, World,
 };
-use renderer_vulkan::{PipelineKey, VertexLayout};
+use renderer_vulkan::PipelineKey;
 use turbo_math::Transform;
 
-use crate::{EntityApi, ObjectApi, AssetApi, InputApi};
+use crate::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi};
 pub use camera_system::CameraSystem;
 pub use rotator_system::RotatorSystem;
 
@@ -58,7 +57,6 @@ impl<'a> UpdateContext<'a> {
         self.time.delta_seconds()
     }
 
-
     // create new primitive entity and new mesh
     // entity is create here, but mesh is created in RenderSystem using VulkanRenderer.
     // the frame this called do not render new primitive
@@ -85,17 +83,6 @@ impl<'a> UpdateContext<'a> {
         self.render_commands.create_primitive_mesh(entity);
 
         Ok(entity)
-    }
-
-
-    pub fn update_primitive_mesh(
-        &mut self,
-        primitive_type: PrimitiveType,
-        vertex_layout: VertexLayout,
-        shape: PrimitiveShape,
-    ) {
-        self.render_commands
-            .update_primitive_mesh(primitive_type, vertex_layout, shape);
     }
 }
 
@@ -199,19 +186,25 @@ impl ObjectApi for UpdateContext<'_> {
     }
 }
 
-impl AssetApi for UpdateContext<'_>{
-    fn resources(&self) -> &Resources{
+impl AssetApi for UpdateContext<'_> {
+    fn resources(&self) -> &Resources {
         &self.resources
     }
 
-    fn resources_mut(&mut self) -> &mut Resources{
+    fn resources_mut(&mut self) -> &mut Resources {
         &mut self.resources
     }
 }
 
-impl InputApi for UpdateContext<'_>{
-    fn input(&self) -> &Input{
+impl InputApi for UpdateContext<'_> {
+    fn input(&self) -> &Input {
         &self.input
+    }
+}
+
+impl RenderCommandApi for UpdateContext<'_> {
+    fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
+        &mut self.render_commands
     }
 }
 

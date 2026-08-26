@@ -1,9 +1,10 @@
-use cgmath::{Vector2};
-use winit::event::{MouseButton};
-use winit::keyboard::{KeyCode};
-use crate::{Input};
+use cgmath::Vector2;
+use winit::event::MouseButton;
+use winit::keyboard::KeyCode;
 
-type Vec2=Vector2<f32>;
+use crate::Input;
+
+type Vec2 = Vector2<f32>;
 
 pub trait InputApi {
     fn input(&self) -> &Input;
@@ -34,5 +35,13 @@ pub trait InputApi {
 
     fn mouse_button_down(&self, button: MouseButton) -> bool {
         self.input().mouse_button_down(button)
+    }
+
+    fn mouse_button_pressed(&self, button: MouseButton) -> bool {
+        self.input().mouse_button_pressed(button)
+    }
+
+    fn mouse_button_released(&self, button: MouseButton) -> bool {
+        self.input().mouse_button_released(button)
     }
 }

@@ -379,6 +379,7 @@ impl VulkanRenderer {
 
             self.device.device_wait_idle()?;
 
+            // old mesh is released
             let old_mesh = self.data.meshes[mesh_index]
                 .replace(new_mesh)
                 .ok_or_else(|| anyhow!("Mesh slot is empty: {mesh_index}"))?;

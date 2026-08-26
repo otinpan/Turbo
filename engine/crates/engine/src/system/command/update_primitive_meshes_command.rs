@@ -3,6 +3,7 @@ use cgmath::vec3;
 use renderer_vulkan::VertexLayout;
 
 use super::{Command, CommandContext};
+use crate::RenderCommandApi;
 use crate::primitive::{PrimitiveShape, PrimitiveType};
 
 #[derive(Clone, Debug)]

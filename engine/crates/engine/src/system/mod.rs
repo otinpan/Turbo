@@ -6,20 +6,20 @@
     clippy::unnecessary_wraps
 )]
 
-mod command;
 mod api;
+mod command;
 mod input_system;
 mod render_command;
 mod render_system;
 mod scheduler;
 mod update;
 
+pub use api::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi};
 pub use command::{
     Command, CommandContext, CommandSystem, CreatePrimitiveCommand, DebugMonitor,
     DespawnLastCommand, SpawnPrimitiveCommand, SpawnVikingRoomCommand,
     UpdatePrimitiveMeshesCommand,
 };
-pub use api::{AssetApi, EntityApi, ObjectApi, InputApi};
 pub use input_system::{CommandQueue, CommandRef, InputSystem, InputTrigger, KeyBinding};
 pub use render_command::{RenderCommand, RenderCommandQueue};
 pub use render_system::{RenderContext, RenderSystem};

@@ -23,18 +23,16 @@ pub use update_primitive_meshes_command::UpdatePrimitiveMeshesCommand;
 use anyhow::{Result, anyhow};
 use cgmath::Vector3;
 
-use crate::app::{DEFAULT_TEXTURE};
+use crate::app::DEFAULT_TEXTURE;
 use crate::component::{Material, MeshRenderer, PendingPrimitiveMesh, Visibility};
 use crate::primitive::spawn_primitive_from_mesh;
+use crate::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi};
 use crate::{
-    CommandQueue, EntityId, Input, MeshAssetId, PrimitiveShape,
-    PrimitiveType, RenderCommandQueue, Resources, World,
+    CommandQueue, EntityId, Input, MeshAssetId, PrimitiveShape, RenderCommandQueue, Resources,
+    World,
 };
-use renderer_vulkan::{PipelineKey, VertexLayout};
+use renderer_vulkan::PipelineKey;
 use turbo_math::Transform;
-use crate::{
-    EntityApi, ObjectApi, AssetApi, InputApi,
-};
 
 pub type Vec3 = Vector3<f32>;
 pub type Vec2 = cgmath::Vector2<f32>;
@@ -71,7 +69,6 @@ impl<'a> CommandContext<'a> {
         self.positions
     }
 
-
     // resources /////////////////////////////////
 
     // create new primitive entity and new mesh
@@ -100,16 +97,6 @@ impl<'a> CommandContext<'a> {
         self.render_commands.create_primitive_mesh(entity);
 
         Ok(entity)
-    }
-
-    pub fn update_primitive_mesh(
-        &mut self,
-        primitive_type: PrimitiveType,
-        vertex_layout: VertexLayout,
-        shape: PrimitiveShape,
-    ) {
-        self.render_commands
-            .update_primitive_mesh(primitive_type, vertex_layout, shape);
     }
 }
 
@@ -218,19 +205,25 @@ impl EntityApi for CommandContext<'_> {
     }
 }
 
-impl AssetApi for CommandContext<'_>{
-    fn resources(&self) -> &Resources{
+impl AssetApi for CommandContext<'_> {
+    fn resources(&self) -> &Resources {
         &self.resources
     }
 
-    fn resources_mut(&mut self) -> &mut Resources{
+    fn resources_mut(&mut self) -> &mut Resources {
         &mut self.resources
     }
 }
 
-impl InputApi for CommandContext<'_>{
-    fn input(&self) -> &Input{
+impl InputApi for CommandContext<'_> {
+    fn input(&self) -> &Input {
         &self.input
+    }
+}
+
+impl RenderCommandApi for CommandContext<'_> {
+    fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
+        &mut self.render_commands
     }
 }
 

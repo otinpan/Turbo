@@ -5,26 +5,27 @@ use winit::event::MouseButton;
 use winit::keyboard::KeyCode;
 
 use super::{UpdateContext, UpdateSystem};
-use crate::{Camera, EntityApi, Input};
-use crate::{InputApi};
+use crate::{Camera, EntityApi, InputApi};
 
 #[derive(Clone, Debug)]
 pub struct CameraSystem;
 
 impl CameraSystem {
-    fn update_camera(
-        &mut self,
-        context: &mut UpdateContext<'_>,
-        input: &Input,
-        delta_time: f32,
-    ) -> Result<()> {
+    fn update_camera(&mut self, context: &mut UpdateContext<'_>, delta_time: f32) -> Result<()> {
         let move_speed = 3.0;
         let mouse_sensitivity = 0.003;
         let max_pitch = std::f32::consts::FRAC_PI_2 - 0.01;
+        let mouse_delta = context.mouse_delta();
+        let right_mouse_down = context.mouse_button_down(MouseButton::Right);
+        let move_forward = context.key_down(KeyCode::KeyW);
+        let move_backward = context.key_down(KeyCode::KeyS);
+        let move_left = context.key_down(KeyCode::KeyA);
+        let move_right = context.key_down(KeyCode::KeyD);
+        let move_up = context.key_down(KeyCode::ArrowUp);
+        let move_down = context.key_down(KeyCode::ArrowDown);
 
         if let Some((_, transform, camera)) = context.query2_mut_mut::<Transform, Camera>().next() {
-            let mouse_delta = input.mouse_delta();
-            if input.mouse_button_down(MouseButton::Right) {
+            if right_mouse_down {
                 camera.yaw -= mouse_delta.x * mouse_sensitivity;
                 camera.pitch -= mouse_delta.y * mouse_sensitivity;
                 camera.pitch = camera.pitch.clamp(-max_pitch, max_pitch);
@@ -39,22 +40,22 @@ impl CameraSystem {
             let left = vec3(-direction.y, direction.x, 0.0).normalize();
             let up = vec3(0.0, 0.0, 1.0);
 
-            if input.key_down(KeyCode::KeyW) {
+            if move_forward {
                 transform.position += direction * move_speed * delta_time;
             }
-            if input.key_down(KeyCode::KeyS) {
+            if move_backward {
                 transform.position -= direction * move_speed * delta_time;
             }
-            if input.key_down(KeyCode::KeyA) {
+            if move_left {
                 transform.position += left * move_speed * delta_time;
             }
-            if input.key_down(KeyCode::KeyD) {
+            if move_right {
                 transform.position -= left * move_speed * delta_time;
             }
-            if input.key_down(KeyCode::ArrowUp) {
+            if move_up {
                 transform.position += up * move_speed * delta_time;
             }
-            if input.key_down(KeyCode::ArrowDown) {
+            if move_down {
                 transform.position -= up * move_speed * delta_time;
             }
 
@@ -67,9 +68,8 @@ impl CameraSystem {
 
 impl UpdateSystem for CameraSystem {
     fn update(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
-        let input = context.input().clone();
         let delta_time = context.delta_seconds();
 
-        self.update_camera(context, &input, delta_time)
+        self.update_camera(context, delta_time)
     }
 }
