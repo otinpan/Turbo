@@ -1,6 +1,7 @@
 use cgmath::{Vector3};
 use crate::system::{
     AssetApi, CommandContext, EntityApi, ObjectApi, RenderCommandApi, UpdateContext,
+    Command, InputTrigger, UpdateSystem,
 };
 use crate::component::{
     Visibility,
@@ -61,9 +62,28 @@ impl<'a> SceneContext<'a> {
 
         Ok(entity)
     }
-    // bind_input_commands
 
-    // add_update_system
+    // bind Command with (key,trigger)
+    pub fn bind_input_command<C>(
+        &mut self,
+        key: winit::keyboard::KeyCode,
+        trigger: InputTrigger,
+        command: C
+    )
+    where
+        C: Command + 'static,
+    {
+        self.scheduler.bind_key(key,trigger,command);
+    }
+
+    // insert UpdateSystem to Scheduler
+    pub fn add_update_system<S>(&mut self, name: &str, system: S)
+    where
+        S: UpdateSystem + 'static,
+    {
+        self.scheduler.add_update_system(name,system);
+    }
+
 }
 
 impl EntityApi for SceneContext<'_> {
