@@ -12,6 +12,7 @@ mod mesh_renderer;
 mod name;
 mod pending_primitive_mesh;
 mod rotator;
+mod scene_owned;
 mod tags;
 mod visibility;
 
@@ -22,6 +23,7 @@ pub use mesh_renderer::MeshRenderer;
 pub use name::Name;
 pub use pending_primitive_mesh::PendingPrimitiveMesh;
 pub use rotator::Rotator;
+pub use scene_owned::{SceneId, SceneOwned};
 pub use tags::Tags;
 use turbo_math::Transform;
 pub use visibility::Visibility;

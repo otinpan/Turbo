@@ -9,7 +9,22 @@ use crate::{Material, MeshRenderer, Rotator};
 use crate::{AssetApi, EntityApi, ObjectApi};
 
 #[derive(Clone, Debug)]
-pub struct SpawnVikingRoomCommand;
+pub struct SpawnVikingRoomCommand {
+    pub positions: Vec<cgmath::Vector3<f32>>,
+}
+
+impl Default for SpawnVikingRoomCommand {
+    fn default() -> Self {
+        Self {
+            positions: vec![
+                vec3(0.0, -1.25, 1.0),
+                vec3(0.0, 1.25, 1.0),
+                vec3(0.0, -1.25, -1.0),
+                vec3(0.0, 1.25, -1.0),
+            ],
+        }
+    }
+}
 
 impl Command for SpawnVikingRoomCommand {
     fn id(&self) -> String {
@@ -40,26 +55,28 @@ impl Command for SpawnVikingRoomCommand {
             })
             .count();
 
-        if context.positions().len() > index {
-            let variants = [
-                ("viking_room", PipelineKey::Mesh3D, 1.0),
-                ("viking_room_debug_line", PipelineKey::DebugLine3D, 1.0),
-                ("viking_room", PipelineKey::Transparent3D, 0.5),
-                ("viking_room_lit3d", PipelineKey::Lit3D, 1.0),
-            ];
+        let variants = [
+            ("viking_room", PipelineKey::Mesh3D, 1.0),
+            ("viking_room_debug_line", PipelineKey::DebugLine3D, 1.0),
+            ("viking_room", PipelineKey::Transparent3D, 0.5),
+            ("viking_room_lit3d", PipelineKey::Lit3D, 1.0),
+        ];
 
+        if let (Some(position), Some(variant)) =
+            (self.positions.get(index).copied(), variants.get(index))
+        {
             let entity = context.spawn_model(
-                variants[index].0,
+                variant.0,
                 Transform {
-                    position: context.positions()[index],
+                    position,
                     ..Default::default()
                 },
                 Material {
                     color: vec3(1.0, 1.0, 1.0),
-                    alpha: variants[index].2,
+                    alpha: variant.2,
                     use_texture: true,
                     texture: viking_texture,
-                    pipeline_key: variants[index].1,
+                    pipeline_key: variant.1,
                 },
             )?;
             context.add_component(
@@ -68,7 +85,7 @@ impl Command for SpawnVikingRoomCommand {
                     speed: vec3(20.0, 0.0, 0.0),
                 },
             );
-            context.set_tags(entity, ["Model", "VikingRoom", variants[index].0]);
+            context.set_tags(entity, ["Model", "VikingRoom", variant.0]);
         }
 
         Ok(())

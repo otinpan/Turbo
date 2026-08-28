@@ -127,6 +127,7 @@ dependencies = [
  "log",
  "pretty_env_logger",
  "turbo_engine",
+ "turbo_math",
  "winit",
 ]
 

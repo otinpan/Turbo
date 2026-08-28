@@ -6,6 +6,8 @@
     clippy::unnecessary_wraps
 )]
 
+mod basic_3d_scene;
+
 use anyhow::Result;
 use cgmath::{Vector3, vec3};
 use turbo_engine::{App, Command, CommandContext, InputTrigger, ObjectApi, PipelineKey};

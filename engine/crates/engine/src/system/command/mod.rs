@@ -43,7 +43,6 @@ pub struct CommandContext<'a> {
     input: &'a Input,
     resources: &'a mut Resources,
     render_commands: &'a mut RenderCommandQueue,
-    positions: &'a [Vec3],
 }
 
 impl<'a> CommandContext<'a> {
@@ -53,7 +52,6 @@ impl<'a> CommandContext<'a> {
         input: &'a Input,
         resources: &'a mut Resources,
         render_commands: &'a mut RenderCommandQueue,
-        positions: &'a [Vec3],
     ) -> Self {
         Self {
             commands,
@@ -61,12 +59,7 @@ impl<'a> CommandContext<'a> {
             input,
             resources,
             render_commands,
-            positions,
         }
-    }
-
-    pub fn positions(&self) -> &[Vec3] {
-        self.positions
     }
 
     // resources /////////////////////////////////

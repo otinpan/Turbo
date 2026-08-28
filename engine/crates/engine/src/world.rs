@@ -61,6 +61,20 @@ impl World {
         self.registry.has_component::<T>(entity)
     }
 
+    pub fn query1<A>(&self) -> Box<dyn Iterator<Item = (EntityId, &A)> + '_>
+    where
+        A: Component,
+    {
+        self.registry.query1::<A>()
+    }
+
+    pub fn query1_mut<A>(&mut self) -> Box<dyn Iterator<Item = (EntityId, &mut A)> + '_>
+    where
+        A: Component,
+    {
+        self.registry.query1_mut::<A>()
+    }
+
     pub fn query2<A, B>(&self) -> Box<dyn Iterator<Item = (EntityId, &A, &B)> + '_>
     where
         A: Component,
@@ -200,6 +214,38 @@ mod tests {
             Some(Health { hp: 75 })
         );
         assert!(!world.has_component::<Health>(entity));
+    }
+
+    #[test]
+    fn query1_delegates_to_registry() {
+        let mut world = World::default();
+        let matching = world.spawn();
+        world.add_component(matching, Health { hp: 100 });
+        let other = world.spawn();
+
+        let entities = world
+            .query1::<Health>()
+            .map(|(entity, _)| entity)
+            .collect::<Vec<_>>();
+
+        assert_eq!(entities, vec![matching]);
+        assert!(!world.has_component::<Health>(other));
+    }
+
+    #[test]
+    fn query1_mut_delegates_to_registry() {
+        let mut world = World::default();
+        let entity = world.spawn();
+        world.add_component(entity, Health { hp: 100 });
+
+        for (_, health) in world.query1_mut::<Health>() {
+            health.hp -= 25;
+        }
+
+        assert_eq!(
+            world.get_component::<Health>(entity),
+            Some(&Health { hp: 75 })
+        );
     }
 
     #[test]

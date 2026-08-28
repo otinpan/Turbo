@@ -102,6 +102,7 @@
 
 * シーン管理
   - Scene trait
+  - SceneManager
   - current_scene
   - change_scene
   - sceneごとの初期化/update

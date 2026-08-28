@@ -59,7 +59,7 @@ pub trait EntityApi {
         self.world_mut().add_component::<T>(entity, component)
     }
 
-    fn remove_component<T: Component>(&mut self, entity: EntityId, component: T) -> Option<T> {
+    fn remove_component<T: Component>(&mut self, entity: EntityId) -> Option<T> {
         self.world_mut().remove_component::<T>(entity)
     }
 
@@ -81,6 +81,20 @@ pub trait EntityApi {
 
     fn has_component<T: Component>(&self, entity: EntityId) -> bool {
         self.world().has_component::<T>(entity)
+    }
+
+    fn query1<A>(&self) -> Box<dyn Iterator<Item = (EntityId, &A)> + '_>
+    where
+        A: Component,
+    {
+        self.world().query1::<A>()
+    }
+
+    fn query1_mut<A>(&mut self) -> Box<dyn Iterator<Item = (EntityId, &mut A)> + '_>
+    where
+        A: Component,
+    {
+        self.world_mut().query1_mut::<A>()
     }
 
     fn query2<A, B>(&self) -> Box<dyn Iterator<Item = (EntityId, &A, &B)> + '_>

@@ -8,5 +8,6 @@ anyhow.workspace = true
 cgmath.workspace = true
 pretty_env_logger.workspace = true
 turbo_engine = { path = "../../crates/engine" }
+turbo_math={path="../../crates/turbo_math"}
 winit.workspace = true
 log.workspace=true

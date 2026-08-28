@@ -3,7 +3,7 @@ use cgmath::{InnerSpace, vec2, vec3};
 use renderer_vulkan::{SourceMesh, SourceTopology, SourceVertex, VertexLayout, VulkanRenderer};
 use turbo_math::Transform;
 
-use super::{EntityId, Material, MeshAssetId, MeshRenderer, Resources, World};
+use super::{EntityId, Material, MeshAssetId, MeshRenderer, Resources, Visibility, World};
 
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Vec2 = cgmath::Vector2<f32>;
@@ -604,9 +604,10 @@ pub fn spawn_primitive_from_mesh(
 
     let added_transform = world.add_component(entity, transform);
     let added_mesh_renderer = world.add_component(entity, mesh_renderer);
+    let added_visibility = world.add_component(entity, Visibility::default());
     let added_name = world.set_tags(entity, ["Primitive"]);
 
-    if added_transform && added_mesh_renderer && added_name {
+    if added_transform && added_mesh_renderer && added_visibility && added_name {
         Ok(entity)
     } else {
         bail!("failed to spawn primitive")
@@ -1138,7 +1139,8 @@ mod tests {
             Transform::default(),
         );
 
-        assert!(result.is_ok());
+        let entity = result.unwrap();
+        assert!(world.has_component::<Visibility>(entity));
     }
 
     #[test]
@@ -1159,7 +1161,8 @@ mod tests {
             Transform::default(),
         );
 
-        assert!(result.is_ok());
+        let entity = result.unwrap();
+        assert!(world.has_component::<Visibility>(entity));
     }
 
     #[test]

@@ -137,6 +137,28 @@ impl Registry {
     }
 
     // query ////////
+    pub fn query1<A>(&self) -> Box<dyn Iterator<Item = (EntityId, &A)> + '_>
+    where
+        A: Component,
+    {
+        let Some(a_pool) = self.get_pool::<A>() else {
+            return Box::new(std::iter::empty());
+        };
+
+        Box::new(a_pool.iter())
+    }
+
+    pub fn query1_mut<A>(&mut self) -> Box<dyn Iterator<Item = (EntityId, &mut A)> + '_>
+    where
+        A: Component,
+    {
+        let Some(a_pool) = self.get_pool_mut::<A>() else {
+            return Box::new(std::iter::empty());
+        };
+
+        Box::new(a_pool.iter_mut())
+    }
+
     pub fn query2<A, B>(&self) -> Box<dyn Iterator<Item = (EntityId, &A, &B)> + '_>
     where
         A: Component,
@@ -338,6 +360,46 @@ mod tests {
         );
         assert!(registry.remove_component::<Rotator>(entity).is_some());
         assert!(!registry.has_component::<Rotator>(entity));
+    }
+
+    #[test]
+    fn query1_iterates_entities_with_component() {
+        let mut registry = Registry::default();
+        let matching = registry.create();
+        registry.add_component(matching, Transform::default());
+        let other = registry.create();
+        registry.add_component(
+            other,
+            Rotator {
+                speed: vec3(1.0, 2.0, 3.0),
+            },
+        );
+
+        let entities = registry
+            .query1::<Transform>()
+            .map(|(entity, _)| entity)
+            .collect::<Vec<_>>();
+
+        assert_eq!(entities, vec![matching]);
+    }
+
+    #[test]
+    fn query1_mut_iterates_entities_with_component() {
+        let mut registry = Registry::default();
+        let matching = registry.create();
+        registry.add_component(matching, Transform::default());
+
+        for (_, transform) in registry.query1_mut::<Transform>() {
+            transform.rotate(vec3(1.0, 2.0, 3.0));
+        }
+
+        assert_eq!(
+            registry
+                .get_component::<Transform>(matching)
+                .unwrap()
+                .rotation,
+            vec3(1.0, 2.0, 3.0)
+        );
     }
 
     #[test]

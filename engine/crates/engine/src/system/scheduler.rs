@@ -76,16 +76,9 @@ impl Scheduler {
         world: &mut World,
         input: &Input,
         resources: &mut Resources,
-        positions: &[Vec3],
     ) -> Result<()> {
-        let mut context = CommandContext::new(
-            commands,
-            world,
-            input,
-            resources,
-            &mut self.render_commands,
-            positions,
-        );
+        let mut context =
+            CommandContext::new(commands, world, input, resources, &mut self.render_commands);
 
         self.command_system.update(&mut context)
     }

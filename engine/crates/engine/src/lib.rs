@@ -20,14 +20,14 @@ mod world;
 pub use app::App;
 pub use component::{
     Camera, CameraComponent, Component, Material, MeshRenderer, Name, PendingPrimitiveMesh,
-    Rotator, Tags, Visibility,
+    Rotator, SceneId, SceneOwned, Tags, Visibility,
 };
 pub use ecs::{ComponentPool, EntityId, Registry};
 pub use input::Input;
 pub use primitive::{PrimitiveMesh, PrimitiveShape, PrimitiveType};
 pub use renderer_vulkan::PipelineKey;
 pub use resources::{MeshAsset, MeshAssetId, Resources};
-pub use scene::Scene;
+pub use scene::{Scene, SceneContext};
 pub use system::{
     AssetApi, CameraSystem, Command, CommandContext, CommandQueue, CommandRef, CommandSystem,
     CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, EntityApi, InputApi, InputSystem,

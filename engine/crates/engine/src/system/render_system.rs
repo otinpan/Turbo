@@ -127,6 +127,8 @@ impl RenderSystem {
     pub fn update(&mut self, context: &mut RenderContext<'_>) -> Result<()> {
         self.execute_render_commands(context)?;
 
+        // render entities whitch have MeshRenderer and Transform
+        // if entity have Visibility and it is false, this entity is not be rendered
         let render_items = context
             .query2::<Transform, MeshRenderer>()
             .map(|(entity, transform, mesh_renderer)| RenderItem {

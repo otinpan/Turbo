@@ -44,8 +44,6 @@ pub struct App {
 
     // system
     scheduler: Scheduler,
-
-    positions: Vec<Vec3>,
 }
 
 impl App {
@@ -62,13 +60,6 @@ impl App {
         resources.set_skybox_mesh(create_skybox_mesh(&mut renderer, 20.0)?);
         resources.set_skybox_textures(load_skybox_textures(&mut renderer)?);
 
-        let positions = vec![
-            vec3(0.0, -1.25, 1.0),
-            vec3(0.0, 1.25, 1.0),
-            vec3(0.0, -1.25, -1.0),
-            vec3(0.0, 1.25, -1.0),
-        ];
-
         let mut input = Input::default();
         let window_size = window.inner_size();
         input.set_window_size(vec2(window_size.width as f32, window_size.height as f32));
@@ -81,7 +72,6 @@ impl App {
             input,
             time: Time::default(),
             resources,
-            positions,
             scheduler,
         };
 
@@ -459,7 +449,6 @@ impl App {
             &mut self.world,
             &self.input,
             &mut self.resources,
-            &self.positions,
         )?;
 
         self.scheduler.run_update_stage(
@@ -488,7 +477,7 @@ impl App {
         scheduler.bind_key(
             KeyCode::ArrowRight,
             InputTrigger::Pressed,
-            SpawnVikingRoomCommand,
+            SpawnVikingRoomCommand::default(),
         );
         scheduler.bind_key(
             KeyCode::KeyT,
@@ -1264,12 +1253,12 @@ mod tests {
         scheduler.bind_key(
             KeyCode::ArrowRight,
             InputTrigger::Pressed,
-            SpawnVikingRoomCommand,
+            SpawnVikingRoomCommand::default(),
         );
         scheduler.bind_key(
             KeyCode::ArrowRight,
             InputTrigger::Pressed,
-            SpawnVikingRoomCommand,
+            SpawnVikingRoomCommand::default(),
         );
         scheduler.bind_key(
             KeyCode::KeyT,
@@ -1287,7 +1276,7 @@ mod tests {
             key: KeyCode::ArrowRight,
             trigger: InputTrigger::Pressed,
             command_id: "spawn_viking_room".to_string(),
-            command: std::sync::Arc::new(SpawnVikingRoomCommand),
+            command: std::sync::Arc::new(SpawnVikingRoomCommand::default()),
         }));
 
         scheduler.input_system.reset();
