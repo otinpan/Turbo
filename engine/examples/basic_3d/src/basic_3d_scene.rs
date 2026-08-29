@@ -1,10 +1,7 @@
 use anyhow::{Result, anyhow};
 use cgmath::{Vector2, Vector3, vec2, vec3};
 use turbo_engine::{AssetApi, ObjectApi};
-use turbo_engine::{
-    Camera, Command, CommandContext, EntityApi, InputTrigger, PipelineKey, PrimitiveShape,
-    PrimitiveType, Scene, SceneContext, UpdateContext,
-};
+use turbo_engine::prelude::*;
 use turbo_engine::{
     CameraSystem, CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, RotatorSystem,
     SpawnPrimitiveCommand, SpawnVikingRoomCommand, UpdatePrimitiveMeshesCommand,
