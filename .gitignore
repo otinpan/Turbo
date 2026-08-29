@@ -1,5 +1,7 @@
 .trace-worktree/
 .intent-tracer/
+Cargo.lock
+engine/Cargo.lock
 tutorial_cpp/build/
 engine/target
 engine/assets/
