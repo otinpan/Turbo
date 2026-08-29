@@ -24,6 +24,7 @@ impl Scene for Basic3dScene {
     }
 
     fn on_enter(&mut self, context: &mut SceneContext<'_>) -> Result<()> {
+        context.set_skybox("ghost")?;
         self.create_models(context)?;
         self.create_primitives(context)?;
         self.create_camera(context)?;
@@ -41,10 +42,16 @@ impl Scene for Basic3dScene {
         Ok(())
     }
 }
+impl Default for Basic3dScene {
+    fn default() -> Self {
+        Self {}
+    }
+}
 
 impl Basic3dScene {
     fn create_camera(&mut self, context: &mut SceneContext<'_>) -> Result<()> {
         let camera = context.spawn();
+        context.add_component(camera, Transform::default());
         let success = context.add_component(
             camera,
             Camera {
@@ -56,7 +63,7 @@ impl Basic3dScene {
                 pitch: 0.0,
             },
         );
-        if success {
+        if !success {
             Err(anyhow!("failed to create Camera"))
         } else {
             Ok(())
@@ -307,7 +314,7 @@ impl Basic3dScene {
             ],
             vec3(0.0, 1.0, 0.0),
             1.0,
-            Some("escapee"),
+            Some("face"),
             PipelineKey::Lit3D,
         )?;
         /*let polygon_ui2d=app.spawn_polygon_2d(

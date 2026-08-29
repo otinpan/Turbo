@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 use cgmath::vec3;
-use renderer_vulkan::{RenderCamera, RenderItem, VulkanRenderer};
+use renderer_vulkan::{RenderCamera, RenderItem, SkyboxTextureHandle, VulkanRenderer};
 use turbo_math::Transform;
 
 use super::render_command::{RenderCommand, RenderCommandQueue};
@@ -62,6 +62,14 @@ impl<'a> RenderContext<'a> {
 
     pub(crate) unsafe fn destroy_mesh(&mut self, mesh: renderer_vulkan::MeshHandle) -> Result<()> {
         self.renderer.destroy_mesh(mesh)
+    }
+
+    pub(crate) unsafe fn set_skybox(
+        &mut self,
+        mesh: renderer_vulkan::MeshHandle,
+        texture: SkyboxTextureHandle,
+    ) -> Result<()> {
+        self.renderer.set_skybox(mesh, texture)
     }
 
     pub(crate) unsafe fn update_primitive_mesh(
@@ -227,6 +235,9 @@ impl RenderSystem {
                     context.add_component(entity, mesh_renderer);
                     context.remove_component::<PendingPrimitiveMesh>(entity);
                 }
+                RenderCommand::SetSkybox { mesh, texture } => unsafe {
+                    context.set_skybox(mesh, texture)?;
+                },
             }
         }
 

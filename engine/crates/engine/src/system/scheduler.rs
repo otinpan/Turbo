@@ -59,6 +59,14 @@ impl Scheduler {
         });
     }
 
+    pub fn remove_update_system(&mut self, name: &str) -> bool {
+        let before_len = self.update_systems.len();
+        self.update_systems
+            .retain(|scheduled_system| scheduled_system.name != name);
+
+        self.update_systems.len() != before_len
+    }
+
     pub fn bind_key<C>(&mut self, key: winit::keyboard::KeyCode, trigger: InputTrigger, command: C)
     where
         C: Command + 'static,
@@ -122,5 +130,40 @@ impl Default for Scheduler {
             render_commands: RenderCommandQueue::default(),
             update_systems: Vec::new(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct TestUpdateSystem;
+
+    impl UpdateSystem for TestUpdateSystem {
+        fn update(&mut self, _context: &mut UpdateContext<'_>) -> Result<()> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn remove_update_system_removes_system_by_name() {
+        let mut scheduler = Scheduler::default();
+        scheduler.add_update_system("first", TestUpdateSystem);
+        scheduler.add_update_system("second", TestUpdateSystem);
+
+        assert_eq!(scheduler.update_systems.len(), 2);
+        assert!(scheduler.remove_update_system("first"));
+        assert_eq!(scheduler.update_systems.len(), 1);
+        assert_eq!(scheduler.update_systems[0].name, "second");
+    }
+
+    #[test]
+    fn remove_update_system_returns_false_when_missing() {
+        let mut scheduler = Scheduler::default();
+        scheduler.add_update_system("first", TestUpdateSystem);
+
+        assert!(!scheduler.remove_update_system("missing"));
+        assert_eq!(scheduler.update_systems.len(), 1);
+        assert_eq!(scheduler.update_systems[0].name, "first");
     }
 }

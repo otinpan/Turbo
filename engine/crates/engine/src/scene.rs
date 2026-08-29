@@ -33,12 +33,28 @@ pub struct SceneContext<'a> {
     time: &'a Time,
     // resource
     resources: &'a mut Resources,
-    render_commands: &'a mut RenderCommandQueue,
     // system
     scheduler: &'a mut Scheduler,
 }
 
 impl<'a> SceneContext<'a> {
+    pub(crate) fn new(
+        scene_id: SceneId,
+        world: &'a mut World,
+        input: &'a Input,
+        time: &'a Time,
+        resources: &'a mut Resources,
+        scheduler: &'a mut Scheduler,
+    ) -> Self {
+        Self {
+            scene_id,
+            world,
+            input,
+            time,
+            resources,
+            scheduler,
+        }
+    }
     pub fn despawn_scene_owned_entities(&mut self) -> usize {
         let scene_id = self.scene_id;
         let entities = self
@@ -102,7 +118,7 @@ impl<'a> SceneContext<'a> {
             },
         );
 
-        self.render_commands.create_primitive_mesh(entity);
+        self.scheduler.render_commands.create_primitive_mesh(entity);
 
         Ok(entity)
     }
@@ -136,10 +152,10 @@ impl EntityApi for SceneContext<'_> {
     }
 
     fn render_commands(&self) -> &RenderCommandQueue {
-        &self.render_commands
+        &self.scheduler.render_commands
     }
     fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
-        &mut self.render_commands
+        &mut self.scheduler.render_commands
     }
 }
 
@@ -197,7 +213,7 @@ impl ObjectApi for SceneContext<'_> {
 
 impl RenderCommandApi for SceneContext<'_> {
     fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
-        &mut self.render_commands
+        &mut self.scheduler.render_commands
     }
 }
 
@@ -261,7 +277,6 @@ mod tests {
         let input = Input::default();
         let time = Time::default();
         let mut resources = Resources::default();
-        let mut render_commands = RenderCommandQueue::default();
         let mut scheduler = Scheduler::default();
 
         let mut scene = MockScene {
@@ -275,7 +290,6 @@ mod tests {
                 input: &input,
                 time: &time,
                 resources: &mut resources,
-                render_commands: &mut render_commands,
                 scheduler: &mut scheduler,
             };
 

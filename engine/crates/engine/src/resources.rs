@@ -48,12 +48,22 @@ impl Resources {
         auto_release: bool,
     ) -> MeshAssetId {
         let id = self.insert_mesh_asset(handle, auto_release);
+
         self.models.insert(name.into(), id);
         id
     }
 
     pub fn register_texture(&mut self, name: &str, handle: TextureHandle) -> TextureHandle {
         self.textures.insert(name.to_string(), handle);
+        handle
+    }
+
+    pub fn register_skybox_texture(
+        &mut self,
+        name: &str,
+        handle: SkyboxTextureHandle,
+    ) -> SkyboxTextureHandle {
+        self.skybox_textures.insert(name.to_string(), handle);
         handle
     }
 

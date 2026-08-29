@@ -1,4 +1,4 @@
-use renderer_vulkan::MeshHandle;
+use renderer_vulkan::{MeshHandle, SkyboxTextureHandle};
 
 use crate::{EntityId, MeshAssetId, PrimitiveShape};
 
@@ -13,6 +13,10 @@ pub enum RenderCommand {
     },
     CreatePrimitiveMesh {
         entity: EntityId,
+    },
+    SetSkybox {
+        mesh: MeshHandle,
+        texture: SkyboxTextureHandle,
     },
 }
 
@@ -34,6 +38,11 @@ impl RenderCommandQueue {
     pub fn create_primitive_mesh(&mut self, entity: EntityId) {
         self.command
             .push(RenderCommand::CreatePrimitiveMesh { entity });
+    }
+
+    pub fn set_skybox(&mut self, mesh: MeshHandle, texture: SkyboxTextureHandle) {
+        self.command
+            .push(RenderCommand::SetSkybox { mesh, texture });
     }
 
     pub fn drain(&mut self) -> impl Iterator<Item = RenderCommand> + '_ {

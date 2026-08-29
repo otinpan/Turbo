@@ -12,6 +12,7 @@ mod ecs;
 mod input;
 mod primitive;
 mod resources;
+mod runner;
 mod scene;
 mod scene_manager;
 mod system;
@@ -28,6 +29,7 @@ pub use input::Input;
 pub use primitive::{PrimitiveMesh, PrimitiveShape, PrimitiveType};
 pub use renderer_vulkan::PipelineKey;
 pub use resources::{MeshAsset, MeshAssetId, Resources};
+pub use runner::{EngineConfig, run};
 pub use scene::{Scene, SceneContext};
 pub use scene_manager::SceneManager;
 pub use system::{

@@ -1,5 +1,5 @@
 use crate::app::{DEFAULT_SKYBOX_TEXTURE, DEFAULT_TEXTURE};
-use crate::{MeshAsset, MeshAssetId, PrimitiveType, Resources};
+use crate::{MeshAsset, MeshAssetId, PrimitiveType, RenderCommandApi, Resources};
 use anyhow::{Result, anyhow};
 use renderer_vulkan::{SkyboxTextureHandle, TextureHandle, VertexLayout};
 
@@ -30,6 +30,25 @@ pub trait AssetApi {
         self.resources()
             .get_texture_handle(texture_name)
             .ok_or_else(|| anyhow!("texture not found: {texture_name}"))
+    }
+
+    fn set_skybox(&mut self, texture_name: &str) -> Result<()>
+    where
+        Self: RenderCommandApi,
+    {
+        let mesh = self
+            .resources()
+            .skybox_mesh()
+            .ok_or_else(|| anyhow!("skybox mesh is not registered"))?;
+
+        let texture = self
+            .resources()
+            .skybox_texture(texture_name)
+            .ok_or_else(|| anyhow!("skybox texture not found: {texture_name}"))?;
+
+        self.render_commands_mut().set_skybox(mesh, texture);
+
+        Ok(())
     }
 
     fn default_texture(&self) -> TextureHandle {
