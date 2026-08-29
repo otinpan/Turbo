@@ -13,6 +13,7 @@ mod input;
 mod primitive;
 mod resources;
 mod scene;
+mod scene_manager;
 mod system;
 mod time;
 mod world;
@@ -28,6 +29,7 @@ pub use primitive::{PrimitiveMesh, PrimitiveShape, PrimitiveType};
 pub use renderer_vulkan::PipelineKey;
 pub use resources::{MeshAsset, MeshAssetId, Resources};
 pub use scene::{Scene, SceneContext};
+pub use scene_manager::SceneManager;
 pub use system::{
     AssetApi, CameraSystem, Command, CommandContext, CommandQueue, CommandRef, CommandSystem,
     CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, EntityApi, InputApi, InputSystem,

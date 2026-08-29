@@ -18,7 +18,7 @@ use turbo_math::Transform;
 type Vec3 = Vector3<f32>;
 
 pub trait Scene {
-    fn id(&self) -> String;
+    fn name(&self) -> String;
     fn on_enter(&mut self, context: &mut SceneContext<'_>) -> Result<()>;
 
     fn update(&mut self, context: &mut UpdateContext<'_>) -> Result<()>;
@@ -210,7 +210,7 @@ mod tests {
     }
 
     impl Scene for MockScene {
-        fn id(&self) -> String {
+        fn name(&self) -> String {
             "MockScene".to_string()
         }
 

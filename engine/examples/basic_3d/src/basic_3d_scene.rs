@@ -19,7 +19,7 @@ type Vec2 = Vector2<f32>;
 pub struct Basic3dScene {}
 
 impl Scene for Basic3dScene {
-    fn id(&self) -> String {
+    fn name(&self) -> String {
         "Basic3dScene".to_string()
     }
 
