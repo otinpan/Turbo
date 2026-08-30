@@ -77,7 +77,7 @@ impl Command for SpawnVikingRoomCommand {
                     use_texture: true,
                     texture: viking_texture,
                     pipeline_key: variant.1,
-                },
+                }
             )?;
             context.add_component(
                 entity,

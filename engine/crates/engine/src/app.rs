@@ -43,7 +43,6 @@ impl App {
 
         let primitive_meshes = create_primitive_meshes(&mut renderer, &mut resources)?;
         resources.set_primitive_meshes(primitive_meshes);
-        resources.set_skybox_mesh(create_skybox_mesh(&mut renderer, 20.0)?);
 
         let mut input = Input::default();
         let window_size = window.inner_size();
@@ -191,6 +190,17 @@ impl App {
         let handle = self.renderer.load_texture(path)?;
 
         Ok(self.resources.register_texture(name, handle))
+    }
+
+    pub fn create_skybox(
+        &mut self,
+        half_size: f32,
+    ) -> Result<()>{
+        unsafe{
+            let mesh=create_skybox_mesh(&mut self.renderer, half_size)?;
+            self.resources.set_skybox_mesh(mesh);
+        }
+        Ok(())
     }
 
     pub unsafe fn load_skybox_texture(

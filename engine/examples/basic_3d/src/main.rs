@@ -7,7 +7,6 @@
 )]
 
 mod basic_3d_scene;
-
 use anyhow::Result;
 use basic_3d_scene::Basic3dScene;
 use turbo_engine::prelude::*;
@@ -23,6 +22,7 @@ fn main() -> Result<()> {
             height: 768,
         },
         |app| {
+            app.create_skybox(10.0)?;
             load_assets(app)?;
             app.add_scene(Basic3dScene::default())?;
             app.set_current_scene("Basic3dScene")?;
