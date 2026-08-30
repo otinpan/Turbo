@@ -50,6 +50,7 @@ pub mod prelude {
         Scene, SceneContext,
         Command, CommandContext,
         UpdateContext, UpdateSystem,
+        CameraSystem,
         AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi, TimeApi,
         InputTrigger,
         Component, EntityId,

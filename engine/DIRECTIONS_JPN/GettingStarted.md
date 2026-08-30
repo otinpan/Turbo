@@ -252,8 +252,39 @@ let viking_texture=context
     .unwrap_or(context.default_texture());
 ```
 画像がまだ登録されていなかったら、真っ白な画像が適用されます。  
-次は背景を作ってみましょう
+次は背景を作ってみましょう。背景を作る前に、背景を張る箱庭を作る必要があります。  
+`main.rs`
+```rust
+|app|{
+    app.create_skybox(20.0)?;
+```
+次にskyboxに張る画像をロードします。skyboxに張る画像は縦横同じサイズの正方形の画像である必要があります。
+```rust
+// load skybox texture.
+// need to select 6 textures
+app.load_skybox_texture(
+    "ghost_skybox",
+    [
+        "assets/textures/ghost.png",
+        "assets/textures/ghost.png",
+        "assets/textures/ghost.png",
+        "assets/textures/ghost.png",
+        "assets/textures/ghost.png",
+        "assets/textures/ghost.png",
+    ],
+)?;
+```
 
-次にComponentとSystem
+そして、Sceneで、ロードしたskybox_textureをskyboxに貼り付けます。
+```rust
+fn on_enter(&mut self, context: &mut SceneContext<'_>) -> Result<()> {
+    context.set_skybox("ghost_skybox")?;
+```
+すると背景に`ghost.pnt`が張られます。
+![](../../assets/tutorial_skybox.png)
+
+次にカメラを動かしてみましょう。カメラは`Camera`と`Transform`コンポーネントを持っています。本来ならこれらに対してSystemを作る必要がありますが、Turboはデフォルトでカメラのシステムを用意しています。
+```rust
+
 
 
