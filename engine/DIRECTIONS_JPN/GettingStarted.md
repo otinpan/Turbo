@@ -482,6 +482,7 @@ fn on_exit(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
 ```
 
 ## コード
+/* わざわざファイルに分ける必要はないです */  
 `main.rs`
 ```rust
 use anyhow::{Result};
