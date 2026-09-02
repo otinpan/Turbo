@@ -33,6 +33,7 @@ impl DebugMonitor {
     }
 
     fn monitor_mesh_assets(&self, context: &mut CommandContext<'_>) -> Result<()> {
+        let s=context.mesh_assets();
         for (asset_id, mesh) in context.mesh_assets() {
             log::debug!("Mesh {asset_id:?}: {mesh:?}");
         }
