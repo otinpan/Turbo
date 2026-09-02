@@ -100,38 +100,17 @@
 	- RenderCommand	 update_primitive
 	- TimeApi        delta_seconds
 
-* シーン管理
-  - Scene trait
-  - SceneManager
-  - current_scene
-  - change_scene
-  - sceneごとの初期化/update
+* ~~シーン管理~~
+  - ~~Scene trait~~
+  - ~~SceneManager~~
+  - ~~current_scene~~
+  - ~~change_scene~~
+  - ~~sceneごとの初期化/update~~
 
 * ドキュメント
-DIRECTIONS/
-  AboutThisEngine.md
-  GettingStarted.md
-  Structs.md
-
-  Scene.md
-  Context.md
-
-  API/
-    App.md
-    Entity.md
-    Object.md
-    Asset.md
-    Input.md
-    RenderCommand.md
-    Time.md
-
-  Examples/
-    BasicScene.md
-    Command.md
-    UpdateSystem.md
-
 * セーブ機能
 
+* ストップ機能
 * 当たり判定
   - BoxCollider
   - SphereCollider
