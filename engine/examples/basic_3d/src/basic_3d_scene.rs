@@ -5,6 +5,7 @@ use turbo_engine::prelude::*;
 use turbo_engine::{
     CameraSystem, CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, RotatorSystem,
     SpawnPrimitiveCommand, SpawnVikingRoomCommand, UpdatePrimitiveMeshesCommand,
+    SceneId, SceneOwned,
 };
 use winit::keyboard::KeyCode;
 
@@ -494,6 +495,7 @@ impl Basic3dScene {
                 alpha: 1.0,
                 texture: Some("face"),
                 pipeline_key: PipelineKey::Lit3D,
+                scene_id: context.scene_id(),
             },
         );
         context.bind_input_command(
@@ -531,6 +533,7 @@ struct CreateTriangleCommand {
     alpha: f32,
     texture: Option<&'static str>,
     pipeline_key: PipelineKey,
+    scene_id: SceneId,
 }
 
 impl Command for CreateTriangleCommand {
@@ -538,7 +541,7 @@ impl Command for CreateTriangleCommand {
         format!("create_triangle")
     }
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        context.spawn_triangle_3d(
+        let triangle=context.spawn_triangle_3d(
             self.p0,
             self.p1,
             self.p2,
@@ -547,6 +550,12 @@ impl Command for CreateTriangleCommand {
             self.texture,
             self.pipeline_key,
         )?;
+        context.add_component(
+            triangle,
+        SceneOwned{
+                scene_id: self.scene_id,
+            }
+        );
         Ok(())
     }
 }

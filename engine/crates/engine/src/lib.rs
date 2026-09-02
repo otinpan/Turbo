@@ -47,7 +47,7 @@ pub use world::World;
 pub mod prelude {
     pub use crate::{
         App, EngineConfig, run,
-        Scene, SceneContext,
+        Scene, SceneContext, SceneId, SceneOwned,
         Command, CommandContext,
         UpdateContext, UpdateSystem,
         CameraSystem, RotatorSystem,

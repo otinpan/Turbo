@@ -70,6 +70,10 @@ impl<'a> SceneContext<'a> {
             .count()
     }
 
+    pub fn scene_id(&self) -> SceneId {
+        self.scene_id
+    }
+
     // delete_scene_owned let entity be global entity.
     // not released when scene is released
     fn delete_scene_owned(&mut self, entity: EntityId) {
