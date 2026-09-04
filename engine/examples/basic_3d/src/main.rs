@@ -9,8 +9,8 @@
 mod basic_3d_scene;
 use anyhow::Result;
 use basic_3d_scene::Basic3dScene;
-use turbo_engine::prelude::*;
-use turbo_engine::{App, EngineConfig, run};
+use kani_volcano_engine::prelude::*;
+use kani_volcano_engine::{App, EngineConfig, run};
 
 fn main() -> Result<()> {
     pretty_env_logger::init();

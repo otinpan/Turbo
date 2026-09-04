@@ -1,5 +1,5 @@
 [package]
-name = "turbo_engine"
+name = "kani-volcano-engine"
 version.workspace = true
 edition.workspace = true
 
@@ -7,6 +7,6 @@ edition.workspace = true
 anyhow.workspace = true
 cgmath.workspace = true
 log.workspace = true
-turbo_math = { path = "../turbo_math" }
+kani_volcano_math = { package = "kani-volcano-math", path = "../kani_volcano_math" }
 renderer_vulkan = { path = "../renderer_vulkan" }
 winit.workspace = true

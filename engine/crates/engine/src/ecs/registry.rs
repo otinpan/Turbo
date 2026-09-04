@@ -272,7 +272,7 @@ mod tests {
     use crate::{Material, MeshRenderer, Rotator, Visibility};
     use cgmath::vec3;
     use renderer_vulkan::{MeshHandle, VertexLayout};
-    use turbo_math::Transform;
+    use kani_volcano_math::Transform;
 
     fn mesh_handle(index: usize) -> MeshHandle {
         MeshHandle::new(index, VertexLayout::Mesh3D)

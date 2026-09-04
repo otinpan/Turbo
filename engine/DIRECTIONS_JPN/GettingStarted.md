@@ -1,5 +1,5 @@
 # チュートリアル
-まずTurboEngineを使えるようにしましょう。`Cargo.toml`に以下を加えてください。
+まずKaniVolcanoEngineを使えるようにしましょう。`Cargo.toml`に以下を加えてください。
 ```
 [dependencies]
 anyhow = "1"
@@ -292,7 +292,7 @@ fn on_enter(&mut self, context: &mut SceneContext<'_>) -> Result<()> {
 
 
 ### カメラの操作
-次にカメラを動かしてみましょう。カメラは`Camera`と`Transform`コンポーネントを持っています。本来ならこれらに対してSystemを作る必要がありますが、Turboはデフォルトでカメラのシステムを用意しています。
+次にカメラを動かしてみましょう。カメラは`Camera`と`Transform`コンポーネントを持っています。本来ならこれらに対してSystemを作る必要がありますが、KaniVolcanoはデフォルトでカメラのシステムを用意しています。
 ```rust
 fn on_enter(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
     ...

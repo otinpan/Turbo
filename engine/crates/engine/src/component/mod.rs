@@ -25,7 +25,7 @@ pub use pending_primitive_mesh::PendingPrimitiveMesh;
 pub use rotator::Rotator;
 pub use scene_owned::{SceneId, SceneOwned};
 pub use tags::Tags;
-use turbo_math::Transform;
+use kani_volcano_math::Transform;
 pub use visibility::Visibility;
 
 // Component does not have short reference like &'a str, &String

@@ -1,12 +1,12 @@
-# Turbo Engine
+# KaniVolcano Engine
 
 ![](../../assets/engine_screenshot.png)
 
-**Turbo Engine** is an open-source game engine that uses Vulkan as its graphics API and ECS as its core design pattern.
+**KaniVolcano Engine** is an open-source game engine that uses Vulkan as its graphics API and ECS as its core design pattern.
 
-The goal of Turbo is to hide much of Vulkan's low-level complexity while still giving users the flexibility of an ECS-based engine. Users can create entities, attach components, register systems, load assets, and draw interactive 2D/3D scenes without directly managing Vulkan objects.
+The goal of KaniVolcano is to hide much of Vulkan's low-level complexity while still giving users the flexibility of an ECS-based engine. Users can create entities, attach components, register systems, load assets, and draw interactive 2D/3D scenes without directly managing Vulkan objects.
 
-At the current stage, Turbo provides:
+At the current stage, KaniVolcano provides:
 
 - Simple primitive rendering
 - Model loading and rendering
@@ -262,7 +262,7 @@ However, Vulkan also requires the developer to manage many details directly:
 - Command buffer recording
 - Synchronization
 
-Turbo wraps these low-level operations behind engine APIs so users can focus on building scenes, entities, components, systems, and shaders.
+KaniVolcano wraps these low-level operations behind engine APIs so users can focus on building scenes, entities, components, systems, and shaders.
 
 For example, instead of manually creating Vulkan buffers and command buffers, a user can write:
 

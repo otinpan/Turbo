@@ -124,10 +124,10 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "cgmath",
+ "kani-volcano-engine",
+ "kani-volcano-math",
  "log",
  "pretty_env_logger",
- "turbo_engine",
- "turbo_math",
  "winit",
 ]
 
@@ -659,6 +659,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "kani-volcano-engine"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "cgmath",
+ "kani-volcano-math",
+ "log",
+ "renderer_vulkan",
+ "winit",
+]
+
+[[package]]
+name = "kani-volcano-math"
+version = "0.1.0"
+dependencies = [
+ "cgmath",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.186"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1038,11 +1057,11 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "cgmath",
+ "kani-volcano-math",
  "log",
  "png",
  "thiserror",
  "tobj",
- "turbo_math",
  "vulkanalia",
  "winit",
 ]
@@ -1310,25 +1329,6 @@ name = "ttf-parser"
 version = "0.25.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
-
-[[package]]
-name = "turbo_engine"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "cgmath",
- "log",
- "renderer_vulkan",
- "turbo_math",
- "winit",
-]
-
-[[package]]
-name = "turbo_math"
-version = "0.1.0"
-dependencies = [
- "cgmath",
-]
 
 [[package]]
 name = "unicode-ident"

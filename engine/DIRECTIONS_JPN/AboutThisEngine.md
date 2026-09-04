@@ -1,6 +1,6 @@
-# Turbo Engine
+# KaniVolcano Engine
 ![](../../assets/engine_screenshot.png)
-**Turbo Engine**はグラフィックスAPIとしてVulkanを使用し、デザインパターンとしてECSを採用した、オープンソースなゲームエンジンです。Vulkanの低レベルな重さを隠しつつ、ECS的な自由度を提供します。  
+**KaniVolcano Engine**はグラフィックスAPIとしてVulkanを使用し、デザインパターンとしてECSを採用した、オープンソースなゲームエンジンです。Vulkanの低レベルな重さを隠しつつ、ECS的な自由度を提供します。  
 現段階では
 * シンプルな図形の描画
 * モデルのロード・描画
@@ -246,7 +246,7 @@ Khronos Groupが策定した低レベル・クロスプラットフォーム対�
 * コマンド作成・送信
 * 同期処理
 
-を扱わなければなりません。開発者が毎度これらを明示するのは大変です。そこで、Turboはこれらの低レベルな命令の集合を抽象化しAPIとして提供します。
+を扱わなければなりません。開発者が毎度これらを明示するのは大変です。そこで、KaniVolcanoはこれらの低レベルな命令の集合を抽象化しAPIとして提供します。
 例えば、
 ```rust
 let polygon = context.spawn_polygon_3d(

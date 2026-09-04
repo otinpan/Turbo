@@ -1,16 +1,16 @@
 use anyhow::{Result, anyhow};
 use cgmath::{Vector2, Vector3, vec2, vec3};
-use turbo_engine::{AssetApi, ObjectApi};
-use turbo_engine::prelude::*;
-use turbo_engine::{
+use kani_volcano_engine::{AssetApi, ObjectApi};
+use kani_volcano_engine::prelude::*;
+use kani_volcano_engine::{
     CameraSystem, CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, RotatorSystem,
     SpawnPrimitiveCommand, SpawnVikingRoomCommand, UpdatePrimitiveMeshesCommand,
     SceneId, SceneOwned,
 };
 use winit::keyboard::KeyCode;
 
-type Material = turbo_engine::Material;
-type Transform = turbo_math::Transform;
+type Material = kani_volcano_engine::Material;
+type Transform = kani_volcano_math::Transform;
 type Vec3 = Vector3<f32>;
 type Vec2 = Vector2<f32>;
 

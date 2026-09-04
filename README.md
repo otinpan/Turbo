@@ -1,6 +1,6 @@
-# Turbo
+# KaniVolcano
 
-Turbo is a small Rust game engine built on Vulkan.
+KaniVolcano is a small Rust game engine built on Vulkan.
 
 It is designed around ECS, scenes, and context-based APIs so users can create entities, attach components, register systems, load assets, and draw 2D/3D objects without directly managing Vulkan resources.
 
@@ -29,7 +29,7 @@ See the documentation in:
 anyhow = "1"
 cgmath = "0.18"
 pretty_env_logger = "0.5"
-turbo_engine = { git = "https://github.com/otinpan/turbo" }
+kani_volocano_engine = { git = "https://github.com/otinpan/turbo" }
 turbo_math = { git = "https://github.com/otinpan/turbo" }
 winit = "0.29"
 ```

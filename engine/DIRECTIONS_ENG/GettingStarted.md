@@ -1,18 +1,18 @@
 # Getting Started
 
-This guide walks through the first steps for using Turbo Engine from another Rust project.
+This guide walks through the first steps for using KaniVolcano Engine from another Rust project.
 
 ## Add Dependencies
 
-Add Turbo Engine and the required support crates to your `Cargo.toml`.
+Add KaniVolcano Engine and the required support crates to your `Cargo.toml`.
 
 ```toml
 [dependencies]
 anyhow = "1"
 cgmath = "0.18"
 pretty_env_logger = "0.5"
-turbo_engine = { git = "https://github.com/otinpan/turbo" }
-turbo_math = { git = "https://github.com/otinpan/turbo" }
+kani_volcano_engine = { git = "https://github.com/otinpan/KaniVolcano" }
+kani_volcano_math = { git = "https://github.com/otinpan/KaniVolcano" }
 winit = "0.29"
 ```
 
@@ -22,14 +22,14 @@ Edit `main.rs`.
 
 ```rust
 use anyhow::Result;
-use turbo_engine::prelude::*;
+use kani_volcano::prelude::*;
 
 fn main() -> Result<()> {
     pretty_env_logger::init();
 
     run(
         EngineConfig {
-            title: "Vulkan Tutorial".to_string(),
+            title: "KaniVolcano Tutorial".to_string(),
             width: 1024,
             height: 768,
         },
@@ -65,8 +65,8 @@ A scene represents one screen or stage of your game. Create `tutorial_scene.rs`.
 ```rust
 use anyhow::Result;
 use cgmath::vec3;
-use turbo_engine::prelude::*;
-use turbo_math::Transform;
+use kani_volcano_engine::prelude::*;
+use kani_volcano_math::Transform;
 
 pub struct TutorialScene {}
 
@@ -296,7 +296,7 @@ fn on_enter(&mut self, context: &mut SceneContext<'_>) -> Result<()> {
 
 ## Move the Camera
 
-Turbo includes a default camera system. Add it from the scene.
+KaniVolcano includes a default camera system. Add it from the scene.
 
 ```rust
 fn on_enter(&mut self, context: &mut SceneContext<'_>) -> Result<()> {
@@ -316,7 +316,7 @@ The camera system allows camera movement with keyboard and mouse input.
 Create a custom component.
 
 ```rust
-use turbo_engine::prelude::*;
+use kani_volcano::prelude::*;
 
 pub struct MoveComponent {
     pub velocity: cgmath::Vector3<f32>,
@@ -329,7 +329,7 @@ Create a system that moves every entity with both `Transform` and `MoveComponent
 
 ```rust
 use anyhow::Result;
-use turbo_engine::prelude::*;
+use kani_volcano::prelude::*;
 use turbo_math::Transform;
 
 use crate::MoveComponent;
@@ -515,8 +515,8 @@ You can keep all code in one file while learning, but splitting it into separate
 
 ```rust
 use anyhow::Result;
-use turbo_engine::prelude::*;
-use turbo_tutorial::TutorialScene;
+use kani_volcano::prelude::*;
+use kani_volcano_tutorial::TutorialScene;
 
 fn main() -> Result<()> {
     pretty_env_logger::init();
@@ -578,8 +578,8 @@ fn load_assets(app: &mut App) -> Result<()> {
 ```rust
 use anyhow::Result;
 use cgmath::{vec2, vec3};
-use turbo_engine::prelude::*;
-use turbo_math::Transform;
+use kani_volcano_engine::prelude::*;
+use kani_volcano_math::Transform;
 use winit::keyboard::KeyCode;
 
 use crate::{MoveComponent, MoveSystem};
@@ -779,7 +779,7 @@ fn mouse_position_on_spawn_plane(context: &CommandContext<'_>) -> Vec3 {
 `move_component.rs`
 
 ```rust
-use turbo_engine::prelude::*;
+use kani_volcano_engine::prelude::*;
 
 pub struct MoveComponent {
     pub velocity: cgmath::Vector3<f32>,
@@ -792,8 +792,8 @@ impl Component for MoveComponent {}
 
 ```rust
 use anyhow::Result;
-use turbo_engine::prelude::*;
-use turbo_math::Transform;
+use kani_volcano_engine::prelude::*;
+use kani_volcano_math::Transform;
 
 use crate::MoveComponent;
 

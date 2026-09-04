@@ -10,6 +10,6 @@ log.workspace = true
 png.workspace = true
 thiserror.workspace = true
 tobj.workspace = true
-turbo_math = { path = "../turbo_math" }
+kani_volcano_math = { package = "kani-volcano-math", path = "../kani_volcano_math" }
 vulkanalia.workspace = true
 winit.workspace = true

@@ -13,9 +13,10 @@ use cgmath::Vector3;
 use renderer_vulkan::PipelineKey;
 
 use anyhow::Result;
-use turbo_math::Transform;
+use kani_volcano_math::Transform;
 
 type Vec3 = Vector3<f32>;
+
 
 pub trait Scene {
     fn name(&self) -> String;
@@ -45,8 +46,8 @@ impl<'a> SceneContext<'a> {
         time: &'a Time,
         resources: &'a mut Resources,
         scheduler: &'a mut Scheduler,
-    ) -> Self {
-        Self {
+    ) -> Self{
+        Self{
             scene_id,
             world,
             input,
@@ -55,6 +56,11 @@ impl<'a> SceneContext<'a> {
             scheduler,
         }
     }
+
+    pub fn scene_id(&self) -> SceneId{
+        self.scene_id
+    }
+
     pub fn despawn_scene_owned_entities(&mut self) -> usize {
         let scene_id = self.scene_id;
         let entities = self
@@ -68,10 +74,6 @@ impl<'a> SceneContext<'a> {
             .into_iter()
             .filter(|entity| self.despawn(*entity))
             .count()
-    }
-
-    pub fn scene_id(&self) -> SceneId {
-        self.scene_id
     }
 
     // delete_scene_owned let entity be global entity.
