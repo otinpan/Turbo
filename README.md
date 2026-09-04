@@ -29,14 +29,14 @@ See the documentation in:
 anyhow = "1"
 cgmath = "0.18"
 pretty_env_logger = "0.5"
-kani_volocano_engine = { git = "https://github.com/otinpan/turbo" }
-turbo_math = { git = "https://github.com/otinpan/turbo" }
+kani-volcano-engine = { git = "https://github.com/otinpan/KaniVolcano.git" }
+kani-volcano-math = { git = "https://github.com/otinpan/KaniVolcano.git" }
 winit = "0.29"
 ```
 
 ```rust
 use anyhow::Result;
-use turbo_engine::prelude::*;
+use kani_volcano::prelude::*;
 
 fn main() -> Result<()> {
     pretty_env_logger::init();

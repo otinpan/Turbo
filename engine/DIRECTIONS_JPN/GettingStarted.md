@@ -5,15 +5,15 @@
 anyhow = "1"
 cgmath = "0.18"
 pretty_env_logger = "0.5"
-turbo_engine = { git = "https://github.com/otinpan/turbo" }
-turbo_math = { git = "https://github.com/otinpan/turbo" }
+kani-volcano-engine = { git = "https://github.com/otinpan/KaniVolcano.git" }
+kani-volcano-math = { git = "https://github.com/otinpan/KaniVolcano.git" }
 winit = "0.29"
 ```
 
 `main.rs`を編集して、ビルドしてみましょう
 ```rust
 use anyhow::{Result};
-use turbo_engine::prelude::*;
+use kani_volcano_engine::prelude::*;
 fn main()  -> Result<()>{
     pretty_env_logger::init();
     run(
@@ -30,14 +30,14 @@ fn main()  -> Result<()>{
 ```
 `run`関数を呼び出します。1つ目の引数では`EngineConfig`でwindowのタイトル、幅、高さを設定します。第2引数ではクロージャを呼び出します。今後はここでモデルや画像のロード、シーンの登録などを記述していきます。この段階でビルドしてみましょう。おそらく１分くらいかかりますが成功するはずです。
 ```
-PS D:\MyGame\turbo_tutorial> cargo build
-   Compiling turbo_tutorial v0.1.0 (D:\MyGame\turbo_tutorial)
+PS D:\MyGame\kani_volcano_tutorial> cargo build
+   Compiling kani_volcano_tutorial v0.1.0 (D:\MyGame\kani_volcano_tutorial)
 ```
 では`cargo run`で実行してみましょう。
 ```
 The vertical field of view cannot be below zero, found: 0.0 rad
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-error: process didn't exit successfully: `target\debug\turbo_tutorial.exe` (exit code: 101)The vertical field of view cannot be below zero, found: 0.0 rad
+error: process didn't exit successfully: `target\debug\kani_volcano_tutorial.exe` (exit code: 101)The vertical field of view cannot be below zero, found: 0.0 rad
 ```
 panicしてしまいました。この原因は、Sceneとカメラをまだ作っていないからです。ではSceneを作成し、その中でカメラを作りましょう。Sceneとはゲーム内の1つの画面や場面をまとめて管理する単位です。`tutorial_scene.rs`に`TutorialScene`として作りましょう。
 ```rust
@@ -486,8 +486,8 @@ fn on_exit(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
 `main.rs`
 ```rust
 use anyhow::{Result};
-use turbo_engine::prelude::*;
-use turbo_tutorial::TutorialScene;
+use kani_volcano_engine::prelude::*;
+use kani_volcano_tutorial::TutorialScene;
 fn main()  -> Result<()>{
     pretty_env_logger::init();
     run(
@@ -550,8 +550,8 @@ fn load_assets(app: &mut App) -> Result<()>{
 ```rust
 use cgmath::{vec3,vec2};
 use anyhow::{Result};
-use turbo_engine::prelude::*;
-use turbo_math::Transform;
+use kani_volcano_engine::prelude::*;
+use kani_volcanomath::Transform;
 use winit::keyboard::KeyCode;
 use crate::{MoveComponent, MoveSystem};
 
@@ -783,7 +783,7 @@ fn mouse_position_on_spawn_plane(context: &CommandContext<'_>) ->Vec3{
 
 `move_component.rs`
 ```rust
-use turbo_engine::*;
+use kani_volcano_engine::*;
 pub struct MoveComponent{
     pub velocity: cgmath::Vector3<f32>,
 }
@@ -795,8 +795,8 @@ impl Component for MoveComponent{
 
 `move_system.rs`
 ```rust
-use turbo_engine::*;
-use turbo_math::Transform;
+use kani_volcano_engine::*;
+use kani_volcano_math::Transform;
 use anyhow::{Result};
 use crate::{MoveComponent};
 

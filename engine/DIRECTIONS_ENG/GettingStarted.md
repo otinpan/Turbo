@@ -11,8 +11,8 @@ Add KaniVolcano Engine and the required support crates to your `Cargo.toml`.
 anyhow = "1"
 cgmath = "0.18"
 pretty_env_logger = "0.5"
-kani_volcano_engine = { git = "https://github.com/otinpan/KaniVolcano" }
-kani_volcano_math = { git = "https://github.com/otinpan/KaniVolcano" }
+kani-volcano-engine = { git = "https://github.com/otinpan/KaniVolcano.git" }
+kani-volcano-math = { git = "https://github.com/otinpan/KaniVolcano.git" }
 winit = "0.29"
 ```
 
@@ -329,8 +329,8 @@ Create a system that moves every entity with both `Transform` and `MoveComponent
 
 ```rust
 use anyhow::Result;
-use kani_volcano::prelude::*;
-use turbo_math::Transform;
+use kani_volcano_engine::prelude::*;
+use kani_volcano_math::Transform;
 
 use crate::MoveComponent;
 

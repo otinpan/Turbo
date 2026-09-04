@@ -5,7 +5,7 @@ Entity APIは、ECS上のEntityを作成・削除し、Component、Name、Tagを
 
 ```rust
 use engine::{EntityApi, Rotator};
-use turbo_math::Transform;
+use kani_volcano_engine::Transform;
 
 let entity = context.spawn();
 
