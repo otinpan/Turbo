@@ -85,7 +85,7 @@ impl SceneManager {
             .get_mut(&name)
             .ok_or_else(|| anyhow!("scene not registered: {name}"))?;
 
-        registered.scene.on_enter(context)
+        registered.scene.on_enter_scene(context)
     }
 
     pub fn update_current_scene(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
@@ -112,7 +112,7 @@ impl SceneManager {
             .get_mut(&name)
             .ok_or_else(|| anyhow!("scene not registered: {name}"))?;
 
-        registered.scene.on_exit(context)
+        registered.scene.on_exit_scene(context)
     }
 
     pub fn current_scene_name(&self) -> Option<&str> {

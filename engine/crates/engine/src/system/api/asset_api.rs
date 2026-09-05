@@ -44,7 +44,7 @@ pub trait AssetApi {
         let texture = self
             .resources()
             .skybox_texture(texture_name)
-            .ok_or_else(|| anyhow!("skybox texture not found: {texture_name}"))?;
+            .unwrap_or(self.default_skybox_texture());
 
         self.render_commands_mut().set_skybox(mesh, texture);
 

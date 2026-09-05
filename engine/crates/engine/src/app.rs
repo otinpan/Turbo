@@ -14,7 +14,10 @@ use crate::primitive::{
     create_primitive_lit3d, create_primitive_mesh3d, create_primitive_ui2d,
 };
 
-use crate::{MeshAssetId, PipelineKey, Scene, SceneContext, SceneId, UpdateContext};
+use crate::{
+    MeshAssetId, PipelineKey, Scene, SceneCommand, SceneCommandQueue, SceneContext, SceneId,
+    UpdateContext,
+};
 
 use super::{Input, Resources, SceneManager, Scheduler, Time, World};
 
@@ -31,6 +34,7 @@ pub struct App {
     // system
     scheduler: Scheduler,
     scene_manager: SceneManager,
+    scene_commands: SceneCommandQueue,
 }
 
 impl App {
@@ -50,6 +54,7 @@ impl App {
 
         let scheduler = Scheduler::default();
         let scene_manager = SceneManager::default();
+        let scene_commands = SceneCommandQueue::default();
         let mut app = Self {
             renderer,
             world,
@@ -58,6 +63,7 @@ impl App {
             resources,
             scheduler,
             scene_manager,
+            scene_commands,
         };
 
         app.scheduler
@@ -85,6 +91,7 @@ impl App {
             &mut self.world,
             &self.input,
             &mut self.resources,
+            &mut self.scene_commands,
         )?;
 
         {
@@ -94,6 +101,7 @@ impl App {
                 &self.time,
                 &mut self.resources,
                 &mut self.scheduler.render_commands,
+                &mut self.scene_commands,
             );
             self.scene_manager.update_current_scene(&mut context)?;
         }
@@ -103,7 +111,10 @@ impl App {
             &self.input,
             &self.time,
             &mut self.resources,
+            &mut self.scene_commands,
         )?;
+
+        self.apply_scene_commands()?;
 
         self.scheduler.run_render_stage(
             &mut self.world,
@@ -145,6 +156,7 @@ impl App {
             );
 
             self.scene_manager.exit_current_scene(&mut context)?;
+            self.scheduler.reset_scene_runtime();
         }
 
         let scene_id = self.scene_manager.set_current_scene(name)?;
@@ -192,12 +204,9 @@ impl App {
         Ok(self.resources.register_texture(name, handle))
     }
 
-    pub fn create_skybox(
-        &mut self,
-        half_size: f32,
-    ) -> Result<()>{
-        unsafe{
-            let mesh=create_skybox_mesh(&mut self.renderer, half_size)?;
+    pub fn create_skybox(&mut self, half_size: f32) -> Result<()> {
+        unsafe {
+            let mesh = create_skybox_mesh(&mut self.renderer, half_size)?;
             self.resources.set_skybox_mesh(mesh);
         }
         Ok(())
@@ -210,6 +219,19 @@ impl App {
     ) -> Result<SkyboxTextureHandle> {
         let handle = self.renderer.load_skybox_texture(paths)?;
         Ok(self.resources.register_skybox_texture(name, handle))
+    }
+
+    fn apply_scene_commands(&mut self) -> Result<()> {
+        let commands = self.scene_commands.drain().collect::<Vec<_>>();
+
+        for command in commands {
+            match command {
+                SceneCommand::SetCurrentScene { scene_name } => {
+                    self.set_current_scene(&scene_name)?;
+                }
+            }
+        }
+        Ok(())
     }
 }
 

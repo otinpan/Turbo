@@ -12,16 +12,17 @@ mod camera_system;
 mod rotator_system;
 
 pub use super::render_command::RenderCommandQueue;
+pub use super::scene_command::SceneCommandQueue;
 use crate::app::DEFAULT_TEXTURE;
 use crate::component::{Material, Visibility};
 use crate::primitive::spawn_primitive_from_mesh;
 use crate::{
     EntityId, Input, MeshAssetId, PendingPrimitiveMesh, PrimitiveShape, Resources, Time, World,
 };
-use renderer_vulkan::PipelineKey;
 use kani_volcano_math::Transform;
+use renderer_vulkan::PipelineKey;
 
-use crate::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi, TimeApi};
+use crate::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi, SceneCommandApi, TimeApi};
 pub use camera_system::CameraSystem;
 pub use rotator_system::RotatorSystem;
 
@@ -34,6 +35,7 @@ pub struct UpdateContext<'a> {
     time: &'a Time,
     resources: &'a mut Resources,
     render_commands: &'a mut RenderCommandQueue,
+    scene_commands: &'a mut SceneCommandQueue,
 }
 
 impl<'a> UpdateContext<'a> {
@@ -43,6 +45,7 @@ impl<'a> UpdateContext<'a> {
         time: &'a Time,
         resources: &'a mut Resources,
         render_commands: &'a mut RenderCommandQueue,
+        scene_commands: &'a mut SceneCommandQueue,
     ) -> Self {
         Self {
             world,
@@ -50,6 +53,7 @@ impl<'a> UpdateContext<'a> {
             time,
             resources,
             render_commands,
+            scene_commands,
         }
     }
 
@@ -173,6 +177,12 @@ impl TimeApi for UpdateContext<'_> {
 impl RenderCommandApi for UpdateContext<'_> {
     fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
         &mut self.render_commands
+    }
+}
+
+impl SceneCommandApi for UpdateContext<'_> {
+    fn scene_commands_mut(&mut self) -> &mut SceneCommandQueue {
+        &mut self.scene_commands
     }
 }
 

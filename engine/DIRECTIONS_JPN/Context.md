@@ -154,6 +154,7 @@ EntityAPIを使うことが出来ます。ただ、EntityAPIで使える`spaw()`
 * InputAPI
 * TimeAPI
 * RenderCommandAPI
+* SceneCommandAPI
 
 を使用できます。
 
@@ -164,5 +165,6 @@ Commandトレイトの`execute()`は`CommandContext`を使うことが出来ま�
 * AssetAPI
 * InputAPI
 * RenderCommandAPI
+* SceneCommandAPI
 
 を使用できます。

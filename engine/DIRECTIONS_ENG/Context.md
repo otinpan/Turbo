@@ -63,7 +63,7 @@ It provides:
 - Asset API
 - Object API
 - RenderCommand API
-- Scene-specific helpers
+- Scene specific helpers
 
 ### `scene_id()`
 
@@ -115,6 +115,7 @@ It provides:
 - Input API
 - Time API
 - RenderCommand API
+- SceneCommand API
 
 Use it for per-frame logic such as movement, animation, input checks, and mesh updates.
 
@@ -129,6 +130,7 @@ It provides:
 - Asset API
 - Input API
 - RenderCommand API
+- SceneCommand API
 
 Use it for actions triggered by input, such as spawning or despawning objects.
 

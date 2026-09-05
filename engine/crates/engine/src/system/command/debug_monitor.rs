@@ -11,8 +11,9 @@ impl Command for DebugMonitor {
     }
 
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        //self.monitor_entities(context)
-        self.monitor_mesh_assets(context)
+        self.monitor_entities(context)?;
+        self.monitor_mesh_assets(context)?;
+        Ok(())
     }
 }
 
@@ -33,7 +34,7 @@ impl DebugMonitor {
     }
 
     fn monitor_mesh_assets(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        let s=context.mesh_assets();
+        let s = context.mesh_assets();
         for (asset_id, mesh) in context.mesh_assets() {
             log::debug!("Mesh {asset_id:?}: {mesh:?}");
         }

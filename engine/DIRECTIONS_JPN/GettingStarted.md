@@ -472,14 +472,6 @@ fn bind_input_commands(&mut self, context: &mut SceneContext<'_>){
 
 が描画されます。Systemと同じように、Commandでコンポーネントを指定し、そのコンポーネントを持つEntityに対して動作を定義することもできます。
 
-## `on_exit()`
-Scene内で作られたEntityには、このScene内で作られたというラベルが張られています。もし、このSceneで作られたEntityをScene切り替え時に解放したい場合は`on_exit()`で以下のようにしましょう。
-```rust
-fn on_exit(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
-    context.despawn_scene_owned_entities();
-    Ok(())
-}
-```
 
 ## コード
 /* わざわざファイルに分ける必要はないです */  
@@ -579,7 +571,6 @@ impl Scene for TutorialScene{
     }
 
     fn on_exit(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
-        context.despawn_scene_owned_entities();
         Ok(())
     }
 

@@ -7,8 +7,10 @@
 )]
 
 mod basic_3d_scene;
+mod basic_field_scene;
 use anyhow::Result;
 use basic_3d_scene::Basic3dScene;
+pub use basic_field_scene::{BasicFieldScene, ChangeSceneCommand};
 use kani_volcano_engine::prelude::*;
 use kani_volcano_engine::{App, EngineConfig, run};
 
@@ -25,6 +27,7 @@ fn main() -> Result<()> {
             app.create_skybox(10.0)?;
             load_assets(app)?;
             app.add_scene(Basic3dScene::default())?;
+            app.add_scene(BasicFieldScene::default())?;
             app.set_current_scene("Basic3dScene")?;
             Ok(())
         },

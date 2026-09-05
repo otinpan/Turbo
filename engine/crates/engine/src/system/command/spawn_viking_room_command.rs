@@ -1,7 +1,7 @@
 use anyhow::Result;
 use cgmath::vec3;
-use renderer_vulkan::PipelineKey;
 use kani_volcano_math::Transform;
+use renderer_vulkan::PipelineKey;
 
 use super::{Command, CommandContext};
 use crate::{Material, MeshRenderer, Rotator};
@@ -77,7 +77,7 @@ impl Command for SpawnVikingRoomCommand {
                     use_texture: true,
                     texture: viking_texture,
                     pipeline_key: variant.1,
-                }
+                },
             )?;
             context.add_component(
                 entity,

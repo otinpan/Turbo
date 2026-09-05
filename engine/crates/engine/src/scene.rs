@@ -17,14 +17,25 @@ use kani_volcano_math::Transform;
 
 type Vec3 = Vector3<f32>;
 
-
 pub trait Scene {
     fn name(&self) -> String;
+    fn on_enter_scene(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+        self.on_enter(context)?;
+        Ok(())
+    }
+
     fn on_enter(&mut self, context: &mut SceneContext<'_>) -> Result<()>;
 
     fn update(&mut self, context: &mut UpdateContext<'_>) -> Result<()>;
 
+    fn on_exit_scene(&mut self, context: &mut SceneContext<'_>) -> Result<()> {
+        context.despawn_scene_owned_entities();
+        self.on_exit(context)?;
+        Ok(())
+    }
+
     fn on_exit(&mut self, context: &mut SceneContext<'_>) -> Result<()>;
+
 }
 
 pub struct SceneContext<'a> {
@@ -46,8 +57,8 @@ impl<'a> SceneContext<'a> {
         time: &'a Time,
         resources: &'a mut Resources,
         scheduler: &'a mut Scheduler,
-    ) -> Self{
-        Self{
+    ) -> Self {
+        Self {
             scene_id,
             world,
             input,
@@ -57,7 +68,7 @@ impl<'a> SceneContext<'a> {
         }
     }
 
-    pub fn scene_id(&self) -> SceneId{
+    pub fn scene_id(&self) -> SceneId {
         self.scene_id
     }
 

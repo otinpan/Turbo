@@ -496,16 +496,6 @@ After registration:
 - `Digit3` spawns a textured rectangle
 - `Digit4` spawns a blue debug-line rectangle
 
-## Clean Up Scene Entities
-
-Entities spawned through a scene can be marked as scene-owned. To despawn them when the scene exits, call:
-
-```rust
-fn on_exit(&mut self, context: &mut SceneContext<'_>) -> Result<()> {
-    context.despawn_scene_owned_entities();
-    Ok(())
-}
-```
 
 ## Complete Example
 
@@ -609,7 +599,6 @@ impl Scene for TutorialScene {
     }
 
     fn on_exit(&mut self, context: &mut SceneContext<'_>) -> Result<()> {
-        context.despawn_scene_owned_entities();
         Ok(())
     }
 }

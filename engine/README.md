@@ -107,15 +107,20 @@
   - ~~change_scene~~
   - ~~sceneごとの初期化/update~~
 
-* ドキュメント
-* セーブ機能
+* ~~ドキュメント~~
+* Scene更新API
+	- 今は、Scene更新するたびにAppで`set_current_scene()`
+	- Sceneからできるようにする
 
 * ストップ機能
+
 * 当たり判定
   - BoxCollider
   - SphereCollider
   - intersects
   - query_collisions
+
+* セーブ機能
 
 * 簡易物理
   - Velocity

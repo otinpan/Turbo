@@ -1,11 +1,11 @@
+use super::ChangeSceneCommand;
 use anyhow::{Result, anyhow};
 use cgmath::{Vector2, Vector3, vec2, vec3};
-use kani_volcano_engine::{AssetApi, ObjectApi};
 use kani_volcano_engine::prelude::*;
+use kani_volcano_engine::{AssetApi, ObjectApi};
 use kani_volcano_engine::{
-    CameraSystem, CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, RotatorSystem,
-    SpawnPrimitiveCommand, SpawnVikingRoomCommand, UpdatePrimitiveMeshesCommand,
-    SceneId, SceneOwned,
+    CameraSystem, CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, RotatorSystem, SceneId,
+    SceneOwned, SpawnPrimitiveCommand, SpawnVikingRoomCommand, UpdatePrimitiveMeshesCommand,
 };
 use winit::keyboard::KeyCode;
 
@@ -35,10 +35,10 @@ impl Scene for Basic3dScene {
         Ok(())
     }
 
-    fn on_exit(&mut self, context: &mut SceneContext<'_>) -> Result<()> {
-        let despawned = context.despawn_scene_owned_entities();
+    fn on_exit(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
         Ok(())
     }
+
 }
 impl Default for Basic3dScene {
     fn default() -> Self {
@@ -61,6 +61,7 @@ impl Basic3dScene {
                 pitch: 0.0,
             },
         );
+
         if !success {
             Err(anyhow!("failed to create Camera"))
         } else {
@@ -521,6 +522,13 @@ impl Basic3dScene {
                 auto_release: true,
             },
         );
+        context.bind_input_command(
+            KeyCode::Space,
+            InputTrigger::Pressed,
+            ChangeSceneCommand {
+                next_scene: "BasicFieldScene".to_string(),
+            },
+        );
         context.bind_input_command(KeyCode::Enter, InputTrigger::Pressed, DebugMonitor);
     }
 }
@@ -541,7 +549,7 @@ impl Command for CreateTriangleCommand {
         format!("create_triangle")
     }
     fn execute(&self, context: &mut CommandContext<'_>) -> Result<()> {
-        let triangle=context.spawn_triangle_3d(
+        let triangle = context.spawn_triangle_3d(
             self.p0,
             self.p1,
             self.p2,
@@ -552,9 +560,9 @@ impl Command for CreateTriangleCommand {
         )?;
         context.add_component(
             triangle,
-        SceneOwned{
+            SceneOwned {
                 scene_id: self.scene_id,
-            }
+            },
         );
         Ok(())
     }

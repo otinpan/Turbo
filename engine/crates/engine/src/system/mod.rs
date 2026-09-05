@@ -11,10 +11,13 @@ mod command;
 mod input_system;
 mod render_command;
 mod render_system;
+mod scene_command;
 mod scheduler;
 mod update;
 
-pub use api::{AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi, TimeApi};
+pub use api::{
+    AssetApi, EntityApi, InputApi, ObjectApi, RenderCommandApi, SceneCommandApi, TimeApi,
+};
 pub use command::{
     Command, CommandContext, CommandSystem, CreatePrimitiveCommand, DebugMonitor,
     DespawnLastCommand, SpawnPrimitiveCommand, SpawnVikingRoomCommand,
@@ -23,5 +26,6 @@ pub use command::{
 pub use input_system::{CommandQueue, CommandRef, InputSystem, InputTrigger, KeyBinding};
 pub use render_command::{RenderCommand, RenderCommandQueue};
 pub use render_system::{RenderContext, RenderSystem};
+pub use scene_command::{SceneCommand, SceneCommandQueue};
 pub use scheduler::Scheduler;
 pub use update::{CameraSystem, RotatorSystem, ScheduledUpdateSystem, UpdateContext, UpdateSystem};

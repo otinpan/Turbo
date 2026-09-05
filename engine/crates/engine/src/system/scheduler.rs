@@ -6,7 +6,7 @@ use super::{
     UpdateSystem,
 };
 
-use crate::{Input, Resources, Time, World};
+use crate::{Input, Resources, SceneCommandQueue, Time, World};
 use cgmath::Vector3;
 use renderer_vulkan::VulkanRenderer;
 
@@ -67,6 +67,11 @@ impl Scheduler {
         self.update_systems.len() != before_len
     }
 
+    pub fn reset_scene_runtime(&mut self) {
+        self.input_system.reset();
+        self.update_systems.clear();
+    }
+
     pub fn bind_key<C>(&mut self, key: winit::keyboard::KeyCode, trigger: InputTrigger, command: C)
     where
         C: Command + 'static,
@@ -84,9 +89,16 @@ impl Scheduler {
         world: &mut World,
         input: &Input,
         resources: &mut Resources,
+        scene_commands: &mut SceneCommandQueue,
     ) -> Result<()> {
-        let mut context =
-            CommandContext::new(commands, world, input, resources, &mut self.render_commands);
+        let mut context = CommandContext::new(
+            commands,
+            world,
+            input,
+            resources,
+            &mut self.render_commands,
+            scene_commands,
+        );
 
         self.command_system.update(&mut context)
     }
@@ -97,9 +109,16 @@ impl Scheduler {
         input: &Input,
         time: &Time,
         resources: &mut Resources,
+        scene_commands: &mut SceneCommandQueue,
     ) -> Result<()> {
-        let mut context =
-            UpdateContext::new(world, input, time, resources, &mut self.render_commands);
+        let mut context = UpdateContext::new(
+            world,
+            input,
+            time,
+            resources,
+            &mut self.render_commands,
+            scene_commands,
+        );
 
         for scheduled_system in &mut self.update_systems {
             if scheduled_system.enabled {
