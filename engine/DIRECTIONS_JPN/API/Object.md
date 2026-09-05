@@ -205,7 +205,7 @@ fn create_cubes(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
 
     for item in items{
         let cube=context.spawn_cube_3d(
-            item.0, // pos
+            item.0, // position
             1.0, // length
             vec3(0.0,0.0,0.0), // rotation
             item.1, // color
@@ -219,9 +219,188 @@ fn create_cubes(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
 ```
 
 ### Circle: 円の生成
+```rust
+fn create_circles(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+    let items=vec![
+        (vec3(-3.0,-1.0,1.0),vec3(1.0,0.0,0.0),1.0,PipelineKey::Lit3D),
+        (vec3(-3.0,1.0,1.0),vec3(0.0,1.0,0.0),1.0,PipelineKey::Mesh3D),
+        (vec3(-3.0,1.0,-1.0),vec3(1.0,1.0,1.0),1.0,PipelineKey::DebugLine3D),
+        (vec3(-3.0,-1.0,-1.0),vec3(0.0,0.0,1.0),0.5,PipelineKey::Transparent3D),
+    ];
+    
+    for item in items{
+        let circle=context.spawn_circle_3d(
+            item.0, // position
+            0.5, // radius
+            32, // segments
+            item.1, // color
+            item.2, // alpha
+            None, // texture
+            item.3 // PipelineKey
+        );
+    }
+
+    Ok(())
+} 
+```
+
+![](../../../assets/tutorial_circles.png)
 
 ### Polygon: 多角形の生成
+```rust
+fn create_polygons(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+    let items=vec![
+        (vec3(-3.0,-1.0,1.0),vec3(1.0,0.0,0.0),1.0,PipelineKey::Lit3D),
+        (vec3(-3.0,1.0,1.0),vec3(0.0,1.0,0.0),1.0,PipelineKey::Mesh3D),
+        (vec3(-3.0,1.0,-1.0),vec3(1.0,1.0,1.0),1.0,PipelineKey::DebugLine3D),
+        (vec3(-3.0,-1.0,-1.0),vec3(0.0,0.0,1.0),0.5,PipelineKey::Transparent3D),
+    ];
+
+    for item in items{
+        let polygon=context.spawn_polygon_3d(
+            vec![
+                item.0 + vec3(0.0, -0.2, -0.1),
+                item.0 + vec3(0.0, 0.2, -0.5),
+                item.0 + vec3(0.0, 0.5, 0.0),
+                item.0 + vec3(0.0, -0.2, 0.8),
+                item.0 + vec3(0.0, -0.4, 0.9),
+            ], // position counter clockwise
+            item.1, // color
+            item.2, // alpha
+            None, // texture
+            item.3 // PipelineKey
+        );
+    }
+    Ok(())
+}
+```
+
+![](../../../assets/tutorial_polygons.png)
 
 ### Sphere: 球の生成
+```rust
+fn create_spheres(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+    let items=vec![
+        (vec3(-3.0,-1.0,1.0),vec3(1.0,0.0,0.0),1.0,PipelineKey::Lit3D),
+        (vec3(-3.0,1.0,1.0),vec3(0.0,1.0,0.0),1.0,PipelineKey::Mesh3D),
+        (vec3(-3.0,1.0,-1.0),vec3(1.0,1.0,1.0),1.0,PipelineKey::DebugLine3D),
+        (vec3(-3.0,-1.0,-1.0),vec3(0.0,0.0,1.0),0.5,PipelineKey::Transparent3D),
+    ];
+
+    for item in items{
+        let sphere=context.spawn_sphere_3d(
+            item.0,
+            1.0,
+            32,
+            32,
+            item.1,
+            item.2,
+            None,
+            item.3
+        );
+    }
+
+    Ok(())
+}
+```
+
+![](../../../assets/tutorial_spheres.png)
 
 ### Line: 線分の生成
+```rust
+fn create_lines(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+    let line_x=context.spawn_line_3d(
+        vec3(-20.0,0.0,0.0),
+        vec3(20.0,0.0,0.0),
+        vec3(1.0,0.0,0.0),
+        1.0
+    );
+    let line_y=context.spawn_line_3d(
+        vec3(0.0,-20.0,0.0),
+        vec3(0.0,20.0,0.0),
+        vec3(0.0,1.0,0.0),
+        1.0
+    );
+    let line_x=context.spawn_line_3d(
+        vec3(0.0,0.0,-20.0),
+        vec3(0.0,0.0,20.0),
+        vec3(0.0,0.0,1.0),
+        1.0
+    );
+
+    Ok(())
+}
+```
+
+![](../../../assets/tutorial_lines.png)
+
+
+## UIの描画
+2Dの図形を一番手前に描画させることが出来ます。UI作成時に便利です。
+* 三角形
+* 四角形
+* 円
+* ポリゴン
+
+```rust
+fn create_2d_primitives(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+    let items=vec![
+        (vec2(-0.5,0.5),vec3(1.0,0.0,0.0),1.0),
+        (vec2(0.5,0.5),vec3(0.0,1.0,0.0),1.0),
+        (vec2(0.5,-0.5),vec3(1.0,1.0,1.0),1.0),
+        (vec2(-0.5,-0.5),vec3(0.0,0.0,1.0),0.5),
+    ];
+
+    let triangle=context.spawn_triangle_2d(
+        items[0].0+vec2(0.0,0.3), // pos0
+        items[0].0+vec2(-0.3,-0.3), // pos1
+        items[0].0+vec2(0.3,-0.3), // pos2
+        items[0].1, // color
+        items[0].2, // alpha
+        None, // texture
+    );
+
+    let rectangle=context.spawn_rectangle_2d(
+        items[1].0, // position
+        0.5, // width
+        0.3, // height
+        0.0, // rotation
+        items[1].1, // color
+        items[1].2, // alpha
+        None, // texture
+    );
+
+    let circle=context.spawn_circle_2d(
+        items[2].0, // position
+        0.3, // radius
+        32, // segments
+        items[2].1, // color
+        items[2].2, // alpha
+        Some("viking_room"), // texture
+    );
+
+    let polygon=context.spawn_polygon_2d(
+        vec![
+            items[3].0+vec2(0.3,0.2),
+            items[3].0+vec2(0.0,0.5),
+            items[3].0+vec2(-0.5,0.1),
+            items[3].0+vec2(-0.2,-0.3),
+            items[3].0+vec2(0.1,-0.1),
+        ], // points
+        items[3].1, // color
+        items[3].2, // alpha
+        None, // texture
+    );
+
+    let line=context.spawn_line_2d(
+        vec2(0.0,1.0), // edge
+        vec2(0.0,-1.0), // edge
+        vec3(1.0,1.0,1.0), // color
+        0.005, // width
+        1.0, // alpha
+    );
+    Ok(())
+}
+```
+
+![](../../../assets/tutorial_2d_primitives.png)
