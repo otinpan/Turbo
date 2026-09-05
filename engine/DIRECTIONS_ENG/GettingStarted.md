@@ -11,8 +11,8 @@ Add KaniVolcano Engine and the required support crates to your `Cargo.toml`.
 anyhow = "1"
 cgmath = "0.18"
 pretty_env_logger = "0.5"
-kani-volcano-engine = { git = "https://github.com/otinpan/KaniVolcano.git" }
-kani-volcano-math = { git = "https://github.com/otinpan/KaniVolcano.git" }
+kani_volcano_engine = { package = "kani-volcano-engine", git = "https://github.com/otinpan/KaniVolcano.git" }
+kani_volcano_math = { package = "kani-volcano-math", git = "https://github.com/otinpan/KaniVolcano.git" }
 winit = "0.29"
 ```
 
@@ -22,7 +22,7 @@ Edit `main.rs`.
 
 ```rust
 use anyhow::Result;
-use kani_volcano::prelude::*;
+use kani_volcano_engine::prelude::*;
 
 fn main() -> Result<()> {
     pretty_env_logger::init();
@@ -316,7 +316,7 @@ The camera system allows camera movement with keyboard and mouse input.
 Create a custom component.
 
 ```rust
-use kani_volcano::prelude::*;
+use kani_volcano_engine::prelude::*;
 
 pub struct MoveComponent {
     pub velocity: cgmath::Vector3<f32>,
@@ -515,7 +515,7 @@ You can keep all code in one file while learning, but splitting it into separate
 
 ```rust
 use anyhow::Result;
-use kani_volcano::prelude::*;
+use kani_volcano_engine::prelude::*;
 use kani_volcano_tutorial::TutorialScene;
 
 fn main() -> Result<()> {
