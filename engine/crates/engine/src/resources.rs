@@ -116,7 +116,9 @@ impl Resources {
         self.primitive_meshes
             .iter()
             .find(|mesh| {
-                mesh.primitive_type == primitive_type && mesh.vertex_layout == vertex_layout
+                mesh.primitive_type == primitive_type
+                    && mesh.vertex_layout == vertex_layout
+                    && self.get_mesh_handle(mesh.asset_id).is_some()
             })
             .map(|mesh| mesh.asset_id)
     }
