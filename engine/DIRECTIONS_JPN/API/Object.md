@@ -404,3 +404,178 @@ fn create_2d_primitives(&mut self, context: &mut SceneContext<'_>) -> Result<()>
 ```
 
 ![](../../../assets/tutorial_2d_primitives.png)
+
+## MeshAssetIdを指定して描画
+`spawn_primitive_from_mesh()`は`MeshAssetId`を指定し、すでに生成されたMeshを使って基本図形を複製することができます。
+```rust
+if self.cube_mesh_ready && !self.double_created {
+    if let Some(mesh) = context.primitive_asset_id(
+        PrimitiveType::Cube,
+        PipelineKey::Lit3D.required_vertex_layout(),
+    ) {
+        let texture=context.texture("viking_room")
+        .unwrap_or(context.default_texture());
+        context.spawn_primitive_from_mesh(
+            mesh,
+            Material {
+                color: vec3(1.0, 1.0, 1.0),
+                alpha: 1.0,
+                use_texture: true,
+                texture: texture,
+                pipeline_key: PipelineKey::Lit3D,
+            },
+            Transform {
+                position: vec3(-3.0, 0.5, 0.5),
+                scale: vec3(0.5, 0.5, 0.5),
+                ..Default::default()
+            },
+        )?;
+
+        self.double_created = true;
+    }
+}
+```
+
+引数には、`MeshAssetId`、`Material`、`Transform`を取り、描画方法と座標情報を設定します。
+
+```rust
+fn create_doubles(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+    let cube=context.spawn_cube_3d(
+        vec3(-3.0,0.0,0.0),
+        0.3,
+        vec3(0.0,0.0,0.0),
+        vec3(1.0,1.0,1.0),
+        1.0,
+        None,
+        PipelineKey::Lit3D,
+    );
+    let mesh = context
+        .primitive_asset_id(
+            PrimitiveType::Cube,
+            PipelineKey::Lit3D.required_vertex_layout(),
+        )
+        .ok_or_else(|| anyhow!("cube lit3d mesh not found"))?;
+
+    let cube = context.spawn_primitive_from_mesh(
+        mesh,
+        Material {
+            color: vec3(1.0, 1.0, 1.0),
+            alpha: 1.0,
+            use_texture: false,
+            texture: context.default_texture(),
+            pipeline_key: PipelineKey::Lit3D,
+        },
+        Transform {
+            position: vec3(-3.0, 0.5, 0.5),
+            scale: vec3(0.3, 0.3, 0.3),
+            ..Default::default()
+        },
+    )?;
+    Ok(())
+}
+```
+
+`Scene::on_enter()`内で、これを呼ぶとコンパイルエラーになります。
+```
+Error: cube lit3d mesh not found
+error: process didn't exit successfully: `target\debug\kani_volcano_tutorial.exe` (exit code: 1)
+```
+なぜでしょう。一見すると、`spawn_cube3d()`でEntityとメッシュを作成しているから、そこで使用した`MeshAssetId`も使用可能になりそうですが、実は、`context.spawn_primitive_from_mesh()`を呼んだ時点では、メッシュは作られていません。KaniVolcanoでは、Vulkan側にデータを送信する命令は、RenderCommandQueueに入れられ、フレームの終わりにまとめて送信されます。なので、1フレーム以上待ってから、`spawn_primitive_from_mesh()`を呼ぶ必要があります。
+```rust
+pub struct TutorialScene{
+    pub cube_mesh_ready: bool,
+    pub double_created: bool,
+}
+
+impl Scene for TutorialScene{
+    fn name(&self) -> String {
+        "TutorialScene".to_string()
+    }
+
+    fn on_enter(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+        context.set_skybox("ghost_skybox")?;
+        self.create_camera(context)?;
+        self.create_cube()?;
+
+        Ok(())
+    }
+    fn update(&mut self, context: &mut UpdateContext<'_>) -> Result<()> {
+        if self.cube_mesh_ready && !self.double_created {
+            if let Some(mesh) = context.primitive_asset_id(
+                PrimitiveType::Cube,
+                PipelineKey::Lit3D.required_vertex_layout(),
+            ) {
+                let texture=context.texture("viking_room")
+                .unwrap_or(context.default_texture());
+                context.spawn_primitive_from_mesh(
+                    mesh,
+                    Material {
+                        color: vec3(1.0, 1.0, 1.0),
+                        alpha: 1.0,
+                        use_texture: true,
+                        texture: texture,
+                        pipeline_key: PipelineKey::Lit3D,
+                    },
+                    Transform {
+                        position: vec3(-3.0, 0.5, 0.5),
+                        scale: vec3(0.5, 0.5, 0.5),
+                        ..Default::default()
+                    },
+                )?;
+
+                self.double_created = true;
+            }
+        }else{
+            self.cube_mesh_ready=true;
+        }
+
+        Ok(())
+    }
+
+    fn on_exit(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+        context.despawn_scene_owned_entities();
+        Ok(())
+    }
+
+}
+
+impl TutorialScene{
+    fn create_camera(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+        let camera=context.spawn();
+        context.add_component(
+            camera,
+            Transform{
+                position: vec3(5.0,0.0,0.0),
+                ..Default::default()
+            }
+        );
+        context.add_component(
+            camera,
+            Camera{
+                target: vec3(0.0,0.0,0.0),
+                fov_y: 45.0,
+                near: 0.1, // if objects are within `near`, they are not rendered.
+                far: 100.0, // if objects are far than `far`, they are not rendered.
+                yaw: std::f32::consts::PI, // horizontal way to move
+                pitch: 0.0, // vertical way to move
+            },
+        );
+        Ok(())
+    }
+
+    fn create_cube(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+        let cube=context.spawn_cube_3d(
+            vec3(-3.0,0.0,0.0),
+            0.3,
+            vec3(0.0,0.0,0.0),
+            vec3(1.0,1.0,1.0),
+            1.0,
+            None,
+            PipelineKey::Lit3D,
+        );
+        Ok(())
+    }
+}
+```
+
+![](../../../assets/tutorial_create_double_cubes.png)

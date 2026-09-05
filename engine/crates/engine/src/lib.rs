@@ -27,7 +27,7 @@ pub use component::{
 pub use ecs::{ComponentPool, EntityId, Registry};
 pub use input::Input;
 pub use primitive::{PrimitiveMesh, PrimitiveShape, PrimitiveType};
-pub use renderer_vulkan::PipelineKey;
+pub use renderer_vulkan::{PipelineKey, VertexLayout};
 pub use resources::{MeshAsset, MeshAssetId, Resources};
 pub use runner::{EngineConfig, run};
 pub use scene::{Scene, SceneContext};
@@ -37,7 +37,7 @@ pub use system::{
     CreatePrimitiveCommand, DebugMonitor, DespawnLastCommand, EntityApi, InputApi, InputSystem,
     InputTrigger, KeyBinding, ObjectApi, RenderCommand, RenderCommandApi, RenderCommandQueue,
     RenderSystem, RotatorSystem, Scheduler, SpawnPrimitiveCommand, SpawnVikingRoomCommand, TimeApi,
-    UpdateContext, UpdatePrimitiveMeshesCommand, UpdateSystem,
+    UpdateContext, UpdatePrimitiveMeshesCommand, UpdateSystem, 
 };
 pub use time::Time;
 pub use world::World;
@@ -55,8 +55,9 @@ pub mod prelude {
         InputTrigger,
         Component, EntityId,
         Camera, Material, MeshRenderer, Name, Rotator, Tags, Visibility,
-        PrimitiveShape, PrimitiveType,
-        PipelineKey,
+        MeshAssetId,
+        PrimitiveShape, PrimitiveType, 
+        PipelineKey, 
     };
 
     pub use kani_volcano_math::Transform;
