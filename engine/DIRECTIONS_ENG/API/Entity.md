@@ -120,6 +120,18 @@ let tagged_entities: Vec<(String, EntityId)> = context.get_all_taged_entities();
 
 The API name is currently `get_all_taged_entities()`.
 
+### Get MeshAssetId from Entity
+You can get `MeshAssetId` from Entity. If specified Entity have mesh, 
+then return `Some(MeshAssetId)`, else return `None`.
+
+```rust
+let entity_mesh=context.spawn();
+let entity_no_mesh=context.spawn();
+context.add_component(entity_mesh, mesh_renderer(Some(MeshAssetId(3))));
+
+let mesh_asset_id=context.mesh_asset_id(entity_mesh); // Some(MeshAssetId(3))
+let no_mesh_asset_id=context.mesh_asset_id(entity_no_mesh); // None
+```
 ## Context Difference
 
 `SceneContext::spawn()` automatically adds `SceneOwned`.

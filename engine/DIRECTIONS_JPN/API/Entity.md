@@ -427,6 +427,18 @@ for enemy in context.get_entities_by_tag("Enemy") {
 }
 ```
 
+### MeshAssetIdの取得
+Entityを指定して、MeshAssetIdを取得することができます。もし、そのEnitityがメッシュを持っていなかったら`None`を返し、メッシュを持っていたら`Some(MeshAssetId)`を返します。
+
+```rust
+let entity_mesh=context.spawn();
+let entity_no_mesh=context.spawn();
+context.add_component(entity_mesh, mesh_renderer(Some(MeshAssetId(3))));
+
+let mesh_asset_id=context.mesh_asset_id(entity_mesh); // Some(MeshAssetId(3))
+let no_mesh_asset_id=context.mesh_asset_id(entity_no_mesh); // None
+```
+
 ## 注意点
 
 `EntityId`はEntityを識別するためのIDです。

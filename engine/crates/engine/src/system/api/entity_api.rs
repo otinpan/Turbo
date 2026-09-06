@@ -1,5 +1,6 @@
 use crate::{
     Component, ComponentPool, EntityId, MeshRenderer, RenderCommandQueue, Resources, World,
+    MeshAssetId,
 };
 
 pub trait EntityApi {
@@ -154,5 +155,98 @@ pub trait EntityApi {
 
     fn get_all_taged_entities(&self) -> Vec<(String, EntityId)> {
         self.world().get_all_taged_entities()
+    }
+
+
+    fn mesh_asset_id(&self, entity: EntityId) -> Option<MeshAssetId> {
+        self.get_component::<MeshRenderer>(entity)
+            .and_then(|renderer| renderer.asset_id)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Material;
+    use renderer_vulkan::{MeshHandle, VertexLayout};
+
+    #[derive(Default)]
+    struct TestContext {
+        world: World,
+        resources: Resources,
+        render_commands: RenderCommandQueue,
+    }
+
+    impl EntityApi for TestContext {
+        fn world(&self) -> &World {
+            &self.world
+        }
+
+        fn world_mut(&mut self) -> &mut World {
+            &mut self.world
+        }
+
+        fn resources(&self) -> &Resources {
+            &self.resources
+        }
+
+        fn resources_mut(&mut self) -> &mut Resources {
+            &mut self.resources
+        }
+
+        fn render_commands(&self) -> &RenderCommandQueue {
+            &self.render_commands
+        }
+
+        fn render_commands_mut(&mut self) -> &mut RenderCommandQueue {
+            &mut self.render_commands
+        }
+    }
+
+    fn mesh_renderer(asset_id: Option<MeshAssetId>) -> MeshRenderer {
+        MeshRenderer {
+            mesh: MeshHandle::new(0, VertexLayout::Mesh3D),
+            asset_id,
+            material: Material::default(),
+        }
+    }
+
+    #[test]
+    fn mesh_asset_id_returns_the_requested_entity_asset() {
+        let mut context = TestContext::default();
+        let first = context.spawn();
+        let second = context.spawn();
+        context.add_component(first, mesh_renderer(Some(MeshAssetId(3))));
+        context.add_component(second, mesh_renderer(Some(MeshAssetId(7))));
+
+        assert_eq!(context.mesh_asset_id(first), Some(MeshAssetId(3)));
+        assert_eq!(context.mesh_asset_id(second), Some(MeshAssetId(7)));
+    }
+
+    #[test]
+    fn mesh_asset_id_returns_none_without_mesh_renderer() {
+        let mut context = TestContext::default();
+        let entity = context.spawn();
+
+        assert_eq!(context.mesh_asset_id(entity), None);
+    }
+
+    #[test]
+    fn mesh_asset_id_returns_none_without_asset_id() {
+        let mut context = TestContext::default();
+        let entity = context.spawn();
+        context.add_component(entity, mesh_renderer(None));
+
+        assert_eq!(context.mesh_asset_id(entity), None);
+    }
+
+    #[test]
+    fn mesh_asset_id_returns_none_after_entity_is_despawned() {
+        let mut context = TestContext::default();
+        let entity = context.spawn();
+        context.add_component(entity, mesh_renderer(Some(MeshAssetId(3))));
+        assert!(context.despawn(entity));
+
+        assert_eq!(context.mesh_asset_id(entity), None);
     }
 }

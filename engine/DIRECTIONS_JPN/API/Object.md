@@ -218,6 +218,38 @@ fn create_cubes(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
 }
 ```
 
+![](../../../assets/tutorial_cubes.png)
+
+### Cuboid: 直方体の生成
+```rust
+fn create_cuboids(&mut self, context: &mut SceneContext<'_>) -> Result<()>{
+    let items=vec![
+        (vec3(-3.0,-1.0,1.0),0.5,0.2,1.0,vec3(1.0,0.0,0.0),1.0,PipelineKey::Lit3D),
+        (vec3(-3.0,1.0,1.0),0.2,0.5,1.0,vec3(0.0,1.0,0.0),1.0,PipelineKey::Mesh3D),
+        (vec3(-3.0,1.0,-1.0),1.0,0.5,0.2,vec3(1.0,1.0,1.0),1.0,PipelineKey::DebugLine3D),
+        (vec3(-3.0,-1.0,-1.0),0.5,1.0,0.2,vec3(0.0,0.0,1.0),0.5,PipelineKey::Transparent3D),
+    ];
+
+    for item in items{
+        let cuboid=context.spawn_cuboid_3d(
+            item.0, // position
+            item.1, // width
+            item.2, // depth
+            item.3, // height
+            vec3(0.0,0.0,0.0), // rotation
+            item.4, // color
+            item.5, // alpha
+            None, // texture
+            item.6 // PipelineKey
+        );
+    }
+
+    Ok(())
+}
+```
+
+![](../../../assets/tutorial_cuboids.png)
+
 ### Circle: 円の生成
 ```rust
 fn create_circles(&mut self, context: &mut SceneContext<'_>) -> Result<()>{

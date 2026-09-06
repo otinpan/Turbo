@@ -70,4 +70,5 @@ pub trait AssetApi {
     fn mesh_assets(&self) -> impl Iterator<Item = (MeshAssetId, &MeshAsset)> {
         self.resources().mesh_assets()
     }
+
 }
