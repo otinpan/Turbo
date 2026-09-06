@@ -215,6 +215,51 @@ impl Basic3dScene {
             PipelineKey::Lit3D,
         )?;
 
+        let cuboid_id0=context.spawn_cuboid_3d(
+            vec3(5.0,-1.0,-1.0),
+            0.5,
+            1.0,
+            4.0,
+            vec3(0.0,0.0,0.0),
+            vec3(1.0,1.0,0.0),
+            0.5,
+            None,
+            PipelineKey::Mesh3D,
+        )?;
+        let cuboid_id1 = context.spawn_cuboid_3d(
+            vec3(0.0, -1.0, -1.0),
+                1.0,
+            0.5,
+            4.0,
+            vec3(0.0, 0.0, 0.0),
+            vec3(1.0, 1.0, 0.0),
+            0.5,
+            None,
+            PipelineKey::Transparent3D,
+        )?;
+        let cube_id2 = context.spawn_cuboid_3d(
+            vec3(-10.0, -1.0, -1.0),
+            4.0,
+            0.5,
+            1.0,
+            vec3(0.0, 0.0, 0.0),
+            vec3(1.0, 1.0, 0.0),
+            0.5,
+            None,
+            PipelineKey::DebugLine3D,
+        )?;
+        let cuboid_id3 = context.spawn_cuboid_3d(
+            vec3(-5.0, -1.0, -1.0),
+            1.0,
+            4.0,
+            0.5,
+            vec3(0.0, 45.0, 0.0),
+            vec3(1.0, 1.0, 0.0),
+            1.0,
+            Some("face"),
+            PipelineKey::Lit3D,
+        )?;
+
         let circle_id0 = context.spawn_circle_3d(
             vec3(5.0, 2.0, 1.0),
             1.0,

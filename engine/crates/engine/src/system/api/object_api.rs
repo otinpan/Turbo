@@ -196,6 +196,48 @@ pub trait ObjectApi: EntityApi + AssetApi {
         self.spawn_shape_with_material(shape, transform, material, true)
     }
 
+    fn spawn_cuboid_3d(
+        &mut self,
+        pos: Vec3,
+        width: f32,
+        depth: f32,
+        height: f32,
+        rotation: Vec3,
+        color: Vec3,
+        alpha: f32,
+        texture: Option<&str>,
+        pipeline_key: PipelineKey,
+    ) -> Result<EntityId> {
+        let material =
+            self.primitive_material(color, alpha, texture, pipeline_key)?;
+
+        let w = width * 0.5;
+        let d = depth * 0.5;
+        let h = height * 0.5;
+
+        let shape = PrimitiveShape::Cube {
+            points: [
+                vec3(w, -h, d),
+                vec3(w, h, d),
+                vec3(-w, h, d),
+                vec3(-w, -h, d),
+                vec3(w, -h, -d),
+                vec3(w, h, -d),
+                vec3(-w, h, -d),
+                vec3(-w, -h, -d),
+            ],
+            color: material.color,
+        };
+
+        let transform = Transform {
+            position: pos,
+            rotation,
+            ..Default::default()
+        };
+
+        self.spawn_shape_with_material(shape, transform, material, true)
+    }
+
     fn spawn_circle_3d(
         &mut self,
         pos: Vec3,
